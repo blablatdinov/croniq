@@ -1,0 +1,104 @@
+<!-- Главная секция -->
+<div class="bg-gradient-to-br from-blue-50 to-gray-100">
+  <div class="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
+    <div class="text-center">
+      <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+        Croniq — Open-Source Cron Scheduler
+      </h1>
+      <p class="mt-6 text-xl leading-8 text-gray-600">
+        Elixir-powered alternative to EasyCron with HTTP triggers,<br>
+        retries, and beautiful dashboard.
+      </p>
+      <div class="mt-10 flex justify-center gap-4">
+        <.link 
+          href="https://github.com/yourusername/croniq" 
+          target="_blank"
+          class="rounded-md bg-blue-600 px-6 py-3 text-lg font-semibold text-white shadow-sm hover:bg-blue-500"
+        >
+          Get Started
+        </.link>
+        <.link 
+          navigate={~p"/tasks"} 
+          class="rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50"
+        >
+          Live Demo
+        </.link>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Фичи -->
+<div class="py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
+      <!-- Фича 1 -->
+      <div class="rounded-2xl bg-white p-8 shadow-lg">
+        <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
+          <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900">Precise Scheduling</h3>
+        <p class="mt-4 text-gray-600">
+          Full cron syntax support with seconds precision. Never miss a job execution.
+        </p>
+      </div>
+
+      <!-- Фича 2 -->
+      <div class="rounded-2xl bg-white p-8 shadow-lg">
+        <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
+          <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900">HTTP Triggers</h3>
+        <p class="mt-4 text-gray-600">
+          Call any API endpoint with custom headers, retries, and failure notifications.
+        </p>
+      </div>
+
+      <!-- Фича 3 -->
+      <div class="rounded-2xl bg-white p-8 shadow-lg">
+        <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
+          <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900">Elixir-Powered</h3>
+        <p class="mt-4 text-gray-600">
+          Built with Phoenix LiveView for real-time updates and unmatched reliability.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="bg-white py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto max-w-2xl text-center">
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+        Ready to simplify your scheduling?
+      </h2>
+      <p class="mt-6 text-lg leading-8 text-gray-600">
+        Deploy Croniq in minutes or self-host for full control.
+      </p>
+      <div class="mt-10 flex justify-center gap-x-6">
+        <.link 
+          href="https://github.com/yourusername/croniq" 
+          target="_blank"
+          class="rounded-md bg-blue-600 px-6 py-3 text-lg font-semibold text-white shadow-sm hover:bg-blue-500"
+        >
+          Star on GitHub
+        </.link>
+        <.link 
+          navigate={~p"/tasks"} 
+          class="rounded-md bg-white px-6 py-3 text-lg font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50"
+        >
+          Try Live Demo
+        </.link>
+      </div>
+    </div>
+  </div>
+</div>

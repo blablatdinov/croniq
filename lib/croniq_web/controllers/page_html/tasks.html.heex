@@ -1,0 +1,52 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Cron Tasks</h1>
+    <.link href={~p"/tasks/new"}
+      class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+      + Create New Task
+    </.link>
+  </div>
+
+  <table class="min-w-full bg-white border border-gray-200">
+    <thead>
+      <tr class="bg-gray-100">
+        <th class="py-2 px-4 border">ID</th>
+        <th class="py-2 px-4 border">Name</th>
+        <th class="py-2 px-4 border">Schedule</th>
+        <th class="py-2 px-4 border">Status</th>
+        <th class="py-2 px-4 border">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= for task <- @tasks do %>
+        <tr class="hover:bg-gray-50">
+          <td class="py-2 px-4 border text-center">
+            <%= task.id %>
+          </td>
+          <td class="py-2 px-4 border">
+            <%= task.name %>
+          </td>
+          <td class="py-2 px-4 border font-mono">
+            <%= task.schedule %>
+          </td>
+          <td class="py-2 px-4 border">
+            <span class={ if task.status=="active" , do: "bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs" ,
+              else: "bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs" }>
+              <%= task.status %>
+            </span>
+          </td>
+          <td class="py-2 px-4 border">
+            <.link navigate={~p"/tasks/#{task.id}/edit"}
+              class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded mr-2 inline-block">
+              Edit
+            </.link>
+            <.link navigate={~p"/tasks/#{task.id}/delete"}
+              class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded mr-2 inline-block">
+              Delete
+            </.link>
+          </td>
+        </tr>
+        <% end %>
+    </tbody>
+  </table>
+</div>
