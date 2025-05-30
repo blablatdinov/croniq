@@ -19,6 +19,7 @@ defmodule CroniqWeb.Router do
 
     get "/", PageController, :home
     get "/tasks", PageController, :tasks
+    post "/tasks", PageController, :create
     get "/tasks/new", PageController, :new_task
     get "/tasks/:task_id/edit", PageController, :edit
     get "/tasks/:task_id/delete", PageController, :delete

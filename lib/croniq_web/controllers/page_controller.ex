@@ -1,5 +1,7 @@
 defmodule CroniqWeb.PageController do
   use CroniqWeb, :controller
+  alias Croniq.Repo
+  alias Croniq.Task
 
   def home(conn, _params) do
     render(conn, :home)
@@ -15,7 +17,24 @@ defmodule CroniqWeb.PageController do
   end
 
   def new_task(conn, _params) do
-    render(conn, :new_task)
+    render(conn, :new_task, changeset: Task.changeset(%Task{}, %{}))
+  end
+
+  defp create_task(attrs) do
+    %Task{} |> Task.changeset(attrs) |> Repo.insert()
+  end
+
+  def create(conn, %{"task" => task_params}) do
+    case create_task(task_params) do
+      {:ok, task} ->
+        conn
+        |> put_flash(:info, "Task created successfully!")
+        |> redirect(to: ~p"/tasks/#{task.id}/edit")
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        IO.inspect(changeset)
+        render(conn, :new_task, changeset: changeset)
+    end
   end
 
   def edit(conn, %{"task_id" => task_id}) do
