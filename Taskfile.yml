@@ -1,0 +1,15 @@
+version: 3
+
+tasks:
+
+  run:
+    cmds:
+      - mix phx.server
+
+  makemigration:
+    cmds:
+      - mix ecto.gen.migration {{.CLI_ARGS}}
+
+  migrate:
+    cmds:
+      - mix ecto.migrate
