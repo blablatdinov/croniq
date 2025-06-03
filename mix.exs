@@ -38,7 +38,7 @@ defmodule Croniq.MixProject do
       {:postgrex, "== 0.20.0"},
       {:phoenix_html, "== 4.2.1"},
       {:phoenix_live_reload, "== 1.6.0", only: :dev},
-      {:phoenix_live_view, "== 1.0.13"},
+      {:phoenix_live_view, "== 1.0.14"},
       {:floki, "== 0.37.1", only: :test},
       {:phoenix_live_dashboard, "== 0.8.7"},
       {:esbuild, "== 0.10.0", runtime: Mix.env() == :dev},
