@@ -56,6 +56,8 @@ defmodule Croniq.MixProject do
       {:bandit, "== 1.7.0"},
       {:bcrypt_elixir, "== 3.3.2"},
       {:guardian, "== 2.3.2"},
+      {:quantum, "== 3.5.3"},
+      {:crontab, "== 1.1.14"},
       # Dev/test dependencies
       {:phoenix_live_reload, "== 1.6.0", only: :dev},
       {:esbuild, "== 0.10.0", runtime: Mix.env() == :dev},

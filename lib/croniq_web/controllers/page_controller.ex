@@ -2,6 +2,9 @@ defmodule CroniqWeb.PageController do
   use CroniqWeb, :controller
   alias Croniq.Repo
   alias Croniq.Task
+  import Croniq.Requests
+  import Crontab.CronExpression
+  import Logger
 
   def home(conn, _params) do
     render(conn, :home)
@@ -16,7 +19,18 @@ defmodule CroniqWeb.PageController do
   end
 
   defp create_task(attrs) do
-    %Task{} |> Task.changeset(attrs) |> Repo.insert()
+    parsed_cron = Map.fetch!(attrs, "schedule") |> Crontab.CronExpression.Parser.parse!()
+    task = %Task{} |> Task.changeset(attrs) |> Repo.insert!()
+    job_name = String.to_atom("request_by_task_#{task.schedule}")
+    Croniq.Scheduler.new_job()
+    |> Quantum.Job.set_name(job_name)
+    |> Quantum.Job.set_schedule(parsed_cron)
+    |> Quantum.Job.set_task(fn -> send_request(task.id) end)
+    |> Croniq.Scheduler.add_job()
+
+    Croniq.Scheduler.activate_job(job_name)
+    Logger.info("Quantum job for task record id=#{task.id} created")
+    {:ok, task}
   end
 
   def create(conn, %{"task" => task_params}) do
