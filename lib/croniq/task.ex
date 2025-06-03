@@ -17,6 +17,7 @@ defmodule Croniq.Task do
 
   def changeset(task, attrs) do
     attrs = Map.update(attrs, "headers", %{}, &decode_json/1)
+
     task
     |> cast(attrs, [:name, :schedule, :url, :method, :headers, :body, :status, :retry_count])
     |> validate_required([:name, :schedule, :url])
@@ -26,7 +27,6 @@ defmodule Croniq.Task do
     |> put_default(:retry_count, 0)
     |> validate_inclusion(:method, ~w(GET POST PUT DELETE))
   end
-
 
   defp decode_json(""), do: %{}
 
@@ -46,5 +46,4 @@ defmodule Croniq.Task do
       changeset
     end
   end
-
 end
