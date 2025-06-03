@@ -22,6 +22,7 @@ defmodule CroniqWeb.PageController do
     parsed_cron = Map.fetch!(attrs, "schedule") |> Crontab.CronExpression.Parser.parse!()
     task = %Task{} |> Task.changeset(attrs) |> Repo.insert!()
     job_name = String.to_atom("request_by_task_#{task.schedule}")
+
     Croniq.Scheduler.new_job()
     |> Quantum.Job.set_name(job_name)
     |> Quantum.Job.set_schedule(parsed_cron)

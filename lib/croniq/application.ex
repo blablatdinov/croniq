@@ -18,7 +18,7 @@ defmodule Croniq.Application do
       # {Croniq.Worker, arg},
       # Start to serve requests, typically the last entry
       CroniqWeb.Endpoint,
-      Croniq.Scheduler,
+      Croniq.Scheduler
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
