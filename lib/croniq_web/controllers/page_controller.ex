@@ -8,13 +8,7 @@ defmodule CroniqWeb.PageController do
   end
 
   def tasks(conn, _params) do
-    tasks = [
-      %{id: 1, name: "Backup DB", schedule: "0 3 * * *", status: "active"},
-      %{id: 2, name: "Clean Cache", schedule: "*/15 * * * *", status: "inactive"},
-      %{id: 3, name: "Send Reports", schedule: "0 9 * * 1", status: "active"}
-    ]
-
-    render(conn, :tasks, tasks: tasks)
+    render(conn, :tasks, tasks: Repo.all(Task))
   end
 
   def new_task(conn, _params) do
@@ -38,12 +32,32 @@ defmodule CroniqWeb.PageController do
     end
   end
 
-  def edit(conn, %{"task_id" => task_id}) do
-    task = %{id: task_id, name: "Backup DB", schedule: "0 3 * * *", status: "active"}
+  def task_details(conn, %{"task_id" => task_id}) do
+    redirect(conn, to: ~p"/tasks/#{task_id}/edit")
+  end
+
+  def edit_form(conn, %{"task_id" => task_id}) do
+    task = Repo.get_by!(Task, id: task_id)
+    render(conn, :edit, task: task, changeset: Task.changeset(task, %{}))
+  end
+
+  def edit(conn, %{"task_id" => task_id, "task" => task_params}) do
+    task = Repo.get_by!(Task, id: task_id)
+
+    case Task.update_task(task, task_params) do
+      {:ok, task} ->
+        conn
+        |> put_flash(:info, "Task updated successfully.")
+        |> redirect(to: ~p"/tasks/#{task_id}/edit")
+    end
+
     render(conn, :edit, task: task)
   end
 
   def delete(conn, %{"task_id" => task_id}) do
+    Repo.get_by!(Task, id: task_id)
+    |> Repo.delete!()
+
     conn
     |> put_flash(:info, "Task deleted successfully")
     |> redirect(to: ~p"/tasks")

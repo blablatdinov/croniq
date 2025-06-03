@@ -37,12 +37,8 @@ defmodule Croniq.MixProject do
       {:ecto_sql, "== 3.12.1"},
       {:postgrex, "== 0.20.0"},
       {:phoenix_html, "== 4.2.1"},
-      {:phoenix_live_reload, "== 1.6.0", only: :dev},
       {:phoenix_live_view, "== 1.0.14"},
-      {:floki, "== 0.37.1", only: :test},
       {:phoenix_live_dashboard, "== 0.8.7"},
-      {:esbuild, "== 0.10.0", runtime: Mix.env() == :dev},
-      {:tailwind, "== 0.2.4", runtime: Mix.env() == :dev},
       {:heroicons,
        github: "tailwindlabs/heroicons",
        tag: "v2.2.0",
@@ -57,7 +53,14 @@ defmodule Croniq.MixProject do
       {:gettext, "== 0.26.2"},
       {:jason, "== 1.4.4"},
       {:dns_cluster, "== 0.2.0"},
-      {:bandit, "== 1.7.0"}
+      {:bandit, "== 1.7.0"},
+      {:bcrypt_elixir, "== 3.3.2"},
+      {:guardian, "== 2.3.2"},
+      # Dev/test dependencies
+      {:phoenix_live_reload, "== 1.6.0", only: :dev},
+      {:esbuild, "== 0.10.0", runtime: Mix.env() == :dev},
+      {:tailwind, "== 0.2.4", runtime: Mix.env() == :dev},
+      {:floki, "== 0.37.1", only: :test}
     ]
   end
 

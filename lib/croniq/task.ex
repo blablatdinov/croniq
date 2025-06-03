@@ -1,5 +1,6 @@
 defmodule Croniq.Task do
   use Ecto.Schema
+  alias Croniq.Repo
   import Ecto.Changeset
 
   schema "tasks" do
@@ -26,6 +27,12 @@ defmodule Croniq.Task do
     |> put_default(:status, "active")
     |> put_default(:retry_count, 0)
     |> validate_inclusion(:method, ~w(GET POST PUT DELETE))
+  end
+
+  def update_task(task, attrs) do
+    task
+    |> changeset(attrs)
+    |> Repo.update()
   end
 
   defp decode_json(""), do: %{}
