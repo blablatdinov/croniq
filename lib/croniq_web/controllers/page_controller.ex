@@ -11,8 +11,9 @@ defmodule CroniqWeb.PageController do
     tasks = [
       %{id: 1, name: "Backup DB", schedule: "0 3 * * *", status: "active"},
       %{id: 2, name: "Clean Cache", schedule: "*/15 * * * *", status: "inactive"},
-      %{id: 3, name: "Send Reports", schedule: "0 9 * * 1", status: "active"},
+      %{id: 3, name: "Send Reports", schedule: "0 9 * * 1", status: "active"}
     ]
+
     render(conn, :tasks, tasks: tasks)
   end
 

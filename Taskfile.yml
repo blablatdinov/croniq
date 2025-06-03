@@ -6,6 +6,14 @@ tasks:
     cmds:
       - mix phx.server
 
+  fmt:
+    cmds:
+      - mix format
+
+  lint:
+    cmds:
+      - mix credo --strict
+
   makemigration:
     cmds:
       - mix ecto.gen.migration {{.CLI_ARGS}}
