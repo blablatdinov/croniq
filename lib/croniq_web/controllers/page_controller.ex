@@ -30,7 +30,7 @@ defmodule CroniqWeb.PageController do
     |> Croniq.Scheduler.add_job()
 
     Croniq.Scheduler.activate_job(job_name)
-    Logger.info("Quantum job for task record id=#{task.id} created")
+    Logger.info("Quantum job for task record id=#{task.id} created from form input")
     {:ok, task}
   end
 
