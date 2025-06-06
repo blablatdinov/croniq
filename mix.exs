@@ -58,6 +58,7 @@ defmodule Croniq.MixProject do
       {:guardian, "== 2.3.2"},
       {:quantum, "== 3.5.3"},
       {:crontab, "== 1.1.14"},
+      {:httpoison, "== 2.2.3"},
       # Dev/test dependencies
       {:phoenix_live_reload, "== 1.6.0", only: :dev},
       {:esbuild, "== 0.10.0", runtime: Mix.env() == :dev},
