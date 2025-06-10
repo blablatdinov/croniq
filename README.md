@@ -1,18 +1,84 @@
-# Croniq
+# Croniq - Open-Source Cron Scheduler
 
-To start your Phoenix server:
+_A modern job scheduler built with Elixir and Phoenix_
 
-  * Run `mix setup` to install and setup dependencies
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+## 🌟 Features
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+**HTTP Task Scheduling** - Trigger any API endpoint on a schedule
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+**Full Cron Syntax** - Supports standard cron expressions with seconds precision
 
-## Learn more
+**Real-time Monitoring** - Built-in dashboard with LiveView
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+**Retry Mechanism** - Automatic retries with exponential backoff
+
+**Web UI & REST API** - Manage jobs through both interfaces
+
+**Lightweight** - Runs with minimal resources
+
+## 🚀 Quick Start
+
+Requirements:
+
+- Elixir 1.14+
+- PostgreSQL 12+
+- Node.js 16+ (for assets)
+
+Installation
+
+1. Clone the repo:
+
+```bash
+git clone https://github.com/yourusername/croniq.git
+cd croniq
+```
+
+2. Set up dependencies:
+
+```bash
+mix deps.get
+cd assets && npm install && cd ..
+```
+
+3. Configure database:
+
+```bash
+mix ecto.setup
+```
+
+4. Start the server:
+
+```bash
+mix phx.server
+```
+
+Visit http://localhost:4000 in your browser.
+
+## 📚 Documentation
+
+API Examples
+
+Create a new job:
+
+```bash
+curl -X POST http://localhost:4000/api/jobs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "daily-backup",
+    "schedule": "0 3 * * *",
+    "url": "https://api.example.com/backup",
+    "method": "POST",
+    "headers": {
+      "Authorization": "Bearer your-token"
+    },
+    "body": {
+      "database": "production"
+    }
+  }'
+```
+
+List all jobs:
+
+```bash
+curl http://localhost:4000/api/jobs
+```
