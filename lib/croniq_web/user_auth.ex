@@ -226,4 +226,16 @@ defmodule CroniqWeb.UserAuth do
   defp maybe_store_return_to(conn), do: conn
 
   defp signed_in_path(_conn), do: ~p"/"
+
+  def fetch_api_user(conn, _opts) do
+    with ["Basic " <> token] <- get_req_header(conn, "authorization"),
+         {:ok, user} <- Accounts.fetch_user_by_api_token(token) do
+      assign(conn, :current_user, user)
+    else
+      _ ->
+        conn
+        |> send_resp(:unauthorized, "No access for you")
+        |> halt()
+    end
+  end
 end

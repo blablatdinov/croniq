@@ -17,28 +17,41 @@ defmodule CroniqWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :api_guard do
+    plug :fetch_api_user
+  end
+
   scope "/", CroniqWeb do
     pipe_through :browser
 
     get "/", PageController, :home
   end
 
-  scope "/", CroniqWeb do
+  scope "/tasks", CroniqWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    get "/tasks", TasksController, :tasks
-    post "/tasks", TasksController, :create
-    get "/tasks/new", TasksController, :new_task
-    get "/tasks/:task_id/edit", TasksController, :edit_form
-    get "/tasks/:task_id", TasksController, :task_details
-    put "/tasks/:task_id", TasksController, :edit
-    get "/tasks/:task_id/delete", TasksController, :delete
+    get "/", TasksController, :tasks
+    post "/", TasksController, :create
+    get "/new", TasksController, :new_task
+    get "/:task_id/edit", TasksController, :edit_form
+    get "/:task_id", TasksController, :task_details
+    put "/:task_id", TasksController, :edit
+    get "/:task_id/delete", TasksController, :delete
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", CroniqWeb do
-  #   pipe_through :api
-  # end
+  scope "/api/v1/auth", CroniqWeb do
+    pipe_through [:api]
+
+    post "/", APIAuthController, :generate_token
+  end
+
+  scope "/api/v1/tasks", CroniqWeb do
+    pipe_through [:api, :api_guard]
+    # pipe_through :api
+
+    get "/", TasksAPIController, :list
+    get "/:task_id", TasksAPIController, :detail
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:croniq, :dev_routes) do
