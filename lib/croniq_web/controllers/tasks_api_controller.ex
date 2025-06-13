@@ -23,6 +23,7 @@ defmodule CroniqWeb.TasksAPIController do
       Repo.get_by!(Task, id: task_id, user_id: conn.assigns.current_user.id)
       |> Map.from_struct()
       |> Map.drop([:user, :__meta__])
+
     render(conn, :detail, task: task)
   end
 end
