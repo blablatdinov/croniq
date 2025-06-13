@@ -8,50 +8,72 @@
           <.link navigate={~p"/"} class="flex items-center">
             <span class="text-xl font-bold text-blue-600">Croniq</span>
           </.link>
-          
-<!-- Основные ссылки -->
+
+          <!-- Основные ссылки -->
           <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-            <.link
-              navigate={~p"/tasks"}
-              class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600"
-            >
+            <.link navigate={~p"/tasks"}
+              class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600">
               Tasks
             </.link>
-            <.link
-              navigate={~p"/docs"}
-              class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600"
-            >
+            <.link navigate={~p"/docs"}
+              class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600">
               API Docs
             </.link>
           </div>
         </div>
-        
-<!-- Кнопки справа (логин/настройки) -->
+
+        <!-- Кнопки справа (логин/настройки) -->
         <div class="flex items-center">
-          <.link
-            navigate={~p"/tasks/new"}
-            class="ml-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm"
-          >
-            New Task
-          </.link>
+          <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
+            <%= if @current_user do %>
+              <li class="text-[0.8125rem] leading-6 text-zinc-900">
+                {@current_user.email}
+              </li>
+              <li>
+                <.link href={~p"/users/settings"}
+                  class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700">
+                  Settings
+                </.link>
+              </li>
+              <li>
+                <.link href={~p"/users/log_out"} method="delete"
+                  class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700">
+                  Log out
+                </.link>
+              </li>
+              <% else %>
+                <li>
+                  <.link href={~p"/users/register"}
+                    class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700">
+                    Register
+                  </.link>
+                </li>
+                <li>
+                  <.link href={~p"/users/log_in"}
+                    class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700">
+                    Log in
+                  </.link>
+                </li>
+                <% end %>
+          </ul>
         </div>
       </div>
     </div>
   </nav>
-  
-<!-- Flash-уведомления -->
+
+  <!-- Flash-уведомления -->
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <.flash_group flash={@flash} auto_clear={true} clear_interval={3000} />
   </div>
-  
-<!-- Основной контент -->
+
+  <!-- Основной контент -->
   <main class="flex-1 py-6">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       {@inner_content}
     </div>
   </main>
-  
-<!-- Футер (опционально) -->
+
+  <!-- Футер (опционально) -->
   <footer class="bg-white border-t mt-8 py-4">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
       &copy; {DateTime.utc_now().year} Croniq. Open-source Elixir scheduler.
