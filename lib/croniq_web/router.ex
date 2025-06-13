@@ -21,13 +21,18 @@ defmodule CroniqWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-    get "/tasks", PageController, :tasks
-    post "/tasks", PageController, :create
-    get "/tasks/new", PageController, :new_task
-    get "/tasks/:task_id/edit", PageController, :edit_form
-    get "/tasks/:task_id", PageController, :task_details
-    put "/tasks/:task_id", PageController, :edit
-    get "/tasks/:task_id/delete", PageController, :delete
+  end
+
+  scope "/", CroniqWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    get "/tasks", TasksController, :tasks
+    post "/tasks", TasksController, :create
+    get "/tasks/new", TasksController, :new_task
+    get "/tasks/:task_id/edit", TasksController, :edit_form
+    get "/tasks/:task_id", TasksController, :task_details
+    put "/tasks/:task_id", TasksController, :edit
+    get "/tasks/:task_id/delete", TasksController, :delete
   end
 
   # Other scopes may use custom stacks.

@@ -4,6 +4,8 @@ defmodule Croniq.Task do
   import Ecto.Changeset
 
   schema "tasks" do
+    belongs_to :user, Croniq.Accounts.User
+
     field :name, :string
     field :schedule, :string
     field :url, :string
@@ -20,13 +22,29 @@ defmodule Croniq.Task do
     attrs = Map.update(attrs, "headers", %{}, &decode_json/1)
 
     task
-    |> cast(attrs, [:name, :schedule, :url, :method, :headers, :body, :status, :retry_count])
+    |> cast(attrs, [
+      :name,
+      :schedule,
+      :url,
+      :method,
+      :headers,
+      :body,
+      :status,
+      :retry_count,
+      :user_id
+    ])
     |> validate_required([:name, :schedule, :url])
     |> put_default(:body, "")
     |> put_default(:headers, %{})
     |> put_default(:status, "active")
     |> put_default(:retry_count, 0)
     |> validate_inclusion(:method, ~w(GET POST PUT DELETE))
+  end
+
+  def create_changeset(task, attrs, user) do
+    task
+    |> changeset(attrs)
+    |> put_assoc(:user, user)
   end
 
   def update_task(task, attrs) do
