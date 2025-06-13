@@ -20,7 +20,7 @@ defmodule CroniqWeb.TasksAPIController do
 
   def detail(conn, %{"task_id" => task_id}) do
     task =
-      Repo.get_by!(Task, id: task_id)
+      Repo.get_by!(Task, id: task_id, user_id: conn.assigns.current_user.id)
       |> Map.from_struct()
       |> Map.drop([:user, :__meta__])
     render(conn, :detail, task: task)
