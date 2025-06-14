@@ -39,6 +39,12 @@ defmodule Croniq.Task do
     |> put_default(:headers, %{})
     |> put_default(:status, "active")
     |> put_default(:retry_count, 0)
+    |> validate_change(:schedule, fn :schedule, schedule ->
+      case Crontab.CronExpression.Parser.parse(schedule) do
+        {:ok, _} -> []
+        {:error, error} -> [schedule: error]
+      end
+    end)
     |> validate_inclusion(:method, ~w(GET POST PUT DELETE))
   end
 
@@ -62,14 +68,21 @@ defmodule Croniq.Task do
   end
 
   def create_task(user_id, attrs) do
-    parsed_cron = Map.fetch!(attrs, "schedule") |> Crontab.CronExpression.Parser.parse!()
-    task = %Croniq.Task{} |> Croniq.Task.create_changeset(attrs, user_id) |> Repo.insert!()
-    job_name = String.to_atom("request_by_task_#{task.schedule}")
-    Croniq.Scheduler.create_quantum_job(task)
+    # TODO: move check "schedule" field into changeset
+    parsed_cron =
+      case %Croniq.Task{} |> Croniq.Task.create_changeset(attrs, user_id) do
+        %{valid?: false} = changeset ->
+          {:error, changeset}
 
-    Croniq.Scheduler.activate_job(job_name)
-    Logger.info("Quantum job for task record id=#{task.id} created from form input")
-    {:ok, task}
+        changeset ->
+          task = Repo.insert!(changeset)
+          job_name = String.to_atom("request_by_task_#{task.schedule}")
+          Croniq.Scheduler.create_quantum_job(task)
+
+          Croniq.Scheduler.activate_job(job_name)
+          Logger.info("Quantum job for task record id=#{task.id} created from form input")
+          {:ok, task}
+      end
   end
 
   defp decode_json(""), do: %{}

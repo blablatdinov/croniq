@@ -13,6 +13,7 @@ tasks:
   shell:
     cmds:
       - iex -S mix
+
   fmt:
     cmds:
       - mix format
