@@ -50,6 +50,7 @@ defmodule CroniqWeb.Router do
     # pipe_through :api
 
     get "/", TasksAPIController, :list
+    post "/", TasksAPIController, :create
     get "/:task_id", TasksAPIController, :detail
   end
 

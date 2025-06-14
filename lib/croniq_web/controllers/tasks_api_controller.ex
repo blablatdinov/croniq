@@ -26,4 +26,17 @@ defmodule CroniqWeb.TasksAPIController do
 
     render(conn, :detail, task: task)
   end
+
+  def create(
+    conn,
+    params
+  ) do
+    {:ok, task} = Croniq.Task.create_task(conn.assigns.current_user.id, params)
+    response_task =
+      task
+      |> Map.from_struct()
+      |> Map.drop([:user, :__meta__])
+
+    render(conn, :detail, task: response_task)
+  end
 end

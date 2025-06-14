@@ -7,7 +7,7 @@ defmodule CroniqWeb.TasksController do
   import Logger
 
   def create(conn, %{"task" => task_params}) do
-    case create_task(conn, task_params) do
+    case Croniq.Task.create_task(conn.assigns.current_user.id, task_params) do
       {:ok, task} ->
         conn
         |> put_flash(:info, "Task created successfully!")
@@ -28,7 +28,7 @@ defmodule CroniqWeb.TasksController do
   end
 
   def create(conn, %{"task" => task_params}) do
-    case create_task(conn, task_params) do
+    case Croniq.Task.create_task(conn, task_params) do
       {:ok, task} ->
         conn
         |> put_flash(:info, "Task created successfully!")
@@ -71,19 +71,4 @@ defmodule CroniqWeb.TasksController do
     |> redirect(to: ~p"/tasks")
   end
 
-  defp create_task(conn, attrs) do
-    parsed_cron = Map.fetch!(attrs, "schedule") |> Crontab.CronExpression.Parser.parse!()
-    task = %Task{} |> Task.create_changeset(attrs, conn.assigns.current_user) |> Repo.insert!()
-    job_name = String.to_atom("request_by_task_#{task.schedule}")
-
-    Croniq.Scheduler.new_job()
-    |> Quantum.Job.set_name(job_name)
-    |> Quantum.Job.set_schedule(parsed_cron)
-    |> Quantum.Job.set_task(fn -> send_request(task.id) end)
-    |> Croniq.Scheduler.add_job()
-
-    Croniq.Scheduler.activate_job(job_name)
-    Logger.info("Quantum job for task record id=#{task.id} created from form input")
-    {:ok, task}
-  end
 end
