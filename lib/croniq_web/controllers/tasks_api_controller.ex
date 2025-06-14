@@ -39,7 +39,7 @@ defmodule CroniqWeb.TasksAPIController do
   end
 
   def edit(conn, params) do
-    task = Repo.get_by!(Task, id: params["task_id"])
+    task = Repo.get_by!(Task, id: params["task_id"], user_id: conn.assigns.current_user.id)
     {:ok, task} = Task.update_task(task, params)
 
     response_task =
@@ -48,5 +48,14 @@ defmodule CroniqWeb.TasksAPIController do
       |> Map.drop([:user, :__meta__])
 
     render(conn, :detail, task: response_task)
+  end
+
+  def delete(conn, %{"task_id" => task_id}) do
+    case Repo.get_by(Task, id: task_id, user_id: conn.assigns.current_user.id) do
+      {:ok, task} -> Repo.delete!(task)
+      _ -> nil
+    end
+
+    put_status(conn, :no_content) |> json(nil)
   end
 end
