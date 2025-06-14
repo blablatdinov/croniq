@@ -8,7 +8,7 @@ tasks:
 
   build:
     cmds:
-      - mix compile
+      - mix compile --warnings-as-errors
 
   shell:
     cmds:
