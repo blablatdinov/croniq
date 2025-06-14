@@ -1,4 +1,17 @@
 defmodule Croniq.Accounts.UserToken do
+  @moduledoc """
+  Manages authentication tokens and their lifecycle.
+
+  Handles:
+  - Session tokens (for browser auth)
+  - Email tokens (for password reset/confirmation)
+  - API tokens (for programmatic access)
+  - Token expiration and validation
+  - Cryptographic security measures
+
+  Implements secure token patterns including one-way hashing
+  and context-specific validity periods.
+  """
   use Ecto.Schema
   import Ecto.Query
   alias Croniq.Accounts.UserToken

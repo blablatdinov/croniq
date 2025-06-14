@@ -1,4 +1,16 @@
 defmodule Croniq.Accounts.UserNotifier do
+  @moduledoc """
+  Handles transactional email delivery.
+
+  Templates include:
+  - Account confirmation instructions
+  - Password reset workflows
+  - Email change verification
+  - Security notifications
+
+  Uses Swoosh for email composition and delivery,
+  with plain-text templates for reliability.
+  """
   import Swoosh.Email
 
   alias Croniq.Mailer
