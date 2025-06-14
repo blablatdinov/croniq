@@ -1,0 +1,73 @@
+---
+name: Elixir CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    services:
+      postgres:
+        image: postgres:13.21
+        env:
+          POSTGRES_USER: almazilaletdinov
+          POSTGRES_DB: croniq_db
+          POSTGRES_PASSWORD:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Elixir
+      uses: erlef/setup-beam@6e1d5a5aa63e46e2579c0a01718a1376fb24354f
+      with:
+        elixir-version: '1.18.0'
+        otp-version: '26.0'
+    # - name: Set up db
+    #   run: psql -d revive_bot -U almazilaletdinov -h localhost < .github/setup-db.sql
+    # - name: Set up .env
+    #   run: cp .github/workflows/.env .env
+    - name: Restore dependencies cache
+      uses: actions/cache@v4
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
+    - name: Install dependencies
+      run: mix deps.get
+    - name: Build
+      run: mix compile --warnings-as-errors
+    - name: Run tests
+      run: mix test
+
+  lint:
+    name: Lint code
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Elixir
+      uses: erlef/setup-beam@6e1d5a5aa63e46e2579c0a01718a1376fb24354f
+      with:
+        elixir-version: '1.15.2'
+        otp-version: '26.0'
+    - name: Restore dependencies cache
+      uses: actions/cache@v4
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
+    - name: Install dependencies
+      run: mix deps.get
+    - name: Check format
+      run: mix format --check-formatted
+    - name: Run credo
+      run: mix credo --strict
