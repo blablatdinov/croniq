@@ -99,6 +99,5 @@ defmodule Croniq.Requests do
     #{response.body || ""}
     """
     |> String.trim()
->>>>>>> master
   end
 end
