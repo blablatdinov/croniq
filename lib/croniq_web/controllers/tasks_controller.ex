@@ -4,7 +4,7 @@ defmodule CroniqWeb.TasksController do
   alias Croniq.Task
   require Logger
 
-  def create(conn, %{"task" => task_params}) do
+  def create conn, %{"task" => task_params} do
     case Croniq.Task.create_task(conn.assigns.current_user.id, task_params) do
       {:ok, task} ->
         conn

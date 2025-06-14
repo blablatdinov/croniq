@@ -4,7 +4,8 @@ defmodule Croniq.AccountsTest do
   alias Croniq.Accounts
 
   import Croniq.AccountsFixtures
-  alias Croniq.Accounts.{User, UserToken}
+  alias Croniq.Accounts.User
+  alias Croniq.Accounts.UserToken
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do

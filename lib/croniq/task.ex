@@ -1,4 +1,17 @@
 defmodule Croniq.Task do
+  @moduledoc """
+  Defines the Task schema and business logic for scheduled jobs.
+
+  Responsibilities:
+  - CRUD operations for scheduled tasks
+  - Cron schedule validation
+  - HTTP request configuration
+  - State management (active/retry status)
+  - Integration with Quantum scheduler
+
+  Tasks belong to users and contain all necessary metadata to execute HTTP requests
+  on a defined schedule.
+  """
   use Ecto.Schema
   alias Croniq.Repo
   import Ecto.Changeset
@@ -68,7 +81,6 @@ defmodule Croniq.Task do
   end
 
   def create_task(user_id, attrs) do
-    # TODO: move check "schedule" field into changeset
     case %Croniq.Task{} |> Croniq.Task.create_changeset(attrs, user_id) do
       %{valid?: false} = changeset ->
         {:error, changeset}

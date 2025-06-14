@@ -1,4 +1,16 @@
 defmodule Croniq.Requests do
+  @moduledoc """
+  Executes and logs HTTP requests for scheduled tasks.
+
+  Features:
+  - Makes HTTP calls with configurable methods/headers/bodies
+  - Tracks response metrics and duration
+  - Stores detailed request/response logs
+  - Handles errors with retry logic
+  - Formats raw HTTP traffic for debugging
+
+  Integrates with Task model to provide end-to-end execution tracking.
+  """
   alias Croniq.Repo
   alias Croniq.Task
   require Logger
@@ -6,11 +18,7 @@ defmodule Croniq.Requests do
   def send_request(task_id) do
     task = Repo.get_by!(Task, id: task_id)
 
-    Logger.info("Sending request for task #{task.id}",
-      method: task.method,
-      url: task.url,
-      task: IO.inspect(task, pretty: true)
-    )
+    Logger.info("Sending request for task: #{task}")
 
     start_time = System.monotonic_time(:millisecond)
 
@@ -18,24 +26,27 @@ defmodule Croniq.Requests do
       method: task.method,
       url: task.url,
       body: task.body,
-      headers: task.headers |> Enum.map(fn {key, value} -> {to_string(key), to_string(value)} end)
+      headers: Enum.map(task.headers, fn {key, value} -> {to_string(key), to_string(value)} end)
     }
 
     case HTTPoison.request(request) do
       {:ok, response} ->
-        Logger.info("Request for task #{task.id} completed",
-          status_code: response.status_code,
-          response_body: IO.inspect(response.body),
-          response_headers: IO.inspect(response.headers)
+        Logger.info(
+          Enum.join(
+            [
+              "Request for task #{task.id} completed, status_code=#{response.status_code}",
+              "response_body=#{response.body}",
+              "response_headers=#{response.headers}"
+            ],
+            " "
+          )
         )
 
         duration = System.monotonic_time(:millisecond) - start_time
         log_successful_response(request, response, duration, task)
 
       {:error, error} ->
-        Logger.error("Request for task #{task.id} failed",
-          error: IO.inspect(error)
-        )
+        Logger.error("Request for task #{task.id} failed, error=#{error}")
 
         duration = System.monotonic_time(:millisecond) - start_time
         log_failed_response(request, error, duration, task)
@@ -69,15 +80,10 @@ defmodule Croniq.Requests do
   end
 
   defp format_request(request) do
-    headers_str =
-      request.headers
-      |> Enum.map(fn {k, v} -> "#{k}: #{v}" end)
-      |> Enum.join("\r\n")
-
     """
     #{request.method} #{URI.parse(request.url).path} HTTP/1.1
     HOST: #{URI.parse(request.url).host}
-    #{headers_str}
+    #{headers_str(request.headers)}
 
     #{request.body || ""}
     """
@@ -85,17 +91,20 @@ defmodule Croniq.Requests do
   end
 
   defp format_response(response) do
-    headers_str =
-      response.headers
-      |> Enum.map(fn {k, v} -> "#{k}: #{v}" end)
-      |> Enum.join("\r\n")
-
     """
     HTTP/1.1 #{response.status_code} #{Plug.Conn.Status.reason_atom(response.status_code)}
-    #{headers_str}
+    #{headers_str(response.headers)}
 
     #{response.body || ""}
     """
     |> String.trim()
+  end
+
+  defp headers_str(headers) do
+    Enum.map_join(
+      headers,
+      "\r\n",
+      fn {k, v} -> "#{k}: #{v}" end
+    )
   end
 end
