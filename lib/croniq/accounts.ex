@@ -6,7 +6,9 @@ defmodule Croniq.Accounts do
   import Ecto.Query, warn: false
   alias Croniq.Repo
 
-  alias Croniq.Accounts.{User, UserToken, UserNotifier}
+  alias Croniq.Accounts.User
+  alias Croniq.Accounts.UserNotifier
+  alias Croniq.Accounts.UserToken
 
   ## Database getters
 

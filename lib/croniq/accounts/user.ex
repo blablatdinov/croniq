@@ -9,7 +9,7 @@ defmodule Croniq.Accounts.User do
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
 
-    timestamps(type: :utc_datetime)
+    timestamps type: :utc_datetime
   end
 
   @doc """
@@ -126,7 +126,7 @@ defmodule Croniq.Accounts.User do
   Confirms the account by setting `confirmed_at`.
   """
   def confirm_changeset(user) do
-    now = DateTime.utc_now() |> DateTime.truncate(:second)
+    now = DateTime.truncate(DateTime.utc_now(), :second)
     change(user, confirmed_at: now)
   end
 
