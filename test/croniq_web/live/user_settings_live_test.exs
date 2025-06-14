@@ -35,7 +35,7 @@ defmodule CroniqWeb.UserSettingsLiveTest do
     test "updates the user email", %{conn: conn, password: password, user: user} do
       new_email = unique_user_email()
 
-      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+      {:ok, lv, _html} = live conn, ~p"/users/settings"
 
       result =
         lv
@@ -50,7 +50,7 @@ defmodule CroniqWeb.UserSettingsLiveTest do
     end
 
     test "renders errors with invalid data (phx-change)", %{conn: conn} do
-      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+      {:ok, lv, _html} = live conn, ~p"/users/settings"
 
       result =
         lv
@@ -66,7 +66,7 @@ defmodule CroniqWeb.UserSettingsLiveTest do
     end
 
     test "renders errors with invalid data (phx-submit)", %{conn: conn, user: user} do
-      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+      {:ok, lv, _html} = live conn, ~p"/users/settings"
 
       result =
         lv
@@ -92,7 +92,7 @@ defmodule CroniqWeb.UserSettingsLiveTest do
     test "updates the user password", %{conn: conn, user: user, password: password} do
       new_password = valid_user_password()
 
-      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+      {:ok, lv, _html} = live conn, ~p"/users/settings"
 
       form =
         form(lv, "#password_form", %{
@@ -119,7 +119,7 @@ defmodule CroniqWeb.UserSettingsLiveTest do
     end
 
     test "renders errors with invalid data (phx-change)", %{conn: conn} do
-      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+      {:ok, lv, _html} = live conn, ~p"/users/settings"
 
       result =
         lv
@@ -138,7 +138,7 @@ defmodule CroniqWeb.UserSettingsLiveTest do
     end
 
     test "renders errors with invalid data (phx-submit)", %{conn: conn} do
-      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+      {:ok, lv, _html} = live conn, ~p"/users/settings"
 
       result =
         lv
@@ -172,7 +172,7 @@ defmodule CroniqWeb.UserSettingsLiveTest do
     end
 
     test "updates the user email once", %{conn: conn, user: user, token: token, email: email} do
-      {:error, redirect} = live(conn, ~p"/users/settings/confirm_email/#{token}")
+      {:error, redirect} = live conn, ~p"/users/settings/confirm_email/#{token}"
 
       assert {:live_redirect, %{to: path, flash: flash}} = redirect
       assert path == ~p"/users/settings"
@@ -182,7 +182,7 @@ defmodule CroniqWeb.UserSettingsLiveTest do
       assert Accounts.get_user_by_email(email)
 
       # use confirm token again
-      {:error, redirect} = live(conn, ~p"/users/settings/confirm_email/#{token}")
+      {:error, redirect} = live conn, ~p"/users/settings/confirm_email/#{token}"
       assert {:live_redirect, %{to: path, flash: flash}} = redirect
       assert path == ~p"/users/settings"
       assert %{"error" => message} = flash
@@ -190,7 +190,7 @@ defmodule CroniqWeb.UserSettingsLiveTest do
     end
 
     test "does not update email with invalid token", %{conn: conn, user: user} do
-      {:error, redirect} = live(conn, ~p"/users/settings/confirm_email/oops")
+      {:error, redirect} = live conn, ~p"/users/settings/confirm_email/oops"
       assert {:live_redirect, %{to: path, flash: flash}} = redirect
       assert path == ~p"/users/settings"
       assert %{"error" => message} = flash
@@ -200,7 +200,7 @@ defmodule CroniqWeb.UserSettingsLiveTest do
 
     test "redirects if user is not logged in", %{token: token} do
       conn = build_conn()
-      {:error, redirect} = live(conn, ~p"/users/settings/confirm_email/#{token}")
+      {:error, redirect} = live conn, ~p"/users/settings/confirm_email/#{token}"
       assert {:redirect, %{to: path, flash: flash}} = redirect
       assert path == ~p"/users/log_in"
       assert %{"error" => message} = flash

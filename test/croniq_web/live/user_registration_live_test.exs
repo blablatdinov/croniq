@@ -6,7 +6,7 @@ defmodule CroniqWeb.UserRegistrationLiveTest do
 
   describe "Registration page" do
     test "renders registration page", %{conn: conn} do
-      {:ok, _lv, html} = live(conn, ~p"/users/register")
+      {:ok, _lv, html} = live conn, ~p"/users/register"
 
       assert html =~ "Register"
       assert html =~ "Log in"
@@ -23,7 +23,7 @@ defmodule CroniqWeb.UserRegistrationLiveTest do
     end
 
     test "renders errors for invalid data", %{conn: conn} do
-      {:ok, lv, _html} = live(conn, ~p"/users/register")
+      {:ok, lv, _html} = live conn, ~p"/users/register"
 
       result =
         lv
@@ -38,7 +38,7 @@ defmodule CroniqWeb.UserRegistrationLiveTest do
 
   describe "register user" do
     test "creates account and logs the user in", %{conn: conn} do
-      {:ok, lv, _html} = live(conn, ~p"/users/register")
+      {:ok, lv, _html} = live conn, ~p"/users/register"
 
       email = unique_user_email()
       form = form(lv, "#registration_form", user: valid_user_attributes(email: email))
@@ -56,7 +56,7 @@ defmodule CroniqWeb.UserRegistrationLiveTest do
     end
 
     test "renders errors for duplicated email", %{conn: conn} do
-      {:ok, lv, _html} = live(conn, ~p"/users/register")
+      {:ok, lv, _html} = live conn, ~p"/users/register"
 
       user = user_fixture(%{email: "test@email.com"})
 
@@ -73,7 +73,7 @@ defmodule CroniqWeb.UserRegistrationLiveTest do
 
   describe "registration navigation" do
     test "redirects to login page when the Log in button is clicked", %{conn: conn} do
-      {:ok, lv, _html} = live(conn, ~p"/users/register")
+      {:ok, lv, _html} = live conn, ~p"/users/register"
 
       {:ok, _login_live, login_html} =
         lv

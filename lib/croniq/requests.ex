@@ -18,7 +18,7 @@ defmodule Croniq.Requests do
       method: task.method,
       url: task.url,
       body: task.body,
-      headers: task.headers |> Enum.map(fn {key, value} -> {to_string(key), to_string(value)} end)
+      headers: Enum.map(task.headers, fn {key, value} -> {to_string(key), to_string(value)} end)
     }
 
     case HTTPoison.request(request) do
