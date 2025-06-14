@@ -31,4 +31,9 @@ defmodule CroniqWeb.APIAuthControllerTest do
     assert %{"error" => error} = response
     assert error == "Invalid email or password"
   end
+
+  test "Remove token" do
+    # TODO: implement
+    assert false
+  end
 end

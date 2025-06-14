@@ -7,6 +7,8 @@ defmodule CroniqWeb.TasksAPIController do
   import Crontab.CronExpression
   import Logger
 
+  action_fallback CroniqWeb.FallbackController
+
   def list(conn, _params) do
     tasks =
       Repo.all(from task in Task, where: task.user_id == ^conn.assigns.current_user.id)
@@ -19,23 +21,35 @@ defmodule CroniqWeb.TasksAPIController do
   end
 
   def detail(conn, %{"task_id" => task_id}) do
-    task =
-      Repo.get_by!(Task, id: task_id, user_id: conn.assigns.current_user.id)
-      |> Map.from_struct()
-      |> Map.drop([:user, :__meta__])
+    case Repo.get_by(Task, id: task_id, user_id: conn.assigns.current_user.id) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{"detail" => "Not Found"})
 
-    render(conn, :detail, task: task)
+      task ->
+        response_task =
+          task
+          |> Map.from_struct()
+          |> Map.drop([:user, :__meta__])
+
+        render(conn, :detail, task: response_task)
+    end
   end
 
   def create(conn, params) do
-    {:ok, task} = Croniq.Task.create_task(conn.assigns.current_user.id, params)
+    case Croniq.Task.create_task(conn.assigns.current_user.id, params) do
+      {:ok, task} ->
+        response_task =
+          task
+          |> Map.from_struct()
+          |> Map.drop([:user, :__meta__])
 
-    response_task =
-      task
-      |> Map.from_struct()
-      |> Map.drop([:user, :__meta__])
+        render(conn, :detail, task: response_task)
 
-    render(conn, :detail, task: response_task)
+      another ->
+        another
+    end
   end
 
   def edit(conn, params) do

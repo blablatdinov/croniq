@@ -1,5 +1,6 @@
 defmodule CroniqWeb.Router do
   use CroniqWeb, :router
+  # import Phoenix.Controller, only: [action_fallback: 1]
 
   import CroniqWeb.UserAuth
 
@@ -15,6 +16,7 @@ defmodule CroniqWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    # action_fallback CroniqWeb.FallbackController
   end
 
   pipeline :api_guard do
