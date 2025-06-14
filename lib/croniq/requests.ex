@@ -71,18 +71,33 @@ defmodule Croniq.Requests do
   end
 
   defp format_request(request) do
+    headers_str =
+      request.headers
+      |> Enum.map(fn {k, v} -> "#{k}: #{v}" end)
+      |> Enum.join("\r\n")
+
     """
-    #{request.method} #{request.url}
-    Headers: #{inspect(request.headers)}
-    Body: #{request.body || "<empty>"}
+    #{request.method} #{URI.parse(request.url).path} HTTP/1.1
+    HOST: #{URI.parse(request.url).host}
+    #{headers_str}
+
+    #{request.body || ""}
     """
+    |> String.trim()
   end
 
   defp format_response(response) do
+    headers_str =
+      response.headers
+      |> Enum.map(fn {k, v} -> "#{k}: #{v}" end)
+      |> Enum.join("\r\n")
+
     """
-    Status: #{response.status_coe}
-    Headers: #{inspect(response.headers)}
-    Body: #{response.body || "<empty>"}
+    HTTP/1.1 #{response.status_code} #{Plug.Conn.Status.reason_atom(response.status_code)}
+    #{headers_str}
+
+    #{response.body || ""}
     """
+    |> String.trim()
   end
 end

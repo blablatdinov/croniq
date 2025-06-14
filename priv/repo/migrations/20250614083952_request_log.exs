@@ -3,8 +3,8 @@ defmodule Croniq.Repo.Migrations.RequestLog do
 
   def change do
     create table(:request_log) do
-      add :request, :string, null: false
-      add :response, :string
+      add :request, :text, null: false
+      add :response, :text
       add :duration, :integer, null: false
       add :error, :integer
       add :task_id, references(:tasks)

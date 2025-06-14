@@ -51,9 +51,14 @@ defmodule Croniq.Task do
   end
 
   def update_task(task, attrs) do
-    task
-    |> changeset(attrs)
-    |> Repo.update()
+    updated_task =
+      task
+      |> changeset(attrs)
+      |> Repo.update()
+
+    Croniq.Scheduler.update_quantum_job(task)
+    Logger.info("Quantum job for task record id=#{task.id} updated")
+    updated_task
   end
 
   def create_task(user_id, attrs) do
