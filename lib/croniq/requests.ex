@@ -14,31 +14,90 @@ defmodule Croniq.Requests do
       task: IO.inspect(task, pretty: true)
     )
 
-    try do
-      response =
-        HTTPoison.request!(%HTTPoison.Request{
-          method: task.method,
-          url: task.url,
-          body: task.body,
-          headers:
-            task.headers |> Enum.map(fn {key, value} -> {to_string(key), to_string(value)} end)
-        })
+    start_time = System.monotonic_time(:millisecond)
 
-      Logger.info("Request for task #{task.id} completed",
-        status_code: response.status_code,
-        response_body: IO.inspect(response.body),
-        response_headers: IO.inspect(response.headers)
-      )
+    request = %HTTPoison.Request{
+      method: task.method,
+      url: task.url,
+      body: task.body,
+      headers: task.headers |> Enum.map(fn {key, value} -> {to_string(key), to_string(value)} end)
+    }
 
-      response
-    rescue
-      error ->
-        Logger.error("Request for task #{task.id} failed",
-          error: IO.inspect(error),
-          stacktrace: IO.inspect(__STACKTRACE__)
+    case HTTPoison.request(request) do
+      {:ok, response} ->
+        Logger.info("Request for task #{task.id} completed",
+          status_code: response.status_code,
+          response_body: IO.inspect(response.body),
+          response_headers: IO.inspect(response.headers)
         )
 
-        reraise error, __STACKTRACE__
+        duration = System.monotonic_time(:millisecond) - start_time
+        log_successful_response(request, response, duration, task)
+
+      {:error, error} ->
+        Logger.error("Request for task #{task.id} failed",
+          error: IO.inspect(error)
+        )
+
+        duration = System.monotonic_time(:millisecond) - start_time
+        log_failed_response(request, error, duration, task)
     end
+
+    :ok
+  end
+
+  defp log_successful_response(request, response, duration, task) do
+    %Croniq.RequestLog{}
+    |> Croniq.RequestLog.changeset(%{
+      request: format_request(request),
+      response: format_response(response),
+      duration: duration,
+      error: nil
+    })
+    |> Ecto.Changeset.put_assoc(:task, task)
+    |> Repo.insert!()
+  end
+
+  defp log_failed_response(request, error, duration, task) do
+    %Croniq.RequestLog{}
+    |> Croniq.Requests.Log.changeset(%{
+      request: format_request(request),
+      response: nil,
+      duration: duration,
+      error: error
+    })
+    |> Ecto.Changeset.put_assoc(:task, task)
+    |> Repo.insert!()
+  end
+
+  defp format_request(request) do
+    headers_str =
+      request.headers
+      |> Enum.map(fn {k, v} -> "#{k}: #{v}" end)
+      |> Enum.join("\r\n")
+
+    """
+    #{request.method} #{URI.parse(request.url).path} HTTP/1.1
+    HOST: #{URI.parse(request.url).host}
+    #{headers_str}
+
+    #{request.body || ""}
+    """
+    |> String.trim()
+  end
+
+  defp format_response(response) do
+    headers_str =
+      response.headers
+      |> Enum.map(fn {k, v} -> "#{k}: #{v}" end)
+      |> Enum.join("\r\n")
+
+    """
+    HTTP/1.1 #{response.status_code} #{Plug.Conn.Status.reason_atom(response.status_code)}
+    #{headers_str}
+
+    #{response.body || ""}
+    """
+    |> String.trim()
   end
 end
