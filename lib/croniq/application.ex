@@ -18,15 +18,16 @@ defmodule Croniq.Application do
       {Finch, name: Croniq.Finch},
       # Start a worker by calling: Croniq.Worker.start_link(arg)
       # {Croniq.Worker, arg},
+      Croniq.Scheduler,
       # Start to serve requests, typically the last entry
       CroniqWeb.Endpoint,
-      Croniq.Scheduler
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Croniq.Supervisor]
     result = Supervisor.start_link(children, opts)
+    IO.inspect(result)
     load_job_from_db()
     result
   end

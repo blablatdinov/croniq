@@ -6,6 +6,10 @@ tasks:
     cmds:
       - mix phx.server
 
+  build:
+    cmds:
+      - mix compile
+
   fmt:
     cmds:
       - mix format
@@ -13,6 +17,10 @@ tasks:
   lint:
     cmds:
       - mix credo --strict
+
+  test:
+    cmds:
+      - mix test
 
   makemigration:
     cmds:
