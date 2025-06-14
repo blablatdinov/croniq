@@ -50,7 +50,10 @@ defmodule CroniqWeb.Router do
     # pipe_through :api
 
     get "/", TasksAPIController, :list
+    post "/", TasksAPIController, :create
     get "/:task_id", TasksAPIController, :detail
+    put "/:task_id", TasksAPIController, :edit
+    delete "/:task_id", TasksAPIController, :delete
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

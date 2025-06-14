@@ -2,6 +2,7 @@ defmodule Croniq.Task do
   use Ecto.Schema
   alias Croniq.Repo
   import Ecto.Changeset
+  import Logger
 
   schema "tasks" do
     belongs_to :user, Croniq.Accounts.User
@@ -41,16 +42,29 @@ defmodule Croniq.Task do
     |> validate_inclusion(:method, ~w(GET POST PUT DELETE))
   end
 
-  def create_changeset(task, attrs, user) do
+  def create_changeset(task, attrs, user_id) do
     task
     |> changeset(attrs)
-    |> put_assoc(:user, user)
+    |> put_default(:user_id, user_id)
+
+    # |> put_assoc(:user, user)
   end
 
   def update_task(task, attrs) do
     task
     |> changeset(attrs)
     |> Repo.update()
+  end
+
+  def create_task(user_id, attrs) do
+    parsed_cron = Map.fetch!(attrs, "schedule") |> Crontab.CronExpression.Parser.parse!()
+    task = %Croniq.Task{} |> Croniq.Task.create_changeset(attrs, user_id) |> Repo.insert!()
+    job_name = String.to_atom("request_by_task_#{task.schedule}")
+    Croniq.Scheduler.create_quantum_job(task)
+
+    Croniq.Scheduler.activate_job(job_name)
+    Logger.info("Quantum job for task record id=#{task.id} created from form input")
+    {:ok, task}
   end
 
   defp decode_json(""), do: %{}
