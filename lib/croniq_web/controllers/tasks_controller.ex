@@ -70,5 +70,4 @@ defmodule CroniqWeb.TasksController do
     |> put_flash(:info, "Task deleted successfully")
     |> redirect(to: ~p"/tasks")
   end
-
 end

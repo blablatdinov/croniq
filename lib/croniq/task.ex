@@ -46,6 +46,7 @@ defmodule Croniq.Task do
     task
     |> changeset(attrs)
     |> put_default(:user_id, user_id)
+
     # |> put_assoc(:user, user)
   end
 
