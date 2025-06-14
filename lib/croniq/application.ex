@@ -4,8 +4,7 @@ defmodule Croniq.Application do
   @moduledoc false
 
   use Application
-
-  import Logger
+  require Logger
 
   @impl true
   def start(_type, _args) do

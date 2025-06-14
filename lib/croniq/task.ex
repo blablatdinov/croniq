@@ -2,7 +2,7 @@ defmodule Croniq.Task do
   use Ecto.Schema
   alias Croniq.Repo
   import Ecto.Changeset
-  import Logger
+  require Logger
 
   schema "tasks" do
     belongs_to :user, Croniq.Accounts.User
@@ -69,20 +69,19 @@ defmodule Croniq.Task do
 
   def create_task(user_id, attrs) do
     # TODO: move check "schedule" field into changeset
-    parsed_cron =
-      case %Croniq.Task{} |> Croniq.Task.create_changeset(attrs, user_id) do
-        %{valid?: false} = changeset ->
-          {:error, changeset}
+    case %Croniq.Task{} |> Croniq.Task.create_changeset(attrs, user_id) do
+      %{valid?: false} = changeset ->
+        {:error, changeset}
 
-        changeset ->
-          task = Repo.insert!(changeset)
-          job_name = String.to_atom("request_by_task_#{task.schedule}")
-          Croniq.Scheduler.create_quantum_job(task)
+      changeset ->
+        task = Repo.insert!(changeset)
+        job_name = String.to_atom("request_by_task_#{task.schedule}")
+        Croniq.Scheduler.create_quantum_job(task)
 
-          Croniq.Scheduler.activate_job(job_name)
-          Logger.info("Quantum job for task record id=#{task.id} created from form input")
-          {:ok, task}
-      end
+        Croniq.Scheduler.activate_job(job_name)
+        Logger.info("Quantum job for task record id=#{task.id} created from form input")
+        {:ok, task}
+    end
   end
 
   defp decode_json(""), do: %{}

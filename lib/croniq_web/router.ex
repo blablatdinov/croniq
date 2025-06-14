@@ -27,6 +27,7 @@ defmodule CroniqWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/docs", PageController, :docs
   end
 
   scope "/tasks", CroniqWeb do

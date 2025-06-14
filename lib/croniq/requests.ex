@@ -1,9 +1,7 @@
 defmodule Croniq.Requests do
-  import Ecto.Query
-  import HTTPoison
   alias Croniq.Repo
   alias Croniq.Task
-  import Logger
+  require Logger
 
   def send_request(task_id) do
     task = Repo.get_by!(Task, id: task_id)
@@ -60,7 +58,7 @@ defmodule Croniq.Requests do
 
   defp log_failed_response(request, error, duration, task) do
     %Croniq.RequestLog{}
-    |> Croniq.Requests.Log.changeset(%{
+    |> Croniq.RequestLog.changeset(%{
       request: format_request(request),
       response: nil,
       duration: duration,

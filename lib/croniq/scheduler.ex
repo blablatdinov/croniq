@@ -1,6 +1,5 @@
 defmodule Croniq.Scheduler do
   use Quantum, otp_app: :croniq_scheduler
-  import Logger
 
   def create_quantum_job(task) do
     parsed_cron = Crontab.CronExpression.Parser.parse!(task.schedule)
