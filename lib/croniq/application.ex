@@ -27,6 +27,7 @@ defmodule Croniq.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Croniq.Supervisor]
     result = Supervisor.start_link(children, opts)
+    IO.inspect(result)
     load_job_from_db()
     result
   end
