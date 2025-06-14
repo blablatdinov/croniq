@@ -56,13 +56,13 @@ defmodule CroniqWeb.UserSessionControllerTest do
 
     test "login following registration", %{conn: conn, user: user} do
       conn =
-        post(conn, ~p"/users/log_in", %{
+        post conn, ~p"/users/log_in", %{
           "_action" => "registered",
           "user" => %{
             "email" => user.email,
             "password" => valid_user_password()
           }
-        })
+        }
 
       assert redirected_to(conn) == ~p"/"
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Account created successfully"
@@ -70,13 +70,13 @@ defmodule CroniqWeb.UserSessionControllerTest do
 
     test "login following password update", %{conn: conn, user: user} do
       conn =
-        post(conn, ~p"/users/log_in", %{
+        post conn, ~p"/users/log_in", %{
           "_action" => "password_updated",
           "user" => %{
             "email" => user.email,
             "password" => valid_user_password()
           }
-        })
+        }
 
       assert redirected_to(conn) == ~p"/users/settings"
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Password updated successfully"

@@ -60,7 +60,7 @@ defmodule CroniqWeb.TasksAPIControllerTest do
       |> json_response(200)
 
     assert %{"results" => results} = response
-    assert length(results) == 0
+    assert Enum.empty?(results)
   end
 
   @tag :skip

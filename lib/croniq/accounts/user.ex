@@ -1,4 +1,17 @@
 defmodule Croniq.Accounts.User do
+  @moduledoc """
+  Defines the User schema and authentication logic.
+
+  Provides:
+  - Secure password hashing (bcrypt)
+  - Email validation and confirmation
+  - Password change workflows
+  - Account credential updates
+  - Session association
+
+  Enforces strong credential policies and protects against
+  common authentication vulnerabilities.
+  """
   use Ecto.Schema
   import Ecto.Changeset
 

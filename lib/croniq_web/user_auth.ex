@@ -1,4 +1,17 @@
 defmodule CroniqWeb.UserAuth do
+  @moduledoc """
+  Handles user authentication and session management.
+
+  Provides functions for:
+  - User login/logout flows
+  - Session token generation/validation
+  - Remember-me cookie handling
+  - LiveView authentication hooks
+  - Route authentication guards
+
+  Uses Phoenix's built-in session mechanisms with additional security measures
+  like session fixation protection.
+  """
   use CroniqWeb, :verified_routes
 
   import Plug.Conn
