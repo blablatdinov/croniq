@@ -2,10 +2,10 @@ defmodule CroniqWeb.TasksAPIController do
   use CroniqWeb, :controller
   alias Croniq.Repo
   alias Croniq.Task
-  import Croniq.Requests
+  # import Croniq.Requests
   import Ecto.Query
-  import Crontab.CronExpression
-  import Logger
+  # import Crontab.CronExpression
+  # import Logger
 
   action_fallback CroniqWeb.FallbackController
 
