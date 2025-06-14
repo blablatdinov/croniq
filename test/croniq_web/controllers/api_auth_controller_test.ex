@@ -7,7 +7,10 @@ defmodule CroniqWeb.APIAuthControllerTest do
 
     response =
       conn
-      |> post(~p"/api/v1/auth", %{"email" => "a.ilaletdinov@yandex.ru", "password" => "longStrongPassword"})
+      |> post(~p"/api/v1/auth", %{
+        "email" => "a.ilaletdinov@yandex.ru",
+        "password" => "longStrongPassword"
+      })
       |> json_response(200)
 
     assert %{"token" => token} = response
@@ -16,9 +19,16 @@ defmodule CroniqWeb.APIAuthControllerTest do
 
   test "Invalid auth data", %{conn: conn} do
     user_fixture(%{email: "a.ilaletdinov@yandex.ru", password: "longStrongPassword"})
+
     response =
       conn
-      |> post(~p"/api/v1/auth", %{"email" => "a.ilaletdinov@yandex.ru", "password" => "longStrongPassword"})
+      |> post(~p"/api/v1/auth", %{
+        "email" => "a.ilaletdinov@yandex.ru",
+        "password" => "incorrectPassword"
+      })
       |> json_response(401)
+
+    assert %{"error" => error} = response
+    assert error == "Invalid email or password"
   end
 end
