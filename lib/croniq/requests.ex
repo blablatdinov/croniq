@@ -80,7 +80,7 @@ defmodule Croniq.Requests do
 
   defp format_response(response) do
     """
-    Status: #{response.status_coe}
+    Status: #{response.status_code}
     Headers: #{inspect(response.headers)}
     Body: #{response.body || "<empty>"}
     """
