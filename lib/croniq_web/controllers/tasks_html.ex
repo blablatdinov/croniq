@@ -15,7 +15,7 @@ defmodule CroniqWeb.TasksHTML do
     response
     |> String.split("\n")
     |> Enum.map(&String.trim/1)
-    |> Enum.slice(1..-1)
+    |> Enum.slice(1..-1//1)
     |> Enum.map(fn header ->
       case String.split(header, ": ", parts: 2) do
         [key, value] -> {key, value}
