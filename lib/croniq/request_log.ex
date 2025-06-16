@@ -1,4 +1,16 @@
 defmodule Croniq.RequestLog do
+  @moduledoc """
+  Tracks execution history of scheduled tasks.
+
+  Captures:
+  - Full HTTP request/response data
+  - Execution timing metrics
+  - Error states and stack traces
+  - Task execution context
+
+  Provides audit trail and debugging capabilities
+  for all automated requests.
+  """
   use Ecto.Schema
   import Ecto.Changeset
 

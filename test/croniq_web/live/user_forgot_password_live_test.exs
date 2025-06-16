@@ -9,7 +9,7 @@ defmodule CroniqWeb.UserForgotPasswordLiveTest do
 
   describe "Forgot password page" do
     test "renders email page", %{conn: conn} do
-      {:ok, lv, html} = live(conn, ~p"/users/reset_password")
+      {:ok, lv, html} = live conn, ~p"/users/reset_password"
 
       assert html =~ "Forgot your password?"
       assert has_element?(lv, ~s|a[href="#{~p"/users/register"}"]|, "Register")
@@ -33,7 +33,7 @@ defmodule CroniqWeb.UserForgotPasswordLiveTest do
     end
 
     test "sends a new reset password token", %{conn: conn, user: user} do
-      {:ok, lv, _html} = live(conn, ~p"/users/reset_password")
+      {:ok, lv, _html} = live conn, ~p"/users/reset_password"
 
       {:ok, conn} =
         lv
@@ -48,7 +48,7 @@ defmodule CroniqWeb.UserForgotPasswordLiveTest do
     end
 
     test "does not send reset password token if email is invalid", %{conn: conn} do
-      {:ok, lv, _html} = live(conn, ~p"/users/reset_password")
+      {:ok, lv, _html} = live conn, ~p"/users/reset_password"
 
       {:ok, conn} =
         lv

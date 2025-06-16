@@ -1,4 +1,16 @@
 defmodule Croniq.Scheduler do
+  @moduledoc """
+  Quantum scheduler integration layer.
+
+  Responsibilities:
+  - Creating/updating cron jobs from task definitions
+  - Managing job lifecycle (activation/deactivation)
+  - Bridging between database and scheduler process
+  - Ensuring job/task synchronization
+
+  Translates task schedules into Quantum job configurations
+  and maintains runtime consistency.
+  """
   use Quantum, otp_app: :croniq_scheduler
 
   def create_quantum_job(task) do

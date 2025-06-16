@@ -1,7 +1,20 @@
 defmodule Croniq.Application do
+  @moduledoc """
+  OTP application root and startup coordinator.
+
+  Manages:
+  - Service supervision tree
+  - Database connection pooling
+  - Cluster configuration
+  - Scheduler initialization
+  - Warm-start procedures
+
+  Orchestrates component lifecycle and failure recovery
+  for the entire system.
+  """
+
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
-  @moduledoc false
 
   use Application
   require Logger
@@ -26,12 +39,11 @@ defmodule Croniq.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Croniq.Supervisor]
     result = Supervisor.start_link(children, opts)
-    IO.inspect(result)
     load_job_from_db()
     result
   end
 
-  defp load_job_from_db() do
+  defp load_job_from_db do
     Croniq.Repo.all(Croniq.Task)
     |> Enum.each(fn task ->
       Croniq.Scheduler.create_quantum_job(task)

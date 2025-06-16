@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/elixir,phoenix
-# Edit at https://www.toptal.com/developers/gitignore?templates=elixir,phoenix
+# Created by https://www.toptal.com/developers/gitignore/api/elixir,phoenix,vim
+# Edit at https://www.toptal.com/developers/gitignore?templates=elixir,phoenix,vim
 
 ### Elixir ###
 /_build
@@ -39,4 +39,25 @@ erl_crash.dump
 /installer/doc
 /installer/deps
 
-# End of https://www.toptal.com/developers/gitignore/api/elixir,phoenix
+### Vim ###
+# Swap
+[._]*.s[a-v][a-z]
+!*.svg  # comment out if you don't need vector files
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+Sessionx.vim
+
+# Temporary
+.netrwhist
+*~
+# Auto-generated tag files
+tags
+# Persistent undo
+[._]*.un~
+
+# End of https://www.toptal.com/developers/gitignore/api/elixir,phoenix,vim
