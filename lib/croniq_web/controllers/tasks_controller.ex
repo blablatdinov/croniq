@@ -3,6 +3,7 @@ defmodule CroniqWeb.TasksController do
   alias Croniq.Repo
   alias Croniq.Task
   require Logger
+  import Ecto.Query
 
   def create conn, %{"task" => task_params} do
     case Croniq.Task.create_task(conn.assigns.current_user.id, task_params) do
@@ -54,4 +55,32 @@ defmodule CroniqWeb.TasksController do
     |> put_flash(:info, "Task deleted successfully")
     |> redirect(to: ~p"/tasks")
   end
+
+  def requests_log(conn, %{"task_id" => task_id}) do
+    rq_logs =
+      Repo.all(
+        from rq_log in Croniq.RequestLog,
+          join: task in Croniq.Task,
+          on: rq_log.task_id == task.id,
+          where: rq_log.task_id == ^task_id and task.user_id == ^conn.assigns.current_user.id,
+          order_by: [desc: rq_log.id]
+      )
+
+    render(conn, :requests_log, rq_logs: rq_logs)
+  end
+
+  def request_log_detail(conn, %{"rq_log_id" => rq_log_id}) do
+    rq_log =
+      Repo.one!(
+        from rq_log in Croniq.RequestLog,
+          join: task in Croniq.Task,
+          on: rq_log.task_id == task.id,
+          where:
+              task.user_id == ^conn.assigns.current_user.id and
+              rq_log.id == ^rq_log_id,
+          order_by: [desc: rq_log.id]
+      )
+    render(conn, :request_log_detail, rq_log: rq_log)
+  end
+
 end

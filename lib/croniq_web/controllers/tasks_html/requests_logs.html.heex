@@ -1,0 +1,32 @@
+<div class="container mx-auto px-4 py-8">
+  <table class="min-w-full bg-white border border-gray-200">
+    <thead>
+      <tr class="bg-gray-100">
+        <th class="py-2 px-4 border">ID</th>
+        <th class="py-2 px-4 border">Status</th>
+        <th class="py-2 px-4 border">Duration</th>
+        <th class="py-2 px-4 border">Inserted at</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= for rq_log <- @rq_logs do %>
+        <tr class="hover:bg-gray-50">
+          <td class="py-2 px-4 border text-center">
+            <.link navigate={~p"/tasks/#{rq_log.task_id}/requests-log/#{rq_log.id}"}>
+              {rq_log.id}
+            </.link>
+          </td>
+          <td class="py-2 px-4 border font-mono">
+            {rq_log.status_code}
+          </td>
+          <td class="py-2 px-4 border font-mono">
+            {rq_log.duration} ms
+          </td>
+          <td class="py-2 px-4 border font-mono">
+            {rq_log.inserted_at}
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
