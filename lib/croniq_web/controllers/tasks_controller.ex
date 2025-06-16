@@ -76,11 +76,11 @@ defmodule CroniqWeb.TasksController do
           join: task in Croniq.Task,
           on: rq_log.task_id == task.id,
           where:
-              task.user_id == ^conn.assigns.current_user.id and
+            task.user_id == ^conn.assigns.current_user.id and
               rq_log.id == ^rq_log_id,
           order_by: [desc: rq_log.id]
       )
+
     render(conn, :request_log_detail, rq_log: rq_log)
   end
-
 end
