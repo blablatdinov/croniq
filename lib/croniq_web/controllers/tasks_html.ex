@@ -12,17 +12,16 @@ defmodule CroniqWeb.TasksHTML do
   end
 
   def extract_headers(response) do
-    response =
-      response
-      |> String.split("\n")
-      |> Enum.map(&String.trim/1)
-      |> Enum.slice(1..-1)
-      |> Enum.map(fn header ->
-        case String.split(header, ": ", parts: 2) do
-          [key, value] -> {key, value}
-          _ -> {header, ""}
-        end
-      end)
+    response
+    |> String.split("\n")
+    |> Enum.map(&String.trim/1)
+    |> Enum.slice(1..-1)
+    |> Enum.map(fn header ->
+      case String.split(header, ": ", parts: 2) do
+        [key, value] -> {key, value}
+        _ -> {header, ""}
+      end
+    end)
   end
 
   def render_json(response) do
