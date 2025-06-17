@@ -49,7 +49,7 @@ defmodule CroniqWeb.TasksAPIControllerTest do
            )
   end
 
-  test "Alien task list", %{conn: conn, user: user, user_token: user_token} do
+  test "Alien task list", %{conn: conn, user_token: user_token} do
     alien = user_fixture()
     task_list_for_user(alien, 1)
 
@@ -64,7 +64,7 @@ defmodule CroniqWeb.TasksAPIControllerTest do
   end
 
   @tag :skip
-  test "Tasks list pagination", %{conn: conn, user: user} do
+  test "Tasks list pagination" do
     # TODO implement
     assert false
   end
@@ -94,24 +94,22 @@ defmodule CroniqWeb.TasksAPIControllerTest do
            )
   end
 
-  test "Task detail alien", %{conn: conn, user: user, user_token: user_token} do
+  test "Task detail alien", %{conn: conn, user_token: user_token} do
     alien_task =
       user_fixture()
       |> task_list_for_user()
       |> Enum.at(0)
 
-    response =
-      conn
-      |> put_req_header("authorization", "Basic " <> user_token)
-      |> get(~p"/api/v1/tasks/#{Map.fetch!(alien_task, :id)}")
-      |> json_response(404)
+    conn
+    |> put_req_header("authorization", "Basic " <> user_token)
+    |> get(~p"/api/v1/tasks/#{Map.fetch!(alien_task, :id)}")
+    |> json_response(404)
   end
 
   test "Task create", %{conn: conn, user: user, user_token: user_token} do
-    task =
-      user
-      |> task_list_for_user()
-      |> Enum.at(0)
+    user
+    |> task_list_for_user()
+    |> Enum.at(0)
 
     response =
       conn
@@ -143,10 +141,9 @@ defmodule CroniqWeb.TasksAPIControllerTest do
   end
 
   test "Task create without fields", %{conn: conn, user: user, user_token: user_token} do
-    task =
-      user
-      |> task_list_for_user()
-      |> Enum.at(0)
+    user
+    |> task_list_for_user()
+    |> Enum.at(0)
 
     response =
       conn
@@ -166,10 +163,9 @@ defmodule CroniqWeb.TasksAPIControllerTest do
   end
 
   test "Invalid cron", %{conn: conn, user: user, user_token: user_token} do
-    task =
-      user
-      |> task_list_for_user()
-      |> Enum.at(0)
+    user
+    |> task_list_for_user()
+    |> Enum.at(0)
 
     response =
       conn
