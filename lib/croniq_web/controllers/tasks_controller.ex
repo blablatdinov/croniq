@@ -4,6 +4,8 @@ defmodule CroniqWeb.TasksController do
   alias Croniq.Task
   require Logger
   import Ecto.Query
+  import Plug.Conn
+  import Phoenix.Controller
 
   def create conn, %{"task" => task_params} do
     case Croniq.Task.create_task(conn.assigns.current_user.id, task_params) do
@@ -71,7 +73,7 @@ defmodule CroniqWeb.TasksController do
 
   def request_log_detail(conn, %{"rq_log_id" => rq_log_id}) do
     rq_log =
-      Repo.one!(
+      Repo.one(
         from rq_log in Croniq.RequestLog,
           join: task in Croniq.Task,
           on: rq_log.task_id == task.id,
@@ -81,6 +83,13 @@ defmodule CroniqWeb.TasksController do
           order_by: [desc: rq_log.id]
       )
 
-    render(conn, :request_log_detail, rq_log: rq_log)
+    case rq_log do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> put_view(CroniqWeb.ErrorHTML)
+        |> render("404.html", %{})
+      rq_log -> render(conn, :request_log_detail, rq_log: rq_log)
+    end
   end
 end

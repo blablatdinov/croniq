@@ -59,5 +59,20 @@ defmodule CroniqWeb.TasksControllerTest do
       parsed = Floki.parse_document!(response)
       assert length(Floki.find(parsed, "[data-test=rq-log-line]")) == 0
     end
+
+    test "Alien request log detail", %{conn: conn, user_token: user_token} do
+      alien_user = user_fixture()
+      [task] = task_list_for_user(alien_user)
+      [rq_log] = requests_log(task)
+
+      response =
+        conn
+        |> put_session(:user_token, user_token)
+        |> get(~p"/tasks/#{task.id}/requests-log/#{rq_log.id}")
+        |> html_response(404)
+
+      parsed = Floki.parse_document!(response)
+      assert length(Floki.find(parsed, "[data-test=rq-log-line]")) == 0
+    end
   end
 end
