@@ -10,14 +10,14 @@
     </thead>
     <tbody>
       <%= for rq_log <- @rq_logs do %>
-        <tr class="hover:bg-gray-50">
+        <tr class="hover:bg-gray-50" data-test="rq-log-line">
           <td class="py-2 px-4 border text-center">
             <.link navigate={~p"/tasks/#{rq_log.task_id}/requests-log/#{rq_log.id}"}>
               {rq_log.id}
             </.link>
           </td>
           <td class="py-2 px-4 border font-mono">
-            {rq_log.status_code}
+            {extract_status(rq_log.response)}
           </td>
           <td class="py-2 px-4 border font-mono">
             {rq_log.duration} ms

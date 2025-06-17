@@ -66,7 +66,7 @@ defmodule CroniqWeb.TasksController do
           order_by: [desc: rq_log.id]
       )
 
-    render(conn, :requests_log, rq_logs: rq_logs)
+    render(conn, :requests_logs, rq_logs: rq_logs)
   end
 
   def request_log_detail(conn, %{"rq_log_id" => rq_log_id}) do
