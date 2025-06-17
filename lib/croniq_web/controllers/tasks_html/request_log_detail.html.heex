@@ -4,7 +4,7 @@
     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <span class="text-lg font-semibold">Log ID: {@rq_log.id}</span>
+          <span class="text-lg font-semibold" data-test="rq-log-id">Log ID: {@rq_log.id}</span>
           <span class="ml-4 px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full">
             Status code: {extract_status(@rq_log.response)}
           </span>

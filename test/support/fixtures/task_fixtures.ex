@@ -26,13 +26,15 @@ defmodule Croniq.TaskFixtures do
   def requests_log(task, count \\ 1) do
     1..count
     |> Enum.map(fn _ ->
-      {:ok, request_log} = Croniq.RequestLog.create_rq_log(%{
+      {:ok, request_log} =
+        Croniq.RequestLog.create_rq_log(%{
           "task_id" => task.id,
           "request" => "string",
           "response" => "string",
           "duration" => 430,
-          "error" => "",
+          "error" => ""
         })
+
       request_log
     end)
   end
