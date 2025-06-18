@@ -56,12 +56,10 @@ defmodule CroniqWeb.TasksControllerTest do
         |> get(~p"/tasks/#{task.id}/requests-log")
         |> html_response(200)
 
-      assert
-
-      response
-      |> Floki.parse_document!()
-      |> Floki.find("[data-test=rq-log-line]")
-      |> Enum.empty?()
+      assert response
+             |> Floki.parse_document!()
+             |> Floki.find("[data-test=rq-log-line]")
+             |> Enum.empty?()
     end
 
     test "Alien request log detail", %{conn: conn, user_token: user_token} do
@@ -75,12 +73,10 @@ defmodule CroniqWeb.TasksControllerTest do
         |> get(~p"/tasks/#{task.id}/requests-log/#{rq_log.id}")
         |> html_response(404)
 
-      assert
-
-      response
-      |> Floki.parse_document!()
-      |> Floki.find("[data-test=rq-log-line]")
-      |> Enum.empty?()
+      assert response
+             |> Floki.parse_document!()
+             |> Floki.find("[data-test=rq-log-line]")
+             |> Enum.empty?()
     end
   end
 end
