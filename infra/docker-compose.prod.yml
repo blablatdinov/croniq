@@ -1,0 +1,11 @@
+---
+services:
+  croniq:
+    image: blablatdinov/croniq:${TAG_NAME}
+    command: _build/prod/rel/croniq/bin/croniq start
+    restart: always
+    ports:
+      - 4010:4010
+    environment:
+      DATABASE_URL=${DATABASE_URL}
+      DOMAIN=${DOMAIN}
