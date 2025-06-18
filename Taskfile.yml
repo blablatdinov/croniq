@@ -20,6 +20,7 @@ tasks:
 
   lint:
     cmds:
+      - mix format --check-formatted
       - mix credo --strict
 
   test:

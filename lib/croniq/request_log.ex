@@ -27,7 +27,17 @@ defmodule Croniq.RequestLog do
 
   def changeset(rq_log, attrs) do
     rq_log
-    |> cast(attrs, [:request, :response, :duration, :error])
-    |> validate_required([:request, :duration])
+    |> cast(attrs, [:request, :response, :duration, :error, :task_id])
+    |> validate_required([:request, :duration, :task_id])
+  end
+
+  def create_rq_log(attrs) do
+    case %Croniq.RequestLog{} |> changeset(attrs) do
+      %{valid?: false} = changeset ->
+        {:error, changeset}
+
+      changeset ->
+        {:ok, Croniq.Repo.insert!(changeset)}
+    end
   end
 end
