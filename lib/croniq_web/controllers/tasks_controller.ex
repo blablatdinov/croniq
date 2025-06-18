@@ -89,7 +89,9 @@ defmodule CroniqWeb.TasksController do
         |> put_status(:not_found)
         |> put_view(CroniqWeb.ErrorHTML)
         |> render("404.html", %{})
-      rq_log -> render(conn, :request_log_detail, rq_log: rq_log)
+
+      rq_log ->
+        render(conn, :request_log_detail, rq_log: rq_log)
     end
   end
 end
