@@ -1,0 +1,15 @@
+---
+services:
+  croniq:
+    image: blablatdinov/croniq:${TAG_NAME}
+    command: bin/croniq start
+    restart: always
+    ports:
+      - 4010:4010
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DOMAIN: ${DOMAIN}
+      PHX_SERVER: true
+      PHX_HOST: ${PHX_HOST}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      PORT: 4010
