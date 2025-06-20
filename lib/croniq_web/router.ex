@@ -40,7 +40,7 @@ defmodule CroniqWeb.Router do
     get "/:task_id", TasksController, :task_details
     put "/:task_id", TasksController, :edit
     # TODO: make post
-    get "/:task_id/delete", TasksController, :delete
+    delete "/:task_id", TasksController, :delete
     get "/:task_id/requests-log", TasksController, :requests_log
     get "/:task_id/requests-log/:rq_log_id", TasksController, :request_log_detail
   end

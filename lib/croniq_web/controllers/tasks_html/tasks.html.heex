@@ -49,12 +49,15 @@
             >
               Edit
             </.link>
-            <.link
-              navigate={~p"/tasks/#{task.id}/delete"}
-              class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded mr-2 inline-block"
-            >
-              Delete
-            </.link>
+            <.form for={%{}} action={~p"/tasks/#{task.id}"} method="delete" class="inline">
+              <button
+                type="submit"
+                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded mr-2"
+                onclick="return confirm('Are you sure?')"
+              >
+                Delete
+              </button>
+            </.form>
           </td>
         </tr>
       <% end %>

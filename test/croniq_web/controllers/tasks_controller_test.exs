@@ -2,6 +2,7 @@ defmodule CroniqWeb.TasksControllerTest do
   use CroniqWeb.ConnCase, async: true
   import Croniq.AccountsFixtures
   import Croniq.TaskFixtures
+  import Ecto.Query
 
   setup %{conn: conn} do
     conn =
@@ -98,6 +99,52 @@ defmodule CroniqWeb.TasksControllerTest do
       assert %{
                name: "new name"
              } = Croniq.Repo.get_by(Croniq.Task, id: task.id) |> Map.from_struct()
+    end
+
+    test "edit alien task", %{conn: conn, user: user} do
+      alien_user = user_fixture()
+      [alien_task] = task_list_for_user(alien_user)
+
+      conn
+      |> log_in_user(user)
+      |> put(~p"/tasks/#{alien_task.id}",
+        task: %{
+          name: "new name"
+        }
+      )
+      |> html_response(404)
+    end
+
+    test "delete task", %{conn: conn, user: user} do
+      [task] = task_list_for_user(user)
+
+      conn
+      |> log_in_user(user)
+      |> delete(~p"/tasks/#{task.id}")
+      |> html_response(302)
+
+      refute Croniq.Repo.exists?(from t in Croniq.Task, where: t.id == ^task.id)
+    end
+
+    test "delete not exist task", %{conn: conn, user: user} do
+      conn
+      |> log_in_user(user)
+      |> delete(~p"/tasks/4895")
+      |> html_response(302)
+
+      refute Croniq.Repo.exists?(from t in Croniq.Task, where: t.id == 4895)
+    end
+
+    test "delete alien task", %{conn: conn, user: user} do
+      alien_user = user_fixture()
+      [alien_task] = task_list_for_user(alien_user)
+
+      conn
+      |> log_in_user(user)
+      |> delete(~p"/tasks/#{alien_task.id}")
+      |> html_response(404)
+
+      assert Croniq.Repo.exists?(from t in Croniq.Task, where: t.id == ^alien_task.id)
     end
 
     test "Task create form", %{conn: conn, user_token: user_token} do

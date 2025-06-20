@@ -38,10 +38,7 @@ defmodule CroniqWeb.TasksController do
   end
 
   def edit_form(conn, %{"task_id" => task_id}) do
-    case Repo.one(
-           from task in Croniq.Task,
-             where: task.id == ^task_id and task.user_id == ^conn.assigns.current_user.id
-         ) do
+    case user_task(task_id, conn.assigns.current_user.id) do
       task = %Croniq.Task{} ->
         render(conn, :edit, task: task, changeset: Task.changeset(task, %{}))
 
@@ -53,27 +50,47 @@ defmodule CroniqWeb.TasksController do
     end
   end
 
+  defp user_task(task_id, user_id) do
+    Repo.one(
+      from task in Croniq.Task,
+        where: task.id == ^task_id and task.user_id == ^user_id
+    )
+  end
+
   def edit(conn, %{"task_id" => task_id, "task" => task_params}) do
-    task = Repo.get_by!(Task, id: task_id)
+    case user_task(task_id, conn.assigns.current_user.id) do
+      task = %Croniq.Task{} ->
+        case Task.update_task(task, task_params) do
+          {:ok, _task} ->
+            conn
+            |> put_flash(:info, "Task updated successfully.")
+            |> redirect(to: ~p"/tasks/#{task_id}/edit")
 
-    case Task.update_task(task, task_params) do
-      {:ok, _task} ->
+          {:error, changeset} ->
+            render(conn, :edit, task: task, changeset: changeset)
+        end
+
+      _ ->
         conn
-        |> put_flash(:info, "Task updated successfully.")
-        |> redirect(to: ~p"/tasks/#{task_id}/edit")
-
-      {:error, changeset} ->
-        render(conn, :edit, task: task, changeset: changeset)
+        |> put_status(:not_found)
+        |> put_view(CroniqWeb.ErrorHTML)
+        |> render("404.html", %{})
     end
   end
 
   def delete(conn, %{"task_id" => task_id}) do
-    Repo.get_by!(Task, id: task_id)
-    |> Repo.delete!()
-
-    conn
-    |> put_flash(:info, "Task deleted successfully")
-    |> redirect(to: ~p"/tasks")
+    case user_task(task_id, conn.assigns.current_user.id) do
+      {:ok, task} ->
+        Repo.delete!()
+        conn
+        |> put_flash(:info, "Task deleted successfully")
+        |> redirect(to: ~p"/tasks")
+      _ ->
+        conn
+        |> put_status(:not_found)
+        |> put_view(CroniqWeb.ErrorHTML)
+        |> render("404.html", %{})
+    end
   end
 
   def requests_log(conn, %{"task_id" => task_id}) do
