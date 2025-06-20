@@ -20,7 +20,13 @@ defmodule CroniqWeb.TasksController do
   end
 
   def tasks(conn, _params) do
-    render(conn, :tasks, tasks: Repo.all(Task))
+    render(conn, :tasks,
+      tasks:
+        Repo.all(
+          from task in Croniq.Task,
+            where: task.user_id == ^conn.assigns.current_user.id
+        )
+    )
   end
 
   def new_task(conn, _params) do
@@ -32,8 +38,19 @@ defmodule CroniqWeb.TasksController do
   end
 
   def edit_form(conn, %{"task_id" => task_id}) do
-    task = Repo.get_by!(Task, id: task_id)
-    render(conn, :edit, task: task, changeset: Task.changeset(task, %{}))
+    case Repo.one(
+           from task in Croniq.Task,
+             where: task.id == ^task_id and task.user_id == ^conn.assigns.current_user.id
+         ) do
+      task = %Croniq.Task{} ->
+        render(conn, :edit, task: task, changeset: Task.changeset(task, %{}))
+
+      _ ->
+        conn
+        |> put_status(:not_found)
+        |> put_view(CroniqWeb.ErrorHTML)
+        |> render("404.html", %{})
+    end
   end
 
   def edit(conn, %{"task_id" => task_id, "task" => task_params}) do

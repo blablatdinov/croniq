@@ -14,6 +14,98 @@ defmodule CroniqWeb.TasksControllerTest do
     %{user: user, conn: conn, user_token: Croniq.Accounts.generate_user_session_token(user)}
   end
 
+  describe "task pages" do
+    test "Read task list", %{conn: conn, user_token: user_token, user: user} do
+      tasks = task_list_for_user(user, 24)
+
+      response =
+        conn
+        |> put_session(:user_token, user_token)
+        |> get(~p"/tasks/")
+        |> html_response(200)
+
+      parsed = Floki.parse_document!(response)
+
+      {"td", [{"class", _}, {"data-test", _}],
+       [
+         {"a", [{"href", url}, _, _], _}
+       ]} =
+        Floki.find(parsed, "[data-test=id-cell]")
+        |> Enum.at(0)
+
+      assert length(Floki.find(parsed, "[data-test=task-line]")) == 24
+      assert url == "/tasks/#{Enum.at(tasks, 0).id}/edit"
+    end
+
+    test "Task detail", %{conn: conn, user: user, user_token: user_token} do
+      [task] = task_list_for_user(user)
+
+      conn
+      |> put_session(:user_token, user_token)
+      |> get(~p"/tasks/#{task.id}")
+      |> html_response(302)
+    end
+
+    test "alien tasks not in list", %{conn: conn, user_token: user_token, user: user} do
+      alien_user = user_fixture()
+      task_list_for_user(alien_user, 12)
+      task_list_for_user(user, 6)
+
+      response =
+        conn
+        |> put_session(:user_token, user_token)
+        |> get(~p"/tasks/")
+        |> html_response(200)
+
+      parsed = Floki.parse_document!(response)
+
+      assert length(Floki.find(parsed, "[data-test=task-line]")) == 6
+    end
+
+    test "Alien task detail", %{conn: conn, user_token: user_token} do
+      alien_user = user_fixture()
+      [alien_task] = task_list_for_user(alien_user)
+
+      conn
+      |> put_session(:user_token, user_token)
+      |> get(~p"/tasks/#{alien_task.id}/edit")
+      |> html_response(404)
+    end
+
+    test "Task edit form", %{conn: conn, user_token: user_token, user: user} do
+      [task] = task_list_for_user(user)
+
+      conn
+      |> put_session(:user_token, user_token)
+      |> get(~p"/tasks/#{task.id}/edit")
+      |> html_response(200)
+    end
+
+    test "Task create form", %{conn: conn, user_token: user_token} do
+      conn
+      |> put_session(:user_token, user_token)
+      |> get(~p"/tasks/new")
+      |> html_response(200)
+    end
+
+    test "Not authorized", %{conn: conn} do
+      Enum.reduce(
+        CroniqWeb.Router.__routes__(),
+        [],
+        fn route, acc ->
+          cond do
+            route.helper in ["tasks"] -> acc ++ [String.replace(route.path, ":task_id", "1")]
+            true -> acc
+          end
+        end
+      )
+      |> Enum.each(fn route ->
+        response = get(conn, route)
+        assert Plug.Conn.get_resp_header(response, "location") == [~p"/users/log_in"]
+      end)
+    end
+  end
+
   describe "Test request logs" do
     test "Read record log list", %{conn: conn, user_token: user_token, user: user} do
       [task] = task_list_for_user(user)

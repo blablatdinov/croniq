@@ -53,7 +53,6 @@ defmodule CroniqWeb.Router do
 
   scope "/api/v1/tasks", CroniqWeb do
     pipe_through [:api, :api_guard]
-    # pipe_through :api
 
     get "/", TasksAPIController, :list
     post "/", TasksAPIController, :create
