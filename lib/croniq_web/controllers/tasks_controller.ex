@@ -79,19 +79,29 @@ defmodule CroniqWeb.TasksController do
   end
 
   def delete(conn, %{"task_id" => task_id}) do
-    case user_task(task_id, conn.assigns.current_user.id) do
-      {:ok, task} ->
-        Repo.delete!(task)
+    user_id = conn.assigns.current_user.id
 
+    case Croniq.Repo.get_by(Task, id: task_id) do
+      task = %Croniq.Task{} ->
+        case task.user_id do
+          ^user_id ->
+            Croniq.Repo.delete!(task)
+
+            conn
+            |> put_flash(:info, "Task deleted successfully")
+            |> redirect(to: ~p"/tasks")
+
+          _ ->
+            conn
+            |> put_status(:not_found)
+            |> put_view(CroniqWeb.ErrorHTML)
+            |> render("404.html", %{})
+        end
+
+      nil ->
         conn
         |> put_flash(:info, "Task deleted successfully")
         |> redirect(to: ~p"/tasks")
-
-      _ ->
-        conn
-        |> put_status(:not_found)
-        |> put_view(CroniqWeb.ErrorHTML)
-        |> render("404.html", %{})
     end
   end
 
