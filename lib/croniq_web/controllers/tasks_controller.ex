@@ -20,7 +20,13 @@ defmodule CroniqWeb.TasksController do
   end
 
   def tasks(conn, _params) do
-    render(conn, :tasks, tasks: Repo.all(Task))
+    render(conn, :tasks,
+      tasks:
+        Repo.all(
+          from task in Croniq.Task,
+            where: task.user_id == ^conn.assigns.current_user.id
+        )
+    )
   end
 
   def new_task(conn, _params) do
@@ -32,30 +38,71 @@ defmodule CroniqWeb.TasksController do
   end
 
   def edit_form(conn, %{"task_id" => task_id}) do
-    task = Repo.get_by!(Task, id: task_id)
-    render(conn, :edit, task: task, changeset: Task.changeset(task, %{}))
+    case user_task(task_id, conn.assigns.current_user.id) do
+      task = %Croniq.Task{} ->
+        render(conn, :edit, task: task, changeset: Task.changeset(task, %{}))
+
+      _ ->
+        conn
+        |> put_status(:not_found)
+        |> put_view(CroniqWeb.ErrorHTML)
+        |> render("404.html", %{})
+    end
+  end
+
+  defp user_task(task_id, user_id) do
+    Repo.one(
+      from task in Croniq.Task,
+        where: task.id == ^task_id and task.user_id == ^user_id
+    )
   end
 
   def edit(conn, %{"task_id" => task_id, "task" => task_params}) do
-    task = Repo.get_by!(Task, id: task_id)
+    case user_task(task_id, conn.assigns.current_user.id) do
+      task = %Croniq.Task{} ->
+        case Task.update_task(task, task_params) do
+          {:ok, _task} ->
+            conn
+            |> put_flash(:info, "Task updated successfully.")
+            |> redirect(to: ~p"/tasks/#{task_id}/edit")
 
-    case Task.update_task(task, task_params) do
-      {:ok, _task} ->
+          {:error, changeset} ->
+            render(conn, :edit, task: task, changeset: changeset)
+        end
+
+      _ ->
         conn
-        |> put_flash(:info, "Task updated successfully.")
-        |> redirect(to: ~p"/tasks/#{task_id}/edit")
+        |> put_status(:not_found)
+        |> put_view(CroniqWeb.ErrorHTML)
+        |> render("404.html", %{})
     end
-
-    render(conn, :edit, task: task)
   end
 
   def delete(conn, %{"task_id" => task_id}) do
-    Repo.get_by!(Task, id: task_id)
-    |> Repo.delete!()
+    user_id = conn.assigns.current_user.id
 
-    conn
-    |> put_flash(:info, "Task deleted successfully")
-    |> redirect(to: ~p"/tasks")
+    case Croniq.Repo.get_by(Task, id: task_id) do
+      task = %Croniq.Task{} ->
+        case task.user_id do
+          ^user_id ->
+            Croniq.Repo.delete!(task)
+
+            conn
+            |> put_flash(:info, "Task deleted successfully")
+            |> redirect(to: ~p"/tasks")
+
+          _ ->
+            conn
+            |> put_status(:not_found)
+            |> put_view(CroniqWeb.ErrorHTML)
+            |> render("404.html", %{})
+        end
+
+      nil ->
+        conn
+        |> put_flash(:info, "Task deleted successfully")
+        |> redirect(to: ~p"/tasks")
+    end
   end
 
   def requests_log(conn, %{"task_id" => task_id}) do

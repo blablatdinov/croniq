@@ -21,9 +21,9 @@
     </thead>
     <tbody>
       <%= for task <- @tasks do %>
-        <tr class="hover:bg-gray-50">
-          <td class="py-2 px-4 border text-center">
-            <.link navigate={~p"/tasks/#{task.id}/requests-log"}>
+        <tr class="hover:bg-gray-50" data-test="task-line">
+          <td class="py-2 px-4 border text-center" data-test="id-cell">
+            <.link navigate={~p"/tasks/#{task.id}/edit"}>
               {task.id}
             </.link>
           </td>
@@ -49,12 +49,15 @@
             >
               Edit
             </.link>
-            <.link
-              navigate={~p"/tasks/#{task.id}/delete"}
-              class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded mr-2 inline-block"
-            >
-              Delete
-            </.link>
+            <.form for={%{}} action={~p"/tasks/#{task.id}"} method="delete" class="inline">
+              <button
+                type="submit"
+                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded mr-2"
+                onclick="return confirm('Are you sure?')"
+              >
+                Delete
+              </button>
+            </.form>
           </td>
         </tr>
       <% end %>
