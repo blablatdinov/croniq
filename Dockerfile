@@ -14,7 +14,8 @@ WORKDIR /app
 
 # Копируем файлы зависимостей
 COPY mix.exs mix.lock ./
-COPY config/config.exs config/prod.exs config/dev.exs config/
+# COPY config/config.exs config/prod.exs config/dev.exs config/
+COPY config/config.exs config/prod.exs config/runtime.exs config/
 
 # Устанавливаем зависимости
 RUN mix deps.get --only prod && \
@@ -40,6 +41,7 @@ WORKDIR /app
 
 # Копируем собранный релиз из предыдущего этапа
 COPY --from=builder /app/_build/prod/rel/croniq ./
+COPY --from=builder /app/config/prod.exs /app/config/runtime.exs ./config/
 
 # Указываем переменные среды по умолчанию
 ENV MIX_ENV=prod
