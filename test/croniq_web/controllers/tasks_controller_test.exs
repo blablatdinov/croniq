@@ -159,9 +159,10 @@ defmodule CroniqWeb.TasksControllerTest do
         CroniqWeb.Router.__routes__(),
         [],
         fn route, acc ->
-          cond do
-            route.helper in ["tasks"] -> acc ++ [String.replace(route.path, ":task_id", "1")]
-            true -> acc
+          if route.helper in ["tasks"] do
+            acc ++ [String.replace(route.path, ":task_id", "1")]
+          else
+            acc
           end
         end
       )
