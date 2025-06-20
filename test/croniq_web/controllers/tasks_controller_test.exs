@@ -81,6 +81,25 @@ defmodule CroniqWeb.TasksControllerTest do
       |> html_response(200)
     end
 
+    test "edit task", %{conn: conn, user: user} do
+      [task] = task_list_for_user(user)
+
+      response =
+        conn
+        |> log_in_user(user)
+        |> put(~p"/tasks/#{task.id}",
+          task: %{
+            name: "new name"
+          }
+        )
+
+      assert Plug.Conn.get_resp_header(response, "location") == [~p"/tasks/#{task.id}/edit"]
+
+      assert %{
+               name: "new name"
+             } = Croniq.Repo.get_by(Croniq.Task, id: task.id) |> Map.from_struct()
+    end
+
     test "Task create form", %{conn: conn, user_token: user_token} do
       conn
       |> put_session(:user_token, user_token)

@@ -61,9 +61,10 @@ defmodule CroniqWeb.TasksController do
         conn
         |> put_flash(:info, "Task updated successfully.")
         |> redirect(to: ~p"/tasks/#{task_id}/edit")
-    end
 
-    render(conn, :edit, task: task)
+      {:error, changeset} ->
+        render(conn, :edit, task: task, changeset: changeset)
+    end
   end
 
   def delete(conn, %{"task_id" => task_id}) do
