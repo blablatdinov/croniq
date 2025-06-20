@@ -82,9 +82,11 @@ defmodule CroniqWeb.TasksController do
     case user_task(task_id, conn.assigns.current_user.id) do
       {:ok, task} ->
         Repo.delete!()
+
         conn
         |> put_flash(:info, "Task deleted successfully")
         |> redirect(to: ~p"/tasks")
+
       _ ->
         conn
         |> put_status(:not_found)
