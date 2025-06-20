@@ -10,5 +10,6 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       DOMAIN: ${DOMAIN}
       PHX_SERVER: true
+      PHX_HOST: ${PHX_HOST}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       PORT: 4010
