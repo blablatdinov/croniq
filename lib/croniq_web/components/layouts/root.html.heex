@@ -8,8 +8,10 @@
       {assigns[:page_title] || "Croniq"}
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
-    <script src={"https://www.google.com/recaptcha/api.js?render=#{@site_key}"}>
-    </script>
+    <%= if assigns[:site_key] do %>
+      <script src={"https://www.google.com/recaptcha/api.js?render=#{@site_key}"}></script>
+      <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <% end %>
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
   </head>

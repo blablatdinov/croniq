@@ -16,7 +16,7 @@ config :croniq, Croniq.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
-{port, ""} = Integer.parse(System.get_env("PORT"))
+port = String.to_integer(System.get_env("PORT"))
 
 host =
   System.get_env("HOST")

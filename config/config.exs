@@ -34,6 +34,8 @@ config :croniq, Croniq.Mailer, adapter: Swoosh.Adapters.Local
 config :croniq, :recaptcha,
   site_key: System.get_env("RECAPTCHA_SITE_KEY"),
   secret_key: System.get_env("RECAPTCHA_SECRET_KEY"),
+  site_v2_key: System.get_env("RECAPTCHA_V2_SITE_KEY"),
+  secret_v2_key: System.get_env("RECAPTCHA_V2_SECRET_KEY"),
   verify_url: "https://www.google.com/recaptcha/api/siteverify"
 
 # Configure esbuild (the version is required)

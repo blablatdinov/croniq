@@ -22,6 +22,7 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import RecaptchaHook from "./hooks/recaptcha"
+import RecaptchaV2 from "./hooks/recaptchaV2"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
@@ -29,6 +30,7 @@ let liveSocket = new LiveSocket("/live", Socket, {
   params: {_csrf_token: csrfToken},
   hooks: {
     RecaptchaHook,
+    RecaptchaV2,
   },
 })
 

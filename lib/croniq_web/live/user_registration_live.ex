@@ -40,7 +40,13 @@ defmodule CroniqWeb.UserRegistrationLive do
           phx-hook="RecaptchaHook"
           data-sitekey={@site_key}
         />
-
+        <%= if @show_v2 do %>
+          <div id="recaptcha-wrapper" phx-hook="RecaptchaV2" data-sitekey={@site_v2_key}>
+            <div class="g-recaptcha" data-sitekey={@site_v2_key}></div>
+          </div>
+        <% else %>
+          <input type="hidden" name="recaptcha_token" id="recaptcha_token" phx-hook="RecaptchaHook" data-sitekey={@site_key} />
+        <% end %>
         <:actions>
           <.button phx-disable-with="Creating account..." class="w-full">Create an account</.button>
         </:actions>
@@ -54,16 +60,32 @@ defmodule CroniqWeb.UserRegistrationLive do
 
     socket =
       socket
-      |> assign(trigger_submit: false, check_errors: false, site_key: Croniq.Recaptcha.site_key())
+      |> assign(
+        trigger_submit: false,
+        check_errors: false,
+        site_key: Croniq.Recaptcha.site_key(),
+        show_v2: false
+      )
       |> assign_form(changeset)
 
     {:ok, socket, temporary_assigns: [form: nil]}
   end
 
   def handle_event("save", %{"user" => user_params} = params, socket) do
-    recaptcha_token = Map.get(params, "recaptcha_token")
+    token = Map.get(params, "recaptcha_token")
+    version = :v3
+    if Map.get(params, "g-recaptcha-response") do
+      token = Map.get(params, "g-recaptcha-response")
+      version = :v2
+    end
+    # recaptcha_v2_token = Map.get(params, "g-recaptcha-response") || Map.get(params, "recaptcha_token")
+    # recaptcha_token = Map.get(params, "g-recaptcha-response") || Map.get(params, "recaptcha_token")
+    IO.inspect({token, version})
+    # IO.inspect(Map.get(params, "recaptcha_token"), label: "recaptcha_token")
 
-    case Croniq.Recaptcha.verify_recaptcha(recaptcha_token) do
+    token_verified = Croniq.Recaptcha.verify_recaptcha(token, version)
+    IO.inspect(token_verified, label: "token_verified")
+    case token_verified do
       {:ok, _score} ->
         case Accounts.register_user(user_params) do
           {:ok, user} ->
@@ -80,11 +102,19 @@ defmodule CroniqWeb.UserRegistrationLive do
             {:noreply, socket |> assign(check_errors: true) |> assign_form(changeset)}
         end
 
+      {:low_score, score} ->
+        IO.inspect(score, label: "low score")
+        changeset =
+          %User{}
+          |> Accounts.change_user_registration(user_params)
+          |> Ecto.Changeset.add_error(:base, "reCAPTCHA verification failed")
+
+        {:noreply, socket |> assign(check_errors: true, show_v2: true, site_v2_key: Croniq.Recaptcha.site_v2_key()) |> assign_form(changeset)}
+
       {:error, reason} ->
         changeset =
           %User{}
           |> Accounts.change_user_registration(user_params)
-          |> Ecto.Changeset.add_error(:base, "reCAPTCHA verification failed: #{reason}")
 
         {:noreply, socket |> assign(check_errors: true) |> assign_form(changeset)}
     end
