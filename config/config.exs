@@ -31,8 +31,6 @@ config :croniq, CroniqWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :croniq, Croniq.Mailer, adapter: Swoosh.Adapters.Local
 
-IO.inspect(System.get_env("RECAPTCHA_SITE_KEY"))
-
 config :croniq, :recaptcha,
   site_key: System.get_env("RECAPTCHA_SITE_KEY"),
   secret_key: System.get_env("RECAPTCHA_SECRET_KEY"),

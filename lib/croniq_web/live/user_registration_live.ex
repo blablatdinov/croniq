@@ -33,7 +33,13 @@ defmodule CroniqWeb.UserRegistrationLive do
 
         <.input field={@form[:email]} type="email" label="Email" required />
         <.input field={@form[:password]} type="password" label="Password" required />
-        <input type="hidden" name="recaptcha_token" id="recaptcha_token" phx-hook="RecaptchaHook" data-sitekey={@site_key} />
+        <input
+          type="hidden"
+          name="recaptcha_token"
+          id="recaptcha_token"
+          phx-hook="RecaptchaHook"
+          data-sitekey={@site_key}
+        />
 
         <:actions>
           <.button phx-disable-with="Creating account..." class="w-full">Create an account</.button>
@@ -46,7 +52,6 @@ defmodule CroniqWeb.UserRegistrationLive do
   def mount(_params, _session, socket) do
     changeset = Accounts.change_user_registration(%User{})
 
-    IO.inspect(Croniq.Recaptcha.site_key())
     socket =
       socket
       |> assign(trigger_submit: false, check_errors: false, site_key: Croniq.Recaptcha.site_key())
@@ -57,7 +62,6 @@ defmodule CroniqWeb.UserRegistrationLive do
 
   def handle_event("save", %{"user" => user_params} = params, socket) do
     recaptcha_token = Map.get(params, "recaptcha_token")
-    IO.inspect(Croniq.Recaptcha.verify_recaptcha(recaptcha_token))
 
     case Croniq.Recaptcha.verify_recaptcha(recaptcha_token) do
       {:ok, _score} ->
