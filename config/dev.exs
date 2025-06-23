@@ -16,10 +16,18 @@ config :croniq, Croniq.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
+{port, ""} = Integer.parse(System.get_env("PORT"))
+
+host =
+  System.get_env("HOST")
+  |> String.split(".")
+  |> Enum.map(&String.to_integer/1)
+  |> List.to_tuple()
+
 config :croniq, CroniqWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: 4000],
+  http: [ip: host, port: port || 4000],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,

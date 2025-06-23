@@ -21,11 +21,15 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+import RecaptchaHook from "./hooks/recaptcha"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken}
+  params: {_csrf_token: csrfToken},
+  hooks: {
+    RecaptchaHook,
+  },
 })
 
 // Show progress bar on live navigation and form submits
@@ -41,4 +45,3 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
-

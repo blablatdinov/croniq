@@ -33,6 +33,7 @@ defmodule CroniqWeb.UserRegistrationLive do
 
         <.input field={@form[:email]} type="email" label="Email" required />
         <.input field={@form[:password]} type="password" label="Password" required />
+        <input type="hidden" name="recaptcha_token" id="recaptcha_token" phx-hook="RecaptchaHook" data-sitekey={@site_key} />
 
         <:actions>
           <.button phx-disable-with="Creating account..." class="w-full">Create an account</.button>
@@ -45,27 +46,42 @@ defmodule CroniqWeb.UserRegistrationLive do
   def mount(_params, _session, socket) do
     changeset = Accounts.change_user_registration(%User{})
 
+    IO.inspect(Croniq.Recaptcha.site_key())
     socket =
       socket
-      |> assign(trigger_submit: false, check_errors: false)
+      |> assign(trigger_submit: false, check_errors: false, site_key: Croniq.Recaptcha.site_key())
       |> assign_form(changeset)
 
     {:ok, socket, temporary_assigns: [form: nil]}
   end
 
-  def handle_event("save", %{"user" => user_params}, socket) do
-    case Accounts.register_user(user_params) do
-      {:ok, user} ->
-        {:ok, _} =
-          Accounts.deliver_user_confirmation_instructions(
-            user,
-            &url(~p"/users/confirm/#{&1}")
-          )
+  def handle_event("save", %{"user" => user_params} = params, socket) do
+    recaptcha_token = Map.get(params, "recaptcha_token")
+    IO.inspect(Croniq.Recaptcha.verify_recaptcha(recaptcha_token))
 
-        changeset = Accounts.change_user_registration(user)
-        {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset)}
+    case Croniq.Recaptcha.verify_recaptcha(recaptcha_token) do
+      {:ok, _score} ->
+        case Accounts.register_user(user_params) do
+          {:ok, user} ->
+            {:ok, _} =
+              Accounts.deliver_user_confirmation_instructions(
+                user,
+                &url(~p"/users/confirm/#{&1}")
+              )
 
-      {:error, %Ecto.Changeset{} = changeset} ->
+            changeset = Accounts.change_user_registration(user)
+            {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset)}
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            {:noreply, socket |> assign(check_errors: true) |> assign_form(changeset)}
+        end
+
+      {:error, reason} ->
+        changeset =
+          %User{}
+          |> Accounts.change_user_registration(user_params)
+          |> Ecto.Changeset.add_error(:base, "reCAPTCHA verification failed: #{reason}")
+
         {:noreply, socket |> assign(check_errors: true) |> assign_form(changeset)}
     end
   end
