@@ -1,0 +1,42 @@
+<div class="mx-auto max-w-sm">
+  <h1 class="text-center text-2xl font-bold mb-4">Log in to your account</h1>
+
+  <p class="text-center mb-6">
+    Don’t have an account?
+    <.link href={~p"/users/register"} class="font-semibold text-brand hover:underline">
+      Register
+    </.link>
+    now.
+  </p>
+
+  <.form
+    :let={f}
+    for={@changeset}
+    action={~p"/users/log_in"}
+    method="post"
+    class="space-y-6 bg-white p-6 rounded-lg shadow-md border border-gray-200"
+  >
+    <p :if={@error_message} class="text-red-600 text-sm text-center">
+      {@error_message}
+    </p>
+
+    <.input field={f[:email]} type="email" label="Email" required />
+    <.input field={f[:password]} type="password" label="Password" required />
+    
+<!--
+    <label class="flex items-center gap-2">
+      <input type="checkbox" name={f[:remember_me]} value="true" class="rounded" />
+      <span class="text-sm">Remember me</span>
+    </label>
+  -->
+
+    <div class="pt-4">
+      <button
+        type="submit"
+        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg w-full"
+      >
+        Log in
+      </button>
+    </div>
+  </.form>
+</div>

@@ -85,10 +85,13 @@ defmodule CroniqWeb.Router do
 
     live_session :redirect_if_user_is_authenticated,
       on_mount: [{CroniqWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      live "/users/register", UserRegistrationLive, :new
-      live "/users/log_in", UserLoginLive, :new
-      live "/users/reset_password", UserForgotPasswordLive, :new
-      live "/users/reset_password/:token", UserResetPasswordLive, :edit
+      get "/users/register", AccountsController, :registration_form
+      post "/users/register", AccountsController, :registration
+      get "/users/log_in", AccountsController, :log_in_form
+      post "/users/log_in", AccountsController, :log_in
+      # live "/users/log_in", UserLoginLive, :new
+      # live "/users/reset_password", UserForgotPasswordLive, :new
+      # live "/users/reset_password/:token", UserResetPasswordLive, :edit
     end
 
     post "/users/log_in", UserSessionController, :create
