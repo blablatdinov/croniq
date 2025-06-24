@@ -28,7 +28,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Elixir
-      uses: erlef/setup-beam@145718908e318cff5539a44e9ab1e38605576529
+      uses: erlef/setup-beam@b29c86feb9d880f6fb0b1ae3d5be5aa9004157d7
       with:
         elixir-version: '1.18'
         otp-version: '26'
@@ -55,7 +55,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Elixir
-      uses: erlef/setup-beam@145718908e318cff5539a44e9ab1e38605576529
+      uses: erlef/setup-beam@b29c86feb9d880f6fb0b1ae3d5be5aa9004157d7
       with:
         elixir-version: '1.18'
         otp-version: '26'
