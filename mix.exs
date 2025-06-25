@@ -33,7 +33,7 @@ defmodule Croniq.MixProject do
   defp deps do
     [
       {:phoenix, "== 1.7.21"},
-      {:phoenix_ecto, "== 4.6.4"},
+      {:phoenix_ecto, "== 4.6.5"},
       {:ecto_sql, "== 3.13.2"},
       {:postgrex, "== 0.20.0"},
       {:phoenix_html, "== 4.2.1"},
