@@ -29,7 +29,9 @@ defmodule Croniq.Requests do
       headers: Enum.map(task.headers, fn {key, value} -> {to_string(key), to_string(value)} end)
     }
 
-    case HTTPoison.request(request) do
+    http_client = Application.get_env(:croniq, :http_client, Croniq.HttpClient.HTTPoison)
+
+    case http_client.request(request) do
       {:ok, response} ->
         Logger.info(
           Enum.join(
@@ -46,7 +48,7 @@ defmodule Croniq.Requests do
         log_successful_response(request, response, duration, task)
 
       {:error, error} ->
-        Logger.error("Request for task #{task.id} failed, error=#{error}")
+        Logger.error("Request for task #{task.id} failed, error=#{inspect(error)}")
 
         duration = System.monotonic_time(:millisecond) - start_time
         log_failed_response(request, error, duration, task)
@@ -55,31 +57,31 @@ defmodule Croniq.Requests do
     :ok
   end
 
-  defp log_successful_response(request, response, duration, task) do
+  def log_successful_response(request, response, duration, task) do
     %Croniq.RequestLog{}
     |> Croniq.RequestLog.changeset(%{
       request: format_request(request),
       response: format_response(response),
       duration: duration,
-      error: nil
+      error: nil,
+      task_id: task.id
     })
-    |> Ecto.Changeset.put_assoc(:task, task)
     |> Repo.insert!()
   end
 
-  defp log_failed_response(request, error, duration, task) do
+  def log_failed_response(request, error, duration, task) do
     %Croniq.RequestLog{}
     |> Croniq.RequestLog.changeset(%{
       request: format_request(request),
       response: nil,
       duration: duration,
-      error: error
+      error: to_string(error.reason),
+      task_id: task.id
     })
-    |> Ecto.Changeset.put_assoc(:task, task)
     |> Repo.insert!()
   end
 
-  defp format_request(request) do
+  def format_request(request) do
     """
     #{request.method} #{URI.parse(request.url).path} HTTP/1.1
     HOST: #{URI.parse(request.url).host}
@@ -90,7 +92,7 @@ defmodule Croniq.Requests do
     |> String.trim()
   end
 
-  defp format_response(response) do
+  def format_response(response) do
     """
     HTTP/1.1 #{response.status_code} #{Plug.Conn.Status.reason_atom(response.status_code)}
     #{headers_str(response.headers)}
@@ -100,7 +102,7 @@ defmodule Croniq.Requests do
     |> String.trim()
   end
 
-  defp headers_str(headers) do
+  def headers_str(headers) do
     Enum.map_join(
       headers,
       "\r\n",
