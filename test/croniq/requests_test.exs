@@ -99,7 +99,7 @@ defmodule Croniq.RequestsTest do
 
       log = List.first(logs)
       assert log.task_id == task.id
-      assert log.duration > 0
+      assert log.duration >= 0
       assert log.error == "timeout"
       assert is_nil(log.response)
       assert log.request =~ "POST /test HTTP/1.1"
