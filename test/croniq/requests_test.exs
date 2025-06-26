@@ -13,25 +13,27 @@ defmodule Croniq.RequestsTest do
   describe "send_request/1" do
     setup do
       # Создаем пользователя для тестов
-      user = %User{}
-      |> User.registration_changeset(%{
-        email: "test@example.com",
-        password: "password123456"
-      })
-      |> Repo.insert!()
+      user =
+        %User{}
+        |> User.registration_changeset(%{
+          email: "test@example.com",
+          password: "password123456"
+        })
+        |> Repo.insert!()
 
       # Создаем тестовую задачу
-      task = Repo.insert!(%Task{
-        user_id: user.id,
-        name: "Test Task",
-        schedule: "*/5 * * * *",
-        url: "https://api.example.com/test",
-        method: "POST",
-        headers: %{"Content-Type" => "application/json", "Authorization" => "Bearer token"},
-        body: ~s({"key": "value"}),
-        status: "active",
-        retry_count: 0
-      })
+      task =
+        Repo.insert!(%Task{
+          user_id: user.id,
+          name: "Test Task",
+          schedule: "*/5 * * * *",
+          url: "https://api.example.com/test",
+          method: "POST",
+          headers: %{"Content-Type" => "application/json", "Authorization" => "Bearer token"},
+          body: ~s({"key": "value"}),
+          status: "active",
+          retry_count: 0
+        })
 
       {:ok, %{user: user, task: task}}
     end
@@ -47,11 +49,12 @@ defmodule Croniq.RequestsTest do
         assert {"Content-Type", "application/json"} in request.headers
         assert {"Authorization", "Bearer token"} in request.headers
 
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
-          body: ~s({"success": true}),
-          headers: [{"Content-Type", "application/json"}]
-        }}
+        {:ok,
+         %HTTPoison.Response{
+           status_code: 200,
+           body: ~s({"success": true}),
+           headers: [{"Content-Type", "application/json"}]
+         }}
       end)
 
       # Выполняем тест
@@ -103,17 +106,18 @@ defmodule Croniq.RequestsTest do
     end
 
     test "обрабатывает задачу с пустыми заголовками", %{user: user} do
-      task_without_headers = Repo.insert!(%Task{
-        user_id: user.id,
-        name: "Task Without Headers",
-        schedule: "*/5 * * * *",
-        url: "https://api.example.com/test",
-        method: "POST",
-        headers: %{},
-        body: ~s({"key": "value"}),
-        status: "active",
-        retry_count: 0
-      })
+      task_without_headers =
+        Repo.insert!(%Task{
+          user_id: user.id,
+          name: "Task Without Headers",
+          schedule: "*/5 * * * *",
+          url: "https://api.example.com/test",
+          method: "POST",
+          headers: %{},
+          body: ~s({"key": "value"}),
+          status: "active",
+          retry_count: 0
+        })
 
       # Мокируем HTTPoison.request для успешного ответа
       expect(Croniq.HttpClientMock, :request, fn request ->
@@ -122,11 +126,12 @@ defmodule Croniq.RequestsTest do
         assert request.body == ~s({"key": "value"})
         assert request.headers == []
 
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
-          body: "OK",
-          headers: []
-        }}
+        {:ok,
+         %HTTPoison.Response{
+           status_code: 200,
+           body: "OK",
+           headers: []
+         }}
       end)
 
       # Выполняем тест
@@ -143,17 +148,19 @@ defmodule Croniq.RequestsTest do
     end
 
     test "обрабатывает задачу с пустым телом запроса", %{user: user} do
-      task_without_body = Repo.insert!(%Task{
-        user_id: user.id,
-        name: "Task Without Body",
-        schedule: "*/5 * * * *",
-        url: "https://api.example.com/test",
-        method: "POST",
-        headers: %{"Content-Type" => "application/json", "Authorization" => "Bearer token"},
-        body: "",  # Используем пустую строку вместо nil
-        status: "active",
-        retry_count: 0
-      })
+      task_without_body =
+        Repo.insert!(%Task{
+          user_id: user.id,
+          name: "Task Without Body",
+          schedule: "*/5 * * * *",
+          url: "https://api.example.com/test",
+          method: "POST",
+          headers: %{"Content-Type" => "application/json", "Authorization" => "Bearer token"},
+          # Используем пустую строку вместо nil
+          body: "",
+          status: "active",
+          retry_count: 0
+        })
 
       # Мокируем HTTPoison.request для успешного ответа
       expect(Croniq.HttpClientMock, :request, fn request ->
@@ -164,11 +171,12 @@ defmodule Croniq.RequestsTest do
         assert {"Content-Type", "application/json"} in request.headers
         assert {"Authorization", "Bearer token"} in request.headers
 
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
-          body: "OK",
-          headers: []
-        }}
+        {:ok,
+         %HTTPoison.Response{
+           status_code: 200,
+           body: "OK",
+           headers: []
+         }}
       end)
 
       # Выполняем тест
@@ -183,17 +191,19 @@ defmodule Croniq.RequestsTest do
     end
 
     test "правильно форматирует GET запрос", %{user: user} do
-      get_task = Repo.insert!(%Task{
-        user_id: user.id,
-        name: "GET Task",
-        schedule: "*/5 * * * *",
-        url: "https://api.example.com/test",
-        method: "GET",
-        headers: %{"Content-Type" => "application/json", "Authorization" => "Bearer token"},
-        body: "",  # Используем пустую строку вместо nil
-        status: "active",
-        retry_count: 0
-      })
+      get_task =
+        Repo.insert!(%Task{
+          user_id: user.id,
+          name: "GET Task",
+          schedule: "*/5 * * * *",
+          url: "https://api.example.com/test",
+          method: "GET",
+          headers: %{"Content-Type" => "application/json", "Authorization" => "Bearer token"},
+          # Используем пустую строку вместо nil
+          body: "",
+          status: "active",
+          retry_count: 0
+        })
 
       # Мокируем HTTPoison.request для успешного ответа
       expect(Croniq.HttpClientMock, :request, fn request ->
@@ -204,11 +214,12 @@ defmodule Croniq.RequestsTest do
         assert {"Content-Type", "application/json"} in request.headers
         assert {"Authorization", "Bearer token"} in request.headers
 
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
-          body: "OK",
-          headers: []
-        }}
+        {:ok,
+         %HTTPoison.Response{
+           status_code: 200,
+           body: "OK",
+           headers: []
+         }}
       end)
 
       # Выполняем тест
@@ -231,11 +242,12 @@ defmodule Croniq.RequestsTest do
         assert {"Content-Type", "application/json"} in request.headers
         assert {"Authorization", "Bearer token"} in request.headers
 
-        {:ok, %HTTPoison.Response{
-          status_code: 404,
-          body: ~s({"error": "Not Found"}),
-          headers: [{"Content-Type", "application/json"}]
-        }}
+        {:ok,
+         %HTTPoison.Response{
+           status_code: 404,
+           body: ~s({"error": "Not Found"}),
+           headers: [{"Content-Type", "application/json"}]
+         }}
       end)
 
       # Выполняем тест
@@ -307,7 +319,8 @@ defmodule Croniq.RequestsTest do
 
       formatted = Requests.format_response(response)
 
-      assert formatted =~ "HTTP/1.1 201 created"  # Исправляем регистр
+      # Исправляем регистр
+      assert formatted =~ "HTTP/1.1 201 created"
       assert formatted =~ "Content-Type: application/json"
       assert formatted =~ "Location: /api/resource/123"
       assert formatted =~ ~s({"id": 123, "status": "created"})

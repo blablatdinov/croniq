@@ -30,6 +30,7 @@ defmodule Croniq.Requests do
     }
 
     http_client = Application.get_env(:croniq, :http_client, Croniq.HttpClient.HTTPoison)
+
     case http_client.request(request) do
       {:ok, response} ->
         Logger.info(
