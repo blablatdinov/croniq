@@ -1,4 +1,9 @@
 defmodule Croniq.Recaptcha do
+  @moduledoc """
+  Handles reCAPTCHA verification for v2 and v3.
+
+  Provides functions to verify reCAPTCHA tokens and retrieve site/secret keys.
+  """
   @behaviour Croniq.RecaptchaBehaviour
 
   def secret_key(:v2) do
@@ -41,7 +46,7 @@ defmodule Croniq.Recaptcha do
         {:error, "Unexpected status code: #{code}"}
 
       {:error, %HTTPoison.Error{reason: reason}} ->
-        {:error, "HTTPoison error: #{IO.inspect(reason)}"}
+        {:error, "HTTPoison error: #{reason}"}
     end
   end
 
@@ -69,7 +74,7 @@ defmodule Croniq.Recaptcha do
         {:error, "Unexpected status code: #{code}"}
 
       {:error, %HTTPoison.Error{reason: reason}} ->
-        {:error, "HTTPoison error: #{IO.inspect(reason)}"}
+        {:error, "HTTPoison error: #{reason}"}
     end
   end
 end

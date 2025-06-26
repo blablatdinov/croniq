@@ -1,8 +1,6 @@
 defmodule CroniqWeb.AccountsControllerTest do
   use CroniqWeb.ConnCase, async: true
   import Croniq.AccountsFixtures
-  import Croniq.TaskFixtures
-  import Ecto.Query
 
   setup %{conn: conn} do
     conn =
@@ -16,7 +14,7 @@ defmodule CroniqWeb.AccountsControllerTest do
   end
 
   test "registration form", %{conn: conn} do
-    response =
+    _response =
       conn
       |> get(~p"/users/register")
       |> html_response(200)
