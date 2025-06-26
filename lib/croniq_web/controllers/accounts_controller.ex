@@ -128,7 +128,8 @@ defmodule CroniqWeb.AccountsController do
       )
     end
 
-    info = "If your email is in our system, you will receive instructions to reset your password shortly."
+    info =
+      "If your email is in our system, you will receive instructions to reset your password shortly."
 
     conn
     |> put_flash(:info, info)
