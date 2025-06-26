@@ -1,4 +1,6 @@
 defmodule Croniq.Recaptcha do
+  @behaviour Croniq.RecaptchaBehaviour
+
   def secret_key(:v2) do
     Application.get_env(:croniq, :recaptcha)[:secret_key_v2]
   end

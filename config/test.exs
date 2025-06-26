@@ -38,3 +38,14 @@ config :phoenix, :plug_init_mode, :runtime
 # Enable helpful, but potentially expensive runtime checks
 config :phoenix_live_view,
   enable_expensive_runtime_checks: true
+
+# Configure reCAPTCHA for tests
+config :croniq, :recaptcha,
+  site_key: "test_site_key",
+  secret_key: "test_secret_key",
+  site_key_v2: "test_site_key_v2",
+  secret_key_v2: "test_secret_key_v2",
+  verify_url: "https://www.google.com/recaptcha/api/siteverify"
+
+# Use mock for reCAPTCHA in tests
+config :croniq, :recaptcha_module, Croniq.RecaptchaMock

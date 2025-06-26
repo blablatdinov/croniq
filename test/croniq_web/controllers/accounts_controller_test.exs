@@ -23,9 +23,17 @@ defmodule CroniqWeb.AccountsControllerTest do
   end
 
   test "registration", %{conn: conn} do
-    response =
+    user_params = %{
+      "email" => "test@example.com",
+      "password" => "valid_password",
+      "password_confirmation" => "valid_password"
+    }
+
+    conn =
       conn
-      |> post(~p"/users/register")
-      |> html_response(302)
+      |> post(~p"/users/register", %{"user" => user_params, "recaptcha_token" => "test_token"})
+
+    # Should redirect after successful registration
+    assert redirected_to(conn) == ~p"/tasks/new"
   end
 end
