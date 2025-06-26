@@ -74,7 +74,7 @@ defmodule Croniq.Requests do
       request: format_request(request),
       response: nil,
       duration: duration,
-      error: inspect(error),
+      error: to_string(error.reason),
       task_id: task.id
     })
     |> Repo.insert!()

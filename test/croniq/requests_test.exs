@@ -74,33 +74,33 @@ defmodule Croniq.RequestsTest do
       assert log.response =~ ~s({"success": true})
     end
 
-    # test "обрабатывает ошибку HTTP запроса и логирует её", %{task: task} do
-    #   # Мокируем HTTPoison.request для ошибки
-    #   expect(Croniq.HttpClientMock, :request, fn request ->
-    #     assert request.method == "POST"
-    #     assert request.url == "https://api.example.com/test"
-    #     assert request.body == ~s({"key": "value"})
-    #     assert length(request.headers) == 2
-    #     assert {"Content-Type", "application/json"} in request.headers
-    #     assert {"Authorization", "Bearer token"} in request.headers
+    test "обрабатывает ошибку HTTP запроса и логирует её", %{task: task} do
+      # Мокируем HTTPoison.request для ошибки
+      expect(Croniq.HttpClientMock, :request, fn request ->
+        assert request.method == "POST"
+        assert request.url == "https://api.example.com/test"
+        assert request.body == ~s({"key": "value"})
+        assert length(request.headers) == 2
+        assert {"Content-Type", "application/json"} in request.headers
+        assert {"Authorization", "Bearer token"} in request.headers
 
-    #     {:error, %HTTPoison.Error{reason: :timeout}}
-    #   end)
+        {:error, %HTTPoison.Error{reason: :timeout}}
+      end)
 
-    #   # Выполняем тест
-    #   assert :ok = Requests.send_request(task.id)
+      # Выполняем тест
+      assert :ok = Requests.send_request(task.id)
 
-    #   # Проверяем, что ошибка была залогирована
-    #   logs = Repo.all(RequestLog)
-    #   assert length(logs) == 1
+      # Проверяем, что ошибка была залогирована
+      logs = Repo.all(RequestLog)
+      assert length(logs) == 1
 
-    #   log = List.first(logs)
-    #   assert log.task_id == task.id
-    #   assert log.duration > 0
-    #   assert log.error.reason == :timeout
-    #   assert is_nil(log.response)
-    #   assert log.request =~ "POST /test HTTP/1.1"
-    # end
+      log = List.first(logs)
+      assert log.task_id == task.id
+      assert log.duration > 0
+      assert log.error == "timeout"
+      assert is_nil(log.response)
+      assert log.request =~ "POST /test HTTP/1.1"
+    end
 
     test "обрабатывает задачу с пустыми заголовками", %{user: user} do
       task_without_headers = Repo.insert!(%Task{
@@ -248,37 +248,36 @@ defmodule Croniq.RequestsTest do
       assert log.response =~ ~s({"error": "Not Found"})
     end
 
-    # test "обрабатывает различные типы ошибок HTTPoison", %{task: task} do
-    #   # Мокируем HTTPoison.request для различных ошибок
-    #   errors = [
-    #     %HTTPoison.Error{reason: :timeout},
-    #     %HTTPoison.Error{reason: :econnrefused},
-    #     %HTTPoison.Error{reason: :nxdomain},
-    #     %HTTPoison.Error{reason: :closed}
-    #   ]
+    test "обрабатывает различные типы ошибок HTTPoison", %{task: task} do
+      errors = [
+        %HTTPoison.Error{reason: :timeout},
+        %HTTPoison.Error{reason: :econnrefused},
+        %HTTPoison.Error{reason: :nxdomain},
+        %HTTPoison.Error{reason: :closed}
+      ]
 
-    #   Enum.each(errors, fn error ->
-    #     expect(Croniq.HttpClientMock, :request, fn request ->
-    #       assert request.method == "POST"
-    #       assert request.url == "https://api.example.com/test"
-    #       assert request.body == ~s({"key": "value"})
-    #       assert length(request.headers) == 2
-    #       assert {"Content-Type", "application/json"} in request.headers
-    #       assert {"Authorization", "Bearer token"} in request.headers
+      Enum.each(errors, fn error ->
+        expect(Croniq.HttpClientMock, :request, fn request ->
+          assert request.method == "POST"
+          assert request.url == "https://api.example.com/test"
+          assert request.body == ~s({"key": "value"})
+          assert length(request.headers) == 2
+          assert {"Content-Type", "application/json"} in request.headers
+          assert {"Authorization", "Bearer token"} in request.headers
 
-    #       {:error, error}
-    #     end)
+          {:error, error}
+        end)
 
-    #     # Выполняем тест
-    #     assert :ok = Requests.send_request(task.id)
+        # Выполняем тест
+        assert :ok = Requests.send_request(task.id)
 
-    #     # Проверяем результат
-    #     logs = Repo.all(RequestLog)
-    #     log = List.first(logs)
-    #     assert log.error.reason == error.reason
-    #     assert is_nil(log.response)
-    #   end)
-    # end
+        # Проверяем результат
+        logs = Repo.all(RequestLog)
+        log = List.last(logs)
+        assert log.error == to_string(error.reason)
+        assert is_nil(log.response)
+      end)
+    end
   end
 
   describe "private functions" do
