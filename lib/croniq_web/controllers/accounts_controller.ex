@@ -16,14 +16,15 @@ defmodule CroniqWeb.AccountsController do
   def registration(conn, params) do
     %{"user" => user_params} = params
 
-    {recaptcha_version, recaptcha_token} = cond do
-      Map.has_key?(params, "g-recaptcha-response") ->
-        IO.inspect(Map.get(params, "g-recaptcha-response"), label: "v2_token")
-        {:v2, Map.get(params, "g-recaptcha-response")}
+    {recaptcha_version, recaptcha_token} =
+      cond do
+        Map.has_key?(params, "g-recaptcha-response") ->
+          IO.inspect(Map.get(params, "g-recaptcha-response"), label: "v2_token")
+          {:v2, Map.get(params, "g-recaptcha-response")}
 
-      true ->
-        {:v3, Map.get(params, "recaptcha_token")}
-    end
+        true ->
+          {:v3, Map.get(params, "recaptcha_token")}
+      end
 
     case Croniq.Recaptcha.verify(recaptcha_version, recaptcha_token) do
       {:ok, _score} ->
@@ -35,6 +36,7 @@ defmodule CroniqWeb.AccountsController do
 
           {:error, %Ecto.Changeset{} = changeset} ->
             IO.inspect(changeset)
+
             render(
               conn,
               :registration_form,
@@ -47,29 +49,33 @@ defmodule CroniqWeb.AccountsController do
       {:low_score, score} ->
         Logger.info("low score: #{score}")
         IO.puts("site_v2_key: #{Croniq.Recaptcha.site_key(:v2)}")
+
         render(
           conn,
           :registration_form,
           site_key: Croniq.Recaptcha.site_key(:v3),
           error_message: "Please, resolve catcha",
           site_key_v2: Croniq.Recaptcha.site_key(:v2),
-          changeset: Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{
-            email: Map.get(user_params, "email", ""),
-            password: Map.get(user_params, "password", ""),
-          })
+          changeset:
+            Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{
+              email: Map.get(user_params, "email", ""),
+              password: Map.get(user_params, "password", "")
+            })
         )
 
       {:error, details} ->
         Logger.info("Error, details: #{details}")
+
         render(
           conn,
           :registration_form,
           site_key: Croniq.Recaptcha.site_key(:v3),
           error_message: nil,
-          changeset: Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{
-            email: Map.get(user_params, "email", ""),
-            password: Map.get(user_params, "password", ""),
-          })
+          changeset:
+            Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{
+              email: Map.get(user_params, "email", ""),
+              password: Map.get(user_params, "password", "")
+            })
         )
     end
   end
