@@ -10,6 +10,21 @@ config :croniq, Croniq.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+config :croniq, :recaptcha,
+  site_key: System.get_env("RECAPTCHA_SITE_KEY"),
+  secret_key: System.get_env("RECAPTCHA_SECRET_KEY"),
+  site_key_v2: System.get_env("RECAPTCHA_SITE_KEY_V2"),
+  secret_key_v2: System.get_env("RECAPTCHA_SECRET_KEY_V2"),
+  verify_url: "https://www.google.com/recaptcha/api/siteverify"
+
+port = System.get_env("PORT", "4000") |> String.to_integer()
+
+host =
+  System.get_env("HOST", "127.0.0.1")
+  |> String.split(".")
+  |> Enum.map(&String.to_integer/1)
+  |> List.to_tuple()
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
@@ -19,7 +34,7 @@ config :croniq, Croniq.Repo,
 config :croniq, CroniqWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: 4000],
+  http: [ip: host, port: port],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,

@@ -65,7 +65,8 @@ defmodule Croniq.MixProject do
       {:tailwind, "== 0.3.1", runtime: Mix.env() == :dev},
       {:floki, "== 0.38.0", only: :test},
       {:credo, "== 1.7.12", only: :dev},
-      {:recode, "== 0.7.3", only: :dev}
+      {:recode, "== 0.7.3", only: :dev},
+      {:mox, "== 1.2.0", only: :test}
     ]
   end
 

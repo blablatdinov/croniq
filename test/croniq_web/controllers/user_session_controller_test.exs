@@ -64,7 +64,7 @@ defmodule CroniqWeb.UserSessionControllerTest do
           }
         }
 
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/tasks"
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Account created successfully"
     end
 
@@ -89,7 +89,6 @@ defmodule CroniqWeb.UserSessionControllerTest do
         }
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) == "Invalid email or password"
-      assert redirected_to(conn) == ~p"/users/log_in"
     end
   end
 
