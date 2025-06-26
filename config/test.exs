@@ -49,3 +49,5 @@ config :croniq, :recaptcha,
 
 # Use mock for reCAPTCHA in tests
 config :croniq, :recaptcha_module, Croniq.RecaptchaMock
+
+config :croniq, :http_client, Croniq.HttpClientMock
