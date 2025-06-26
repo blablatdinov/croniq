@@ -1,4 +1,4 @@
-defmodule CroniqWeb.TasksControllerTest do
+defmodule CroniqWeb.AccountsControllerTest do
   use CroniqWeb.ConnCase, async: true
   import Croniq.AccountsFixtures
   import Croniq.TaskFixtures
