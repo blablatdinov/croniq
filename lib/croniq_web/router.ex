@@ -89,6 +89,9 @@ defmodule CroniqWeb.Router do
       post "/users/register", AccountsController, :registration
       get "/users/log_in", AccountsController, :log_in_form
       post "/users/log_in", AccountsController, :log_in
+      get "/users/reset_password", AccountsController, :forgot_password_form
+      post "/users/reset_password", AccountsController, :forgot_password
+      live "/users/reset_password/:token", UserResetPasswordLive, :edit
     end
   end
 

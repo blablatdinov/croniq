@@ -110,4 +110,28 @@ defmodule CroniqWeb.AccountsController do
         |> redirect(to: ~p"/tasks")
     end
   end
+
+  def forgot_password_form(conn, _params) do
+    render(
+      conn,
+      :forgot_password,
+      changeset: Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{}),
+      error_message: nil
+    )
+  end
+
+  def forgot_password(conn, %{"user" => %{"email" => email}}) do
+    if user = Croniq.Accounts.get_user_by_email(email) do
+      Croniq.Accounts.deliver_user_reset_password_instructions(
+        user,
+        &url(~p"/users/reset_password/#{&1}")
+      )
+    end
+
+    info = "If your email is in our system, you will receive instructions to reset your password shortly."
+
+    conn
+    |> put_flash(:info, info)
+    |> redirect(to: ~p"/")
+  end
 end
