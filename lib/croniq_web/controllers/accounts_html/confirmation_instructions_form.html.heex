@@ -9,15 +9,9 @@
       </p>
     </div>
 
-    <.form
-      :let={f}
-      for={@changeset}
-      action={~p"/users/confirm"}
-      method="post"
-      class="space-y-6"
-    >
+    <.form :let={f} for={@changeset} action={~p"/users/confirm"} method="post" class="space-y-6">
       <.input field={f[:email]} type="email" placeholder="Enter your email" required />
-      
+
       <div class="pt-4">
         <button
           type="submit"
@@ -38,4 +32,4 @@
       </.link>
     </div>
   </div>
-</div> 
+</div>

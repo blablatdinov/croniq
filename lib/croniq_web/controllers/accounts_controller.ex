@@ -52,7 +52,10 @@ defmodule CroniqWeb.AccountsController do
         )
 
         conn
-        |> put_flash(:info, "Account created successfully! Please check your email to confirm your account. You can start creating tasks, but confirmation is required to activate all features.")
+        |> put_flash(
+          :info,
+          "Account created successfully! Please check your email to confirm your account. You can start creating tasks, but confirmation is required to activate all features."
+        )
         |> redirect(to: ~p"/tasks/new")
 
       {:error, changeset} ->
@@ -183,7 +186,10 @@ defmodule CroniqWeb.AccountsController do
   end
 
   def reset_password_form(conn, %{"token" => token}) do
-    render(conn, :reset_password_form, token: token, changeset: Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{}))
+    render(conn, :reset_password_form,
+      token: token,
+      changeset: Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{})
+    )
   end
 
   def reset_password(conn, %{"token" => token, "user" => user_params}) do
@@ -222,7 +228,10 @@ defmodule CroniqWeb.AccountsController do
 
   def confirmation_instructions_form(conn, _params) do
     email = conn.assigns[:current_user] && conn.assigns.current_user.email
-    changeset = Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{email: email || ""})
+
+    changeset =
+      Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{email: email || ""})
+
     render(conn, :confirmation_instructions_form, changeset: changeset)
   end
 
