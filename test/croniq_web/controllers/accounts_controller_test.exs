@@ -34,4 +34,10 @@ defmodule CroniqWeb.AccountsControllerTest do
     # Should redirect to new task page after successful registration
     assert redirected_to(conn) == ~p"/tasks/new"
   end
+
+  test "reset_password_form with invalid token redirects with error", %{conn: conn} do
+    conn = get(conn, ~p"/users/reset_password/invalidtoken")
+    assert redirected_to(conn) == ~p"/"
+    assert get_flash(conn, :error) == "Reset password link is invalid or it has expired."
+  end
 end

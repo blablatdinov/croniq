@@ -187,10 +187,18 @@ defmodule CroniqWeb.AccountsController do
   end
 
   def reset_password_form(conn, %{"token" => token}) do
-    render(conn, :reset_password_form,
-      token: token,
-      changeset: Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{})
-    )
+    case Croniq.Accounts.get_user_by_reset_password_token(token) do
+      nil ->
+        conn
+        |> put_flash(:error, "Reset password link is invalid or it has expired.")
+        |> redirect(to: ~p"/")
+
+      _user ->
+        render(conn, :reset_password_form,
+          token: token,
+          changeset: Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{})
+        )
+    end
   end
 
   def reset_password(conn, %{"token" => token, "user" => user_params}) do
