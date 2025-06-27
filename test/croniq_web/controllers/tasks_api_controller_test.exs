@@ -264,4 +264,47 @@ defmodule CroniqWeb.TasksAPIControllerTest do
     assert %{"errors" => %{"name" => [txt]}} = response
     assert txt == "Can't parse 68 as minute."
   end
+
+  test "Tasks list search by name", %{conn: conn, user: user, user_token: user_token} do
+    Croniq.Task.create_task(user.id, %{
+      "name" => "Alpha task",
+      "schedule" => "* * * * *",
+      "url" => "https://example.com",
+      "method" => "GET"
+    })
+
+    Croniq.Task.create_task(user.id, %{
+      "name" => "Beta task",
+      "schedule" => "* * * * *",
+      "url" => "https://example.com",
+      "method" => "GET"
+    })
+
+    Croniq.Task.create_task(user.id, %{
+      "name" => "Gamma",
+      "schedule" => "* * * * *",
+      "url" => "https://example.com",
+      "method" => "GET"
+    })
+
+    response =
+      conn
+      |> put_req_header("authorization", "Basic " <> user_token)
+      |> get(~p"/api/v1/tasks?name=task")
+      |> json_response(200)
+
+    assert %{"results" => results} = response
+    assert length(results) == 2
+    assert Enum.all?(results, fn t -> String.contains?(String.downcase(t["name"]), "task") end)
+
+    response2 =
+      conn
+      |> put_req_header("authorization", "Basic " <> user_token)
+      |> get(~p"/api/v1/tasks?name=gamma")
+      |> json_response(200)
+
+    assert %{"results" => results2} = response2
+    assert length(results2) == 1
+    assert Enum.at(results2, 0)["name"] == "Gamma"
+  end
 end
