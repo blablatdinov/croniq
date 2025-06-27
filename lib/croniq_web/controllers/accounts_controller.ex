@@ -221,7 +221,9 @@ defmodule CroniqWeb.AccountsController do
   end
 
   def confirmation_instructions_form(conn, _params) do
-    render(conn, :confirmation_instructions_form, changeset: Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{}))
+    email = conn.assigns[:current_user] && conn.assigns.current_user.email
+    changeset = Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{email: email || ""})
+    render(conn, :confirmation_instructions_form, changeset: changeset)
   end
 
   def send_confirmation_instructions(conn, %{"user" => %{"email" => email}}) do
