@@ -20,7 +20,7 @@ defmodule Croniq.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Croniq", "contact@example.com"})
+      |> from({"Croniq", "dev@croniq.ilaletdionv.ru"})
       |> subject(subject)
       |> text_body(body)
 
