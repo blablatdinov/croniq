@@ -1,0 +1,36 @@
+<h2 class="text-xl font-bold mb-4">Your API keys</h2>
+<%= if @api_keys == [] do %>
+  <p>You have no API keys yet.</p>
+<% else %>
+  <table class="table-auto w-full mb-4">
+    <thead>
+      <tr>
+        <th class="px-4 py-2">Key</th>
+        <th class="px-4 py-2">Created at</th>
+        <th class="px-4 py-2"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= for key <- @api_keys do %>
+        <tr>
+          <td class="border px-4 py-2">{Base.encode64(key.token, padding: false)}</td>
+          <td class="border px-4 py-2">{key.inserted_at}</td>
+          <td class="border px-4 py-2">
+            <.form for={%{}} action={~p"/api_keys/#{key.id}"} method="delete" class="inline">
+              <button
+                type="submit"
+                class="text-red-600 hover:underline"
+                onclick="return confirm('Delete this key?')"
+              >
+                Delete
+              </button>
+            </.form>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+<.form for={%{}} action={~p"/api_keys"} method="post">
+  <button type="submit" class="btn btn-primary">Create new key</button>
+</.form>
