@@ -46,4 +46,42 @@ defmodule CroniqWeb.ApiKeyControllerTest do
     assert Phoenix.Flash.get(conn.assigns.flash, :error) == "Key not found."
     assert redirected_to(conn) == "/api_keys"
   end
+
+  test "GET /api/v1/tasks with valid API key from API endpoint returns tasks", %{user: user} do
+    # Создаём таску для пользователя
+    {:ok, _task} =
+      Croniq.Task.create_task(user.id, %{
+        "name" => "Test",
+        "schedule" => "* * * * *",
+        "url" => "https://example.com",
+        "method" => "GET"
+      })
+
+    # Получаем токен через API
+    conn =
+      build_conn()
+      |> put_req_header("content-type", "application/json")
+      |> post("/api/v1/auth", %{email: user.email, password: "hello world!"} |> Jason.encode!())
+
+    IO.inspect(conn.resp_body, label: "API /api/v1/auth response body")
+    token = Jason.decode!(conn.resp_body)["token"]
+
+    # Делаем запрос с этим токеном
+    conn =
+      build_conn()
+      |> put_req_header("authorization", "Basic #{token}")
+      |> get("/api/v1/tasks")
+
+    assert json_response(conn, 200)["results"] |> is_list()
+    assert Enum.any?(json_response(conn, 200)["results"], fn t -> t["name"] == "Test" end)
+  end
+
+  test "GET /api/v1/tasks with invalid API key returns 401" do
+    conn =
+      build_conn()
+      |> put_req_header("authorization", "Basic invalidtoken")
+      |> get("/api/v1/tasks")
+
+    assert response(conn, 401) =~ "No access for you"
+  end
 end

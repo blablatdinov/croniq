@@ -360,6 +360,8 @@ defmodule Croniq.Accounts do
   end
 
   def fetch_user_by_api_token(token) do
+    IO.inspect(token, label: "token")
+
     with {:ok, query} <- UserToken.verify_email_token_query(token, "api-token"),
          %User{} = user <- Repo.one(query) do
       {:ok, user}
