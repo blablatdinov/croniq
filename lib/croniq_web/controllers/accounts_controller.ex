@@ -45,7 +45,6 @@ defmodule CroniqWeb.AccountsController do
   defp handle_registration_result(conn, user_params, {:ok, _score}) do
     case Croniq.Accounts.register_user(user_params) do
       {:ok, user} ->
-        # Send confirmation email instructions
         Croniq.Accounts.deliver_user_confirmation_instructions(
           user,
           &url(~p"/users/confirm/#{&1}")

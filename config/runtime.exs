@@ -71,8 +71,6 @@ if config_env() == :prod do
       environment variable BREVO_API_KEY is missing.
       """
 
-  IO.inspect(brevo_api_key, label: "brevo")
-
   config :croniq, Croniq.Mailer,
     adapter: Swoosh.Adapters.Brevo,
     api_key: brevo_api_key
