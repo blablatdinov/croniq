@@ -19,8 +19,4 @@ config :logger, level: :info
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.
 
-config :croniq, Croniq.Mailer,
-  adapter: Swoosh.Adapters.Brevo,
-  api_key: System.get_env("BREVO_API_KEY")
-
 config :swoosh, :api_client, Finch
