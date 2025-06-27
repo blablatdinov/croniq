@@ -31,6 +31,7 @@ defmodule Croniq.Accounts.UserToken do
     field :token, :binary
     field :context, :string
     field :sent_to, :string
+    field :plaintext_token, :string
     belongs_to :user, Croniq.Accounts.User
 
     timestamps type: :utc_datetime, updated_at: false
@@ -95,6 +96,21 @@ defmodule Croniq.Accounts.UserToken do
     build_hashed_token(user, context, user.email)
   end
 
+  defp build_hashed_token(user, "api-token" = context, sent_to) do
+    token = :crypto.strong_rand_bytes(@rand_size)
+    hashed_token = :crypto.hash(@hash_algorithm, token)
+    plaintext_token = Base.encode64(token, padding: false)
+
+    {plaintext_token,
+     %UserToken{
+       token: hashed_token,
+       context: context,
+       sent_to: sent_to,
+       user_id: user.id,
+       plaintext_token: plaintext_token
+     }}
+  end
+
   defp build_hashed_token(user, context, sent_to) do
     token = :crypto.strong_rand_bytes(@rand_size)
     hashed_token = :crypto.hash(@hash_algorithm, token)
@@ -104,7 +120,8 @@ defmodule Croniq.Accounts.UserToken do
        token: hashed_token,
        context: context,
        sent_to: sent_to,
-       user_id: user.id
+       user_id: user.id,
+       plaintext_token: nil
      }}
   end
 
@@ -121,6 +138,25 @@ defmodule Croniq.Accounts.UserToken do
   for resetting the password. For verifying requests to change the email,
   see `verify_change_email_token_query/2`.
   """
+  def verify_email_token_query(token, "api-token" = context) do
+    case Base.decode64(token, padding: false) do
+      {:ok, decoded_token} ->
+        hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
+        days = days_for_context(context)
+
+        query =
+          from token in by_token_and_context_query(hashed_token, context),
+            join: user in assoc(token, :user),
+            where: token.inserted_at > ago(^days, "day") and token.sent_to == user.email,
+            select: user
+
+        {:ok, query}
+
+      :error ->
+        :error
+    end
+  end
+
   def verify_email_token_query(token, context) do
     case Base.url_decode64(token, padding: false) do
       {:ok, decoded_token} ->
