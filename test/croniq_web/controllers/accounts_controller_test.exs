@@ -31,7 +31,7 @@ defmodule CroniqWeb.AccountsControllerTest do
       conn
       |> post(~p"/users/register", %{"user" => user_params, "recaptcha_token" => "test_token"})
 
-    # Should redirect after successful registration
+    # Should redirect to new task page after successful registration
     assert redirected_to(conn) == ~p"/tasks/new"
   end
 end

@@ -44,9 +44,15 @@ defmodule CroniqWeb.AccountsController do
 
   defp handle_registration_result(conn, user_params, {:ok, _score}) do
     case Croniq.Accounts.register_user(user_params) do
-      {:ok, _user} ->
+      {:ok, user} ->
+        # Send confirmation email instructions
+        Croniq.Accounts.deliver_user_confirmation_instructions(
+          user,
+          &url(~p"/users/confirm/#{&1}")
+        )
+
         conn
-        |> put_flash(:info, "Account created successfully!")
+        |> put_flash(:info, "Account created successfully! Please check your email to confirm your account. You can start creating tasks, but confirmation is required to activate all features.")
         |> redirect(to: ~p"/tasks/new")
 
       {:error, changeset} ->
@@ -174,5 +180,63 @@ defmodule CroniqWeb.AccountsController do
     conn
     |> put_flash(:info, info)
     |> redirect(to: ~p"/")
+  end
+
+  def reset_password_form(conn, %{"token" => token}) do
+    render(conn, :reset_password_form, token: token, changeset: Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{}))
+  end
+
+  def reset_password(conn, %{"token" => token, "user" => user_params}) do
+    case Croniq.Accounts.get_user_by_reset_password_token(token) do
+      nil ->
+        conn
+        |> put_flash(:error, "Reset password link is invalid or it has expired.")
+        |> redirect(to: ~p"/")
+
+      user ->
+        case Croniq.Accounts.reset_user_password(user, user_params) do
+          {:ok, _} ->
+            conn
+            |> put_flash(:info, "Password reset successfully.")
+            |> redirect(to: ~p"/users/log_in")
+
+          {:error, changeset} ->
+            render(conn, :reset_password_form, token: token, changeset: changeset)
+        end
+    end
+  end
+
+  def confirm(conn, %{"token" => token}) do
+    case Croniq.Accounts.confirm_user(token) do
+      {:ok, _} ->
+        conn
+        |> put_flash(:info, "Account confirmed successfully.")
+        |> redirect(to: ~p"/users/log_in")
+
+      :error ->
+        conn
+        |> put_flash(:error, "Confirmation link is invalid or it has expired.")
+        |> redirect(to: ~p"/users/log_in")
+    end
+  end
+
+  def confirmation_instructions_form(conn, _params) do
+    render(conn, :confirmation_instructions_form, changeset: Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{}))
+  end
+
+  def send_confirmation_instructions(conn, %{"user" => %{"email" => email}}) do
+    if user = Croniq.Accounts.get_user_by_email(email) do
+      Croniq.Accounts.deliver_user_confirmation_instructions(
+        user,
+        &url(~p"/users/confirm/#{&1}")
+      )
+    end
+
+    info =
+      "If your email is in our system and it has not been confirmed yet, you will receive an email with instructions shortly."
+
+    conn
+    |> put_flash(:info, info)
+    |> redirect(to: ~p"/users/log_in")
   end
 end

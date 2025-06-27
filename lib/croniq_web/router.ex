@@ -83,16 +83,14 @@ defmodule CroniqWeb.Router do
   scope "/", CroniqWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
-    live_session :redirect_if_user_is_authenticated,
-      on_mount: [{CroniqWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      get "/users/register", AccountsController, :registration_form
-      post "/users/register", AccountsController, :registration
-      get "/users/log_in", AccountsController, :log_in_form
-      post "/users/log_in", AccountsController, :log_in
-      get "/users/reset_password", AccountsController, :forgot_password_form
-      post "/users/reset_password", AccountsController, :forgot_password
-      live "/users/reset_password/:token", UserResetPasswordLive, :edit
-    end
+    get "/users/register", AccountsController, :registration_form
+    post "/users/register", AccountsController, :registration
+    get "/users/log_in", AccountsController, :log_in_form
+    post "/users/log_in", AccountsController, :log_in
+    get "/users/reset_password", AccountsController, :forgot_password_form
+    post "/users/reset_password", AccountsController, :forgot_password
+    get "/users/reset_password/:token", AccountsController, :reset_password_form
+    put "/users/reset_password/:token", AccountsController, :reset_password
   end
 
   scope "/", CroniqWeb do
@@ -110,10 +108,8 @@ defmodule CroniqWeb.Router do
 
     delete "/users/log_out", UserSessionController, :delete
 
-    live_session :current_user,
-      on_mount: [{CroniqWeb.UserAuth, :mount_current_user}] do
-      live "/users/confirm/:token", UserConfirmationLive, :edit
-      live "/users/confirm", UserConfirmationInstructionsLive, :new
-    end
+    get "/users/confirm/:token", AccountsController, :confirm
+    get "/users/confirm", AccountsController, :confirmation_instructions_form
+    post "/users/confirm", AccountsController, :send_confirmation_instructions
   end
 end

@@ -2,7 +2,7 @@
   <h1 class="text-center text-2xl font-bold mb-4">Log in to your account</h1>
 
   <p class="text-center mb-6">
-    Don’t have an account?
+    Don't have an account?
     <.link href={~p"/users/register"} class="font-semibold text-brand hover:underline">
       Register
     </.link>
@@ -39,4 +39,14 @@
       </button>
     </div>
   </.form>
+
+  <div class="text-center mt-4 space-y-2">
+    <.link href={~p"/users/reset_password"} class="text-sm text-gray-600 hover:text-gray-800">
+      Forgot your password?
+    </.link>
+    <br />
+    <.link href={~p"/users/confirm"} class="text-sm text-gray-600 hover:text-gray-800">
+      Didn't receive confirmation instructions?
+    </.link>
+  </div>
 </div>
