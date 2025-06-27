@@ -13,7 +13,9 @@
     <tbody>
       <%= for key <- @api_keys do %>
         <tr>
-          <td class="border px-4 py-2"><span data-test="api-key-token"><%= key.plaintext_token %></span></td>
+          <td class="border px-4 py-2">
+            <span data-test="api-key-token">{key.plaintext_token || "—"}</span>
+          </td>
           <td class="border px-4 py-2">{key.inserted_at}</td>
           <td class="border px-4 py-2">
             <.form for={%{}} action={~p"/api_keys/#{key.id}"} method="delete" class="inline">

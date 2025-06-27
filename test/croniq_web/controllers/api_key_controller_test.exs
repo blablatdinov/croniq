@@ -63,7 +63,6 @@ defmodule CroniqWeb.ApiKeyControllerTest do
       |> put_req_header("content-type", "application/json")
       |> post("/api/v1/auth", %{email: user.email, password: "hello world!"} |> Jason.encode!())
 
-    IO.inspect(conn.resp_body, label: "API /api/v1/auth response body")
     token = Jason.decode!(conn.resp_body)["token"]
 
     # Делаем запрос с этим токеном

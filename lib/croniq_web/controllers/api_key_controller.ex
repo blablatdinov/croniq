@@ -13,12 +13,6 @@ defmodule CroniqWeb.ApiKeyController do
     api_keys =
       Repo.all(from t in UserToken, where: t.user_id == ^user.id and t.context == "api-token")
 
-    api_keys
-      |> Enum.map(fn token -> Base.url_encode64(token.token, padding: false) end)
-      |> IO.inspect(label: "encoded tokens")
-      |> Enum.map(fn token -> Accounts.fetch_user_by_api_token(token) end)
-      |> IO.inspect(label: "users")
-
     render(conn, "index.html", api_keys: api_keys)
   end
 
