@@ -64,6 +64,7 @@ if config_env() == :prod do
       port: port
     ],
     secret_key_base: secret_key_base
+
   brevo_api_key =
     System.get_env("BREVO_API_KEY") ||
       raise """
@@ -71,9 +72,10 @@ if config_env() == :prod do
       """
 
   IO.inspect(brevo_api_key, label: "brevo")
+
   config :croniq, Croniq.Mailer,
     adapter: Swoosh.Adapters.Brevo,
     api_key: brevo_api_key
+
   config :swoosh, :api_client, Swoosh.ApiClient.Finch
 end
-

@@ -175,6 +175,7 @@ defmodule CroniqWeb.AccountsController do
         user,
         &url(~p"/users/reset_password/#{&1}")
       )
+
       Logger.info("Email with token for reset password sended to #{email}")
     end
 

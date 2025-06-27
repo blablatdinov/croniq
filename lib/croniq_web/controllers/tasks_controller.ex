@@ -72,23 +72,21 @@ defmodule CroniqWeb.TasksController do
 
   def edit(conn, %{"task_id" => task_id, "task" => task_params}) do
     if conn.assigns.current_user.confirmed_at do
-      case user_task(task_id, conn.assigns.current_user.id) do
-        task = %Croniq.Task{} ->
-          case Task.update_task(task, task_params) do
-            {:ok, _task} ->
-              conn
-              |> put_flash(:info, "Task updated successfully.")
-              |> redirect(to: ~p"/tasks/#{task_id}/edit")
-
-            {:error, changeset} ->
-              render(conn, :edit, task: task, changeset: changeset)
-          end
-
-        _ ->
+      with %Croniq.Task{} = task <- user_task(task_id, conn.assigns.current_user.id),
+           {:ok, _task} <- Task.update_task(task, task_params) do
+        conn
+        |> put_flash(:info, "Task updated successfully.")
+        |> redirect(to: ~p"/tasks/#{task_id}/edit")
+      else
+        nil ->
           conn
           |> put_status(:not_found)
           |> put_view(CroniqWeb.ErrorHTML)
           |> render("404.html", %{})
+
+        {:error, changeset} ->
+          task = user_task(task_id, conn.assigns.current_user.id)
+          render(conn, :edit, task: task, changeset: changeset)
       end
     else
       conn
