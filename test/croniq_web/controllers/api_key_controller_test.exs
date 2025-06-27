@@ -18,7 +18,7 @@ defmodule CroniqWeb.ApiKeyControllerTest do
     conn = get(conn, ~p"/api_keys")
     assert html_response(conn, 200) =~ "Your API keys"
     key = Repo.one(from t in UserToken, where: t.user_id == ^user.id and t.context == "api-token")
-    assert html_response(conn, 200) =~ Base.encode64(key.token, padding: false)
+    assert html_response(conn, 200) =~ key.plaintext_token
   end
 
   test "POST /api_keys creates a new API key", %{conn: conn, user: user} do
@@ -83,5 +83,41 @@ defmodule CroniqWeb.ApiKeyControllerTest do
       |> get("/api/v1/tasks")
 
     assert response(conn, 401) =~ "No access for you"
+  end
+
+  test "GET /api/v1/tasks with API key created via UI returns tasks", %{conn: conn, user: user} do
+    # Создаём таску для пользователя
+    {:ok, _task} =
+      Croniq.Task.create_task(user.id, %{
+        "name" => "Test",
+        "schedule" => "* * * * *",
+        "url" => "https://example.com",
+        "method" => "GET"
+      })
+
+    # Получаем токен через UI (POST /api_keys)
+    conn =
+      conn
+      |> log_in_user(user)
+      |> post(~p"/api_keys")
+      |> get(~p"/api_keys")
+
+    # Парсим токен из HTML (берём первый токен из таблицы)
+    token_base64 =
+      conn.resp_body
+      |> Floki.parse_document!()
+      |> Floki.find("[data-test=\"api-key-token\"]")
+      |> Floki.text()
+      |> String.split("\n", trim: true)
+      |> List.first()
+
+    # Делаем запрос с этим токеном
+    api_conn =
+      build_conn()
+      |> put_req_header("authorization", "Basic #{token_base64}")
+      |> get("/api/v1/tasks")
+
+    assert json_response(api_conn, 200)["results"] |> is_list()
+    assert Enum.any?(json_response(api_conn, 200)["results"], fn t -> t["name"] == "Test" end)
   end
 end
