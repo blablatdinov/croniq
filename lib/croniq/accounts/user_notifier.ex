@@ -20,7 +20,7 @@ defmodule Croniq.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Croniq", "contact@example.com"})
+      |> from({"Croniq", "dev@croniq.ilaletdionv.ru"})
       |> subject(subject)
       |> text_body(body)
 
@@ -33,17 +33,22 @@ defmodule Croniq.Accounts.UserNotifier do
   Deliver instructions to confirm account.
   """
   def deliver_confirmation_instructions(user, url) do
-    deliver(user.email, "Confirmation instructions", """
+    deliver(user.email, "Account Confirmation - Croniq", """
 
     ==============================
 
-    Hi #{user.email},
+    Hello!
 
-    You can confirm your account by visiting the URL below:
+    Thank you for registering with Croniq! To complete your registration and activate your account, please click the link below:
 
     #{url}
 
-    If you didn't create an account with us, please ignore this.
+    If you didn't create an account with Croniq, please ignore this email.
+
+    This link is valid for 7 days.
+
+    Best regards,
+    The Croniq Team
 
     ==============================
     """)
@@ -53,17 +58,22 @@ defmodule Croniq.Accounts.UserNotifier do
   Deliver instructions to reset a user password.
   """
   def deliver_reset_password_instructions(user, url) do
-    deliver(user.email, "Reset password instructions", """
+    deliver(user.email, "Password Reset - Croniq", """
 
     ==============================
 
-    Hi #{user.email},
+    Hello!
 
-    You can reset your password by visiting the URL below:
+    You requested a password reset for your Croniq account. To create a new password, please click the link below:
 
     #{url}
 
-    If you didn't request this change, please ignore this.
+    If you didn't request a password reset, please ignore this email.
+
+    This link is valid for 24 hours.
+
+    Best regards,
+    The Croniq Team
 
     ==============================
     """)
@@ -73,17 +83,22 @@ defmodule Croniq.Accounts.UserNotifier do
   Deliver instructions to update a user email.
   """
   def deliver_update_email_instructions(user, url) do
-    deliver(user.email, "Update email instructions", """
+    deliver(user.email, "Email Change - Croniq", """
 
     ==============================
 
-    Hi #{user.email},
+    Hello!
 
-    You can change your email by visiting the URL below:
+    You requested to change the email address for your Croniq account. To confirm this change, please click the link below:
 
     #{url}
 
-    If you didn't request this change, please ignore this.
+    If you didn't request an email change, please ignore this email.
+
+    This link is valid for 7 days.
+
+    Best regards,
+    The Croniq Team
 
     ==============================
     """)

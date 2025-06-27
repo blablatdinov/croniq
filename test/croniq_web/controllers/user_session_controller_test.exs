@@ -4,7 +4,7 @@ defmodule CroniqWeb.UserSessionControllerTest do
   import Croniq.AccountsFixtures
 
   setup do
-    %{user: user_fixture()}
+    %{user: confirmed_user_fixture()}
   end
 
   describe "POST /users/log_in" do

@@ -10,7 +10,7 @@ defmodule CroniqWeb.TasksControllerTest do
       |> Map.replace!(:secret_key_base, CroniqWeb.Endpoint.config(:secret_key_base))
       |> init_test_session(%{})
 
-    user = user_fixture()
+    user = confirmed_user_fixture()
 
     %{user: user, conn: conn, user_token: Croniq.Accounts.generate_user_session_token(user)}
   end

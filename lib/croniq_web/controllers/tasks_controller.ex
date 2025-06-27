@@ -8,14 +8,20 @@ defmodule CroniqWeb.TasksController do
   import Phoenix.Controller
 
   def create conn, %{"task" => task_params} do
-    case Croniq.Task.create_task(conn.assigns.current_user.id, task_params) do
-      {:ok, task} ->
-        conn
-        |> put_flash(:info, "Task created successfully!")
-        |> redirect(to: ~p"/tasks/#{task.id}/edit")
+    if conn.assigns.current_user.confirmed_at do
+      case Croniq.Task.create_task(conn.assigns.current_user.id, task_params) do
+        {:ok, task} ->
+          conn
+          |> put_flash(:info, "Task created successfully!")
+          |> redirect(to: ~p"/tasks/#{task.id}/edit")
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :new_task, changeset: changeset)
+        {:error, %Ecto.Changeset{} = changeset} ->
+          render(conn, :new_task, changeset: changeset)
+      end
+    else
+      conn
+      |> put_flash(:error, "Please confirm your email address before creating tasks.")
+      |> redirect(to: ~p"/tasks")
     end
   end
 
@@ -25,12 +31,19 @@ defmodule CroniqWeb.TasksController do
         Repo.all(
           from task in Croniq.Task,
             where: task.user_id == ^conn.assigns.current_user.id
-        )
+        ),
+      current_user: conn.assigns.current_user
     )
   end
 
   def new_task(conn, _params) do
-    render(conn, :new_task, changeset: Task.changeset(%Task{}, %{}))
+    if conn.assigns.current_user.confirmed_at do
+      render(conn, :new_task, changeset: Task.changeset(%Task{}, %{}))
+    else
+      conn
+      |> put_flash(:error, "Please confirm your email address before creating tasks.")
+      |> redirect(to: ~p"/tasks")
+    end
   end
 
   def task_details(conn, %{"task_id" => task_id}) do
@@ -58,23 +71,27 @@ defmodule CroniqWeb.TasksController do
   end
 
   def edit(conn, %{"task_id" => task_id, "task" => task_params}) do
-    case user_task(task_id, conn.assigns.current_user.id) do
-      task = %Croniq.Task{} ->
-        case Task.update_task(task, task_params) do
-          {:ok, _task} ->
-            conn
-            |> put_flash(:info, "Task updated successfully.")
-            |> redirect(to: ~p"/tasks/#{task_id}/edit")
-
-          {:error, changeset} ->
-            render(conn, :edit, task: task, changeset: changeset)
-        end
-
-      _ ->
+    if conn.assigns.current_user.confirmed_at do
+      with %Croniq.Task{} = task <- user_task(task_id, conn.assigns.current_user.id),
+           {:ok, _task} <- Task.update_task(task, task_params) do
         conn
-        |> put_status(:not_found)
-        |> put_view(CroniqWeb.ErrorHTML)
-        |> render("404.html", %{})
+        |> put_flash(:info, "Task updated successfully.")
+        |> redirect(to: ~p"/tasks/#{task_id}/edit")
+      else
+        nil ->
+          conn
+          |> put_status(:not_found)
+          |> put_view(CroniqWeb.ErrorHTML)
+          |> render("404.html", %{})
+
+        {:error, changeset} ->
+          task = user_task(task_id, conn.assigns.current_user.id)
+          render(conn, :edit, task: task, changeset: changeset)
+      end
+    else
+      conn
+      |> put_flash(:error, "Please confirm your email address before editing tasks.")
+      |> redirect(to: ~p"/tasks")
     end
   end
 

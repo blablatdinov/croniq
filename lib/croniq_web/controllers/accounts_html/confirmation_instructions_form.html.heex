@@ -1,0 +1,35 @@
+<div class="mx-auto max-w-md">
+  <div class="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">
+        Didn't receive confirmation instructions?
+      </h1>
+      <p class="text-gray-600">
+        We'll send a new confirmation link to your inbox
+      </p>
+    </div>
+
+    <.form :let={f} for={@changeset} action={~p"/users/confirm"} method="post" class="space-y-6">
+      <.input field={f[:email]} type="email" placeholder="Enter your email" required />
+
+      <div class="pt-4">
+        <button
+          type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full"
+        >
+          Resend confirmation instructions
+        </button>
+      </div>
+    </.form>
+
+    <div class="mt-6 pt-6 border-t border-gray-200 text-center space-y-2">
+      <.link href={~p"/users/register"} class="text-gray-600 hover:text-gray-800 text-sm">
+        Create account
+      </.link>
+      <span class="text-gray-400">|</span>
+      <.link href={~p"/users/log_in"} class="text-gray-600 hover:text-gray-800 text-sm">
+        Log in
+      </.link>
+    </div>
+  </div>
+</div>

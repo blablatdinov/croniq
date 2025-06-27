@@ -23,6 +23,17 @@ defmodule Croniq.AccountsFixtures do
     user
   end
 
+  def confirmed_user_fixture(attrs \\ %{}) do
+    user = user_fixture(attrs)
+
+    {:ok, confirmed_user} =
+      user
+      |> Croniq.Accounts.User.confirm_changeset()
+      |> Croniq.Repo.update()
+
+    confirmed_user
+  end
+
   def extract_user_token(fun) do
     {:ok, captured_email} = fun.(&"[TOKEN]#{&1}[TOKEN]")
     [_, token | _] = String.split(captured_email.text_body, "[TOKEN]")
