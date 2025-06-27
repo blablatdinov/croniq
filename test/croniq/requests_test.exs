@@ -29,7 +29,7 @@ defmodule Croniq.RequestsTest do
           schedule: "*/5 * * * *",
           url: "https://api.example.com/test",
           method: "POST",
-          headers: %{"Content-Type" => "application/json", "Authorization" => "Bearer token"},
+          headers: %{"Content-Type" => "application/json", "Authorization" => "Basic token"},
           body: ~s({"key": "value"}),
           status: "active",
           retry_count: 0
@@ -47,7 +47,7 @@ defmodule Croniq.RequestsTest do
         assert request.body == ~s({"key": "value"})
         assert length(request.headers) == 2
         assert {"Content-Type", "application/json"} in request.headers
-        assert {"Authorization", "Bearer token"} in request.headers
+        assert {"Authorization", "Basic token"} in request.headers
 
         {:ok,
          %HTTPoison.Response{
@@ -71,7 +71,7 @@ defmodule Croniq.RequestsTest do
       assert log.request =~ "POST /test HTTP/1.1"
       assert log.request =~ "HOST: api.example.com"
       assert log.request =~ "Content-Type: application/json"
-      assert log.request =~ "Authorization: Bearer token"
+      assert log.request =~ "Authorization: Basic token"
       assert log.request =~ ~s({"key": "value"})
       assert log.response =~ "HTTP/1.1 200 ok"
       assert log.response =~ ~s({"success": true})
@@ -85,7 +85,7 @@ defmodule Croniq.RequestsTest do
         assert request.body == ~s({"key": "value"})
         assert length(request.headers) == 2
         assert {"Content-Type", "application/json"} in request.headers
-        assert {"Authorization", "Bearer token"} in request.headers
+        assert {"Authorization", "Basic token"} in request.headers
 
         {:error, %HTTPoison.Error{reason: :timeout}}
       end)
@@ -155,7 +155,7 @@ defmodule Croniq.RequestsTest do
           schedule: "*/5 * * * *",
           url: "https://api.example.com/test",
           method: "POST",
-          headers: %{"Content-Type" => "application/json", "Authorization" => "Bearer token"},
+          headers: %{"Content-Type" => "application/json", "Authorization" => "Basic token"},
           # Используем пустую строку вместо nil
           body: "",
           status: "active",
@@ -169,7 +169,7 @@ defmodule Croniq.RequestsTest do
         assert request.body == ""
         assert length(request.headers) == 2
         assert {"Content-Type", "application/json"} in request.headers
-        assert {"Authorization", "Bearer token"} in request.headers
+        assert {"Authorization", "Basic token"} in request.headers
 
         {:ok,
          %HTTPoison.Response{
@@ -198,7 +198,7 @@ defmodule Croniq.RequestsTest do
           schedule: "*/5 * * * *",
           url: "https://api.example.com/test",
           method: "GET",
-          headers: %{"Content-Type" => "application/json", "Authorization" => "Bearer token"},
+          headers: %{"Content-Type" => "application/json", "Authorization" => "Basic token"},
           # Используем пустую строку вместо nil
           body: "",
           status: "active",
@@ -212,7 +212,7 @@ defmodule Croniq.RequestsTest do
         assert request.body == ""
         assert length(request.headers) == 2
         assert {"Content-Type", "application/json"} in request.headers
-        assert {"Authorization", "Bearer token"} in request.headers
+        assert {"Authorization", "Basic token"} in request.headers
 
         {:ok,
          %HTTPoison.Response{
@@ -240,7 +240,7 @@ defmodule Croniq.RequestsTest do
         assert request.body == ~s({"key": "value"})
         assert length(request.headers) == 2
         assert {"Content-Type", "application/json"} in request.headers
-        assert {"Authorization", "Bearer token"} in request.headers
+        assert {"Authorization", "Basic token"} in request.headers
 
         {:ok,
          %HTTPoison.Response{
@@ -275,7 +275,7 @@ defmodule Croniq.RequestsTest do
           assert request.body == ~s({"key": "value"})
           assert length(request.headers) == 2
           assert {"Content-Type", "application/json"} in request.headers
-          assert {"Authorization", "Bearer token"} in request.headers
+          assert {"Authorization", "Basic token"} in request.headers
 
           {:error, error}
         end)
@@ -298,7 +298,7 @@ defmodule Croniq.RequestsTest do
         method: :POST,
         url: "https://api.example.com/path/to/resource",
         body: ~s({"data": "value"}),
-        headers: [{"Content-Type", "application/json"}, {"Authorization", "Bearer token"}]
+        headers: [{"Content-Type", "application/json"}, {"Authorization", "Basic token"}]
       }
 
       formatted = Requests.format_request(request)
@@ -306,7 +306,7 @@ defmodule Croniq.RequestsTest do
       assert formatted =~ "POST /path/to/resource HTTP/1.1"
       assert formatted =~ "HOST: api.example.com"
       assert formatted =~ "Content-Type: application/json"
-      assert formatted =~ "Authorization: Bearer token"
+      assert formatted =~ "Authorization: Basic token"
       assert formatted =~ ~s({"data": "value"})
     end
 
@@ -327,11 +327,11 @@ defmodule Croniq.RequestsTest do
     end
 
     test "headers_str правильно форматирует заголовки" do
-      headers = [{"Content-Type", "application/json"}, {"Authorization", "Bearer token"}]
+      headers = [{"Content-Type", "application/json"}, {"Authorization", "Basic token"}]
       formatted = Requests.headers_str(headers)
 
       assert formatted =~ "Content-Type: application/json"
-      assert formatted =~ "Authorization: Bearer token"
+      assert formatted =~ "Authorization: Basic token"
       assert String.contains?(formatted, "\r\n")
     end
   end
