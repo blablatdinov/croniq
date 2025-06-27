@@ -6,9 +6,23 @@ defmodule CroniqWeb.TasksAPIController do
 
   action_fallback CroniqWeb.FallbackController
 
-  def list(conn, _params) do
+  def list(conn, params) do
+    name = Map.get(params, "name")
+
+    query =
+      from task in Task,
+        where: task.user_id == ^conn.assigns.current_user.id
+
+    query =
+      if name && name != "" do
+        pattern = "%" <> name <> "%"
+        from task in query, where: ilike(task.name, ^pattern)
+      else
+        query
+      end
+
     tasks =
-      Repo.all(from task in Task, where: task.user_id == ^conn.assigns.current_user.id)
+      Repo.all(query)
       |> Enum.map(fn task ->
         Map.from_struct(task)
         |> Map.drop([:user, :__meta__])
