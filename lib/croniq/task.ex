@@ -33,7 +33,10 @@ defmodule Croniq.Task do
   end
 
   def changeset(task, attrs) do
-    attrs = Map.update(attrs, "headers", %{}, &decode_json/1)
+    attrs =
+      Map.update(attrs, "headers", %{}, fn headers ->
+        if is_binary(headers), do: decode_json(headers), else: headers
+      end)
 
     task
     |> cast(attrs, [
@@ -49,7 +52,6 @@ defmodule Croniq.Task do
     ])
     |> validate_required([:name, :schedule, :url])
     |> put_default(:body, "")
-    |> put_default(:headers, %{})
     |> put_default(:status, "active")
     |> put_default(:retry_count, 0)
     |> validate_change(:schedule, fn :schedule, schedule ->
