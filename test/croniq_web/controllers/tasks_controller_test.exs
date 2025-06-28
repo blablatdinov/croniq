@@ -76,28 +76,49 @@ defmodule CroniqWeb.TasksControllerTest do
     test "Task edit form", %{conn: conn, user_token: user_token, user: user} do
       [task] = task_list_for_user(user)
 
-      conn
-      |> put_session(:user_token, user_token)
-      |> get(~p"/tasks/#{task.id}/edit")
-      |> html_response(200)
+      response =
+        conn
+        |> put_session(:user_token, user_token)
+        |> get(~p"/tasks/#{task.id}/edit")
+        |> html_response(200)
+
+      assert true
     end
 
     test "edit task", %{conn: conn, user: user} do
       [task] = task_list_for_user(user)
 
-      response =
+      conn =
         conn
         |> log_in_user(user)
         |> put(~p"/tasks/#{task.id}",
           task: %{
-            name: "new name"
+            name: "new name",
+            headers: %{"Authorization" => "newToken"}
           }
         )
 
-      assert Plug.Conn.get_resp_header(response, "location") == [~p"/tasks/#{task.id}/edit"]
+      response = html_response(conn, 302)
+
+      updated_form =
+        conn
+        |> get(~p"/tasks/#{task.id}/edit")
+        |> html_response(200)
+
+      elem =
+        Floki.parse_document!(updated_form)
+        |> Floki.find("[data-test=task-headers] textarea")
+
+      [{"textarea", [_, _, _, _, {"placeholder", placeholder}], _}] = elem
+
+      assert placeholder ==
+               "{\"Authorization\":\"newToken\"}"
+
+      assert Plug.Conn.get_resp_header(conn, "location") == [~p"/tasks/#{task.id}/edit"]
 
       assert %{
-               name: "new name"
+               name: "new name",
+               headers: %{"Authorization" => "newToken"}
              } = Croniq.Repo.get_by(Croniq.Task, id: task.id) |> Map.from_struct()
     end
 

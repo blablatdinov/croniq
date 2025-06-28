@@ -38,7 +38,9 @@ defmodule CroniqWeb.TasksController do
 
   def new_task(conn, _params) do
     if conn.assigns.current_user.confirmed_at do
-      render(conn, :new_task, changeset: Task.changeset(%Task{}, %{}))
+      headers_string = Jason.encode!(%{})
+      changeset = Task.changeset(%Task{}, %{"headers" => headers_string})
+      render(conn, :new_task, changeset: changeset)
     else
       conn
       |> put_flash(:error, "Please confirm your email address before creating tasks.")
@@ -53,7 +55,8 @@ defmodule CroniqWeb.TasksController do
   def edit_form(conn, %{"task_id" => task_id}) do
     case user_task(task_id, conn.assigns.current_user.id) do
       task = %Croniq.Task{} ->
-        render(conn, :edit, task: task, changeset: Task.changeset(task, %{}))
+        changeset = Task.changeset(task, %{"headers" => task.headers})
+        render(conn, :edit, task: task, changeset: changeset)
 
       _ ->
         conn
@@ -86,6 +89,18 @@ defmodule CroniqWeb.TasksController do
 
         {:error, changeset} ->
           task = user_task(task_id, conn.assigns.current_user.id)
+
+          changeset =
+            if is_map(Ecto.Changeset.get_field(changeset, :headers)) do
+              Ecto.Changeset.put_change(
+                changeset,
+                :headers,
+                Jason.encode!(Ecto.Changeset.get_field(changeset, :headers))
+              )
+            else
+              changeset
+            end
+
           render(conn, :edit, task: task, changeset: changeset)
       end
     else
