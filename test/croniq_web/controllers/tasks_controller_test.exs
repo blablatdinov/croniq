@@ -90,14 +90,16 @@ defmodule CroniqWeb.TasksControllerTest do
         |> log_in_user(user)
         |> put(~p"/tasks/#{task.id}",
           task: %{
-            name: "new name"
+            name: "new name",
+            headers: %{"Authorization" => "token"}
           }
         )
 
       assert Plug.Conn.get_resp_header(response, "location") == [~p"/tasks/#{task.id}/edit"]
 
       assert %{
-               name: "new name"
+               name: "new name",
+               headers: %{"Authorization" => "token"}
              } = Croniq.Repo.get_by(Croniq.Task, id: task.id) |> Map.from_struct()
     end
 
@@ -109,7 +111,7 @@ defmodule CroniqWeb.TasksControllerTest do
       |> log_in_user(user)
       |> put(~p"/tasks/#{alien_task.id}",
         task: %{
-          name: "new name"
+          name: "new name",
         }
       )
       |> html_response(404)
