@@ -17,9 +17,6 @@ defmodule Croniq.Requests do
 
   def send_request(task_id) do
     task = Repo.get_by!(Task, id: task_id)
-
-    Logger.info("Sending request for task: #{task}")
-
     start_time = System.monotonic_time(:millisecond)
 
     request = %HTTPoison.Request{
@@ -31,6 +28,8 @@ defmodule Croniq.Requests do
 
     http_client = Application.get_env(:croniq, :http_client, Croniq.HttpClient.HTTPoison)
 
+    Logger.info("Sending request for task: #{task.id}")
+
     case http_client.request(request) do
       {:ok, response} ->
         Logger.info(
@@ -38,7 +37,7 @@ defmodule Croniq.Requests do
             [
               "Request for task #{task.id} completed, status_code=#{response.status_code}",
               "response_body=#{response.body}",
-              "response_headers=#{response.headers}"
+              "response_headers=#{headers_str(response.headers)}"
             ],
             " "
           )
