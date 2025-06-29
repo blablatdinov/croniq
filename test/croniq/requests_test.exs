@@ -7,12 +7,10 @@ defmodule Croniq.RequestsTest do
   alias Croniq.RequestLog
   alias Croniq.Accounts.User
 
-  # Убеждаемся, что моки сбрасываются после каждого теста
   setup :verify_on_exit!
 
   describe "send_request/1" do
     setup do
-      # Создаем пользователя для тестов
       user =
         %User{}
         |> User.registration_changeset(%{
@@ -21,7 +19,6 @@ defmodule Croniq.RequestsTest do
         })
         |> Repo.insert!()
 
-      # Создаем тестовую задачу
       task =
         Repo.insert!(%Task{
           user_id: user.id,
@@ -39,8 +36,6 @@ defmodule Croniq.RequestsTest do
     end
 
     test "успешно выполняет HTTP запрос и логирует ответ", %{task: task} do
-      # Мокируем HTTPoison.request для успешного ответа
-      # Заголовки могут приходить в любом порядке, поэтому проверяем каждый отдельно
       expect(Croniq.HttpClientMock, :request, fn request ->
         assert request.method == "POST"
         assert request.url == "https://api.example.com/test"
@@ -57,10 +52,8 @@ defmodule Croniq.RequestsTest do
          }}
       end)
 
-      # Выполняем тест
       assert :ok = Requests.send_request(task.id)
 
-      # Проверяем, что запрос был залогирован
       logs = Repo.all(RequestLog)
       assert length(logs) == 1
 
@@ -78,7 +71,6 @@ defmodule Croniq.RequestsTest do
     end
 
     test "обрабатывает ошибку HTTP запроса и логирует её", %{task: task} do
-      # Мокируем HTTPoison.request для ошибки
       expect(Croniq.HttpClientMock, :request, fn request ->
         assert request.method == "POST"
         assert request.url == "https://api.example.com/test"
@@ -90,10 +82,8 @@ defmodule Croniq.RequestsTest do
         {:error, %HTTPoison.Error{reason: :timeout}}
       end)
 
-      # Выполняем тест
       assert :ok = Requests.send_request(task.id)
 
-      # Проверяем, что ошибка была залогирована
       logs = Repo.all(RequestLog)
       assert length(logs) == 1
 
@@ -119,7 +109,6 @@ defmodule Croniq.RequestsTest do
           retry_count: 0
         })
 
-      # Мокируем HTTPoison.request для успешного ответа
       expect(Croniq.HttpClientMock, :request, fn request ->
         assert request.method == "POST"
         assert request.url == "https://api.example.com/test"
@@ -134,15 +123,12 @@ defmodule Croniq.RequestsTest do
          }}
       end)
 
-      # Выполняем тест
       assert :ok = Requests.send_request(task_without_headers.id)
 
-      # Проверяем результат
       logs = Repo.all(RequestLog)
       log = List.first(logs)
       assert log.request =~ "POST /test HTTP/1.1"
       assert log.request =~ "HOST: api.example.com"
-      # Проверяем, что заголовки пустые
       refute log.request =~ "Content-Type:"
       refute log.request =~ "Authorization:"
     end
@@ -156,13 +142,11 @@ defmodule Croniq.RequestsTest do
           url: "https://api.example.com/test",
           method: "POST",
           headers: %{"Content-Type" => "application/json", "Authorization" => "Basic token"},
-          # Используем пустую строку вместо nil
           body: "",
           status: "active",
           retry_count: 0
         })
 
-      # Мокируем HTTPoison.request для успешного ответа
       expect(Croniq.HttpClientMock, :request, fn request ->
         assert request.method == "POST"
         assert request.url == "https://api.example.com/test"
