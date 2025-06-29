@@ -23,6 +23,11 @@ defmodule CroniqWeb.Router do
     plug :fetch_api_user
   end
 
+  pipeline :admin do
+    plug :require_authenticated_user
+    plug CroniqWeb.Plugs.RequireAdmin
+  end
+
   scope "/", CroniqWeb do
     pipe_through :browser
 
@@ -67,6 +72,15 @@ defmodule CroniqWeb.Router do
     get "/", ApiKeyController, :index
     post "/", ApiKeyController, :create
     delete "/:id", ApiKeyController, :delete
+  end
+
+  scope "/admin", CroniqWeb do
+    pipe_through [:browser, :admin]
+
+    get "/users", AdminController, :users_list
+    get "/users/new", AdminController, :new_user_form
+    post "/users", AdminController, :create_user
+    delete "/users/:id", AdminController, :delete_user
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

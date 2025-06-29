@@ -9,6 +9,7 @@ defmodule Croniq.Accounts do
   alias Croniq.Accounts.User
   alias Croniq.Accounts.UserNotifier
   alias Croniq.Accounts.UserToken
+  import Ecto.Changeset
 
   ## Database getters
 
@@ -79,6 +80,13 @@ defmodule Croniq.Accounts do
   def register_user(attrs) do
     %User{}
     |> User.registration_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def register_admin(attrs) do
+    %User{}
+    |> User.registration_changeset(attrs)
+    |> put_change(:is_admin, true)
     |> Repo.insert()
   end
 
@@ -366,5 +374,54 @@ defmodule Croniq.Accounts do
     else
       _ -> :error
     end
+  end
+
+  @doc """
+  Creates a user by admin (automatically confirmed).
+
+  ## Examples
+
+      iex> create_user_by_admin(%{email: "user@example.com", password: "password123"})
+      {:ok, %User{}}
+
+      iex> create_user_by_admin(%{email: "invalid"})
+      {:error, %Ecto.Changeset{}}
+  """
+  def create_user_by_admin(attrs) do
+    %User{}
+    |> User.admin_registration_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for admin user creation.
+
+  ## Examples
+
+      iex> change_admin_user_registration(user)
+      %Ecto.Changeset{data: %User{}}
+  """
+  def change_admin_user_registration(%User{} = user, attrs \\ %{}) do
+    User.admin_registration_changeset(user, attrs, hash_password: false, validate_email: false)
+  end
+
+  def list_users do
+    Repo.all(User)
+  end
+
+  @doc """
+  Deletes a user.
+
+  ## Examples
+
+      iex> delete_user(user)
+      {:ok, %User{}}
+
+      iex> delete_user(user)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_user(%User{} = user) do
+    Repo.delete(user)
   end
 end
