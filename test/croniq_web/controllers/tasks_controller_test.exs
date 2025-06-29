@@ -170,10 +170,22 @@ defmodule CroniqWeb.TasksControllerTest do
     end
 
     test "Task create form", %{conn: conn, user_token: user_token} do
-      conn
+      html = conn
       |> put_session(:user_token, user_token)
       |> get(~p"/tasks/new")
       |> html_response(200)
+
+      request_body_input = Floki.parse_document!(html)
+      |> Floki.find("[data-test=request-body-input]")
+      [
+        {"textarea",
+          [
+            {"id", id},
+            {"name", name} | _
+          ], _}
+      ] = request_body_input
+      assert id == "task_request_body"
+      assert name == "task[request_body]"
     end
 
     test "Not authorized", %{conn: conn} do
