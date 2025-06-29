@@ -77,7 +77,7 @@ defmodule Croniq.Task do
       |> changeset(attrs)
       |> Repo.update()
 
-    Croniq.Scheduler.update_quantum_job(task)
+    Croniq.Scheduler.update_quantum_job(task.id, attrs["schedule"])
     Logger.info("Quantum job for task record id=#{task.id} updated")
     updated_task
   end
