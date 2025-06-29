@@ -17,7 +17,9 @@
         required
         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
       />
-      <.error :for={msg <- f[:email].errors}>{msg}</.error>
+      <.error :for={msg <- f[:email].errors}>
+        {CroniqWeb.CoreComponents.translate_error(msg)}
+      </.error>
     </div>
     <div>
       <.label for={f[:password].id}>Password*</.label>
@@ -27,7 +29,9 @@
         required
         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
       />
-      <.error :for={msg <- f[:password].errors}>{msg}</.error>
+      <.error :for={msg <- f[:password].errors}>
+        {CroniqWeb.CoreComponents.translate_error(msg)}
+      </.error>
     </div>
     <div>
       <.label for={f[:password_confirmation].id}>Password confirmation*</.label>
@@ -37,7 +41,9 @@
         required
         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
       />
-      <.error :for={msg <- f[:password_confirmation].errors}>{msg}</.error>
+      <.error :for={msg <- f[:password_confirmation].errors}>
+        {CroniqWeb.CoreComponents.translate_error(msg)}
+      </.error>
     </div>
 
     <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">

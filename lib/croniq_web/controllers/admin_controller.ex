@@ -14,7 +14,7 @@ defmodule CroniqWeb.AdminController do
     case Croniq.Accounts.create_user_by_admin(user_params) do
       {:ok, user} ->
         conn
-        |> put_flash(:info, "Пользователь #{user.email} успешно создан и подтвержден.")
+        |> put_flash(:info, "User #{user.email} was successfully created and confirmed.")
         |> redirect(to: ~p"/admin/users")
 
       {:error, changeset} ->
@@ -22,7 +22,7 @@ defmodule CroniqWeb.AdminController do
           conn,
           :new_user_form,
           changeset: changeset,
-          error_message: "Ошибка при создании пользователя"
+          error_message: "Error creating user"
         )
     end
   end
@@ -49,16 +49,22 @@ defmodule CroniqWeb.AdminController do
   def delete_user(conn, %{"id" => id}) do
     user = Croniq.Accounts.get_user!(id)
 
-    case Croniq.Accounts.delete_user(user) do
-      {:ok, _} ->
-        conn
-        |> put_flash(:info, "Пользователь #{user.email} успешно удален.")
-        |> redirect(to: ~p"/admin/users")
+    if user.id == conn.assigns.current_user.id do
+      conn
+      |> put_flash(:error, "You cannot delete yourself.")
+      |> redirect(to: ~p"/admin/users")
+    else
+      case Croniq.Accounts.delete_user(user) do
+        {:ok, _} ->
+          conn
+          |> put_flash(:info, "User #{user.email} was successfully deleted.")
+          |> redirect(to: ~p"/admin/users")
 
-      {:error, _changeset} ->
-        conn
-        |> put_flash(:error, "Ошибка при удалении пользователя.")
-        |> redirect(to: ~p"/admin/users")
+        {:error, _changeset} ->
+          conn
+          |> put_flash(:error, "Error deleting user.")
+          |> redirect(to: ~p"/admin/users")
+      end
     end
   end
 end

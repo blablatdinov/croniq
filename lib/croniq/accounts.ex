@@ -81,8 +81,6 @@ defmodule Croniq.Accounts do
     %User{}
     |> User.registration_changeset(attrs)
     |> Repo.insert()
-
-    # |> IO.inspect(label: "register_user")
   end
 
   def register_admin(attrs) do
@@ -409,5 +407,21 @@ defmodule Croniq.Accounts do
 
   def list_users do
     Repo.all(User)
+  end
+
+  @doc """
+  Deletes a user.
+
+  ## Examples
+
+      iex> delete_user(user)
+      {:ok, %User{}}
+
+      iex> delete_user(user)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_user(%User{} = user) do
+    Repo.delete(user)
   end
 end

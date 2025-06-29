@@ -50,6 +50,21 @@ defmodule CroniqWeb.AdminControllerTest do
       conn = post(conn, "/admin/users", %{user: @valid_attrs})
       assert redirected_to(conn) == "/"
     end
+
+    test "shows error for short password", %{conn: conn, admin: admin} do
+      conn = log_in_user(conn, admin)
+
+      attrs = %{
+        "email" => "shortpass@example.com",
+        "password" => "short",
+        "password_confirmation" => "short"
+      }
+
+      conn = post(conn, "/admin/users", %{user: attrs})
+      html = html_response(conn, 200)
+      assert html =~ "should be at least 12 character(s)"
+      assert html =~ "Create New User"
+    end
   end
 
   describe "self-deletion" do
@@ -63,7 +78,18 @@ defmodule CroniqWeb.AdminControllerTest do
       conn = log_in_user(conn, admin)
       conn = delete(conn, "/admin/users/#{admin.id}")
       assert redirected_to(conn) =~ "/admin/users"
+      IO.inspect(Croniq.Repo.all(User), label: "users")
       assert Accounts.get_user_by_email(admin.email)
+    end
+  end
+
+  describe "user deletion" do
+    test "admin can delete another user", %{conn: conn, admin: admin, user: user} do
+      conn = log_in_user(conn, admin)
+      conn = delete(conn, "/admin/users/#{user.id}")
+      assert redirected_to(conn) =~ "/admin/users"
+      refute Accounts.get_user_by_email(user.email)
+      assert get_flash(conn, :info) =~ "successfully deleted"
     end
   end
 end
