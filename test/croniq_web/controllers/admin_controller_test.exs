@@ -78,7 +78,6 @@ defmodule CroniqWeb.AdminControllerTest do
       conn = log_in_user(conn, admin)
       conn = delete(conn, "/admin/users/#{admin.id}")
       assert redirected_to(conn) =~ "/admin/users"
-      IO.inspect(Croniq.Repo.all(User), label: "users")
       assert Accounts.get_user_by_email(admin.email)
     end
   end
