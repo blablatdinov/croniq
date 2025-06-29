@@ -91,15 +91,15 @@
             placeholder='{"Content-Type": "application/json", "Authorization": "Basic token"}'
           />
         </div>
-        
-<!-- Request Body -->
+        <!-- Request Body -->
         <div>
           <.input
-            field={f[:headers]}
+            field={f[:request_body]}
             type="textarea"
-            label="Headers (JSON)"
+            label="Request Body"
             class="w-full px-3 py-2 border rounded-lg font-mono h-20 focus:ring-2 focus:ring-blue-500"
-            placeholder='{"Content-Type": "application/json"}'
+            placeholder='{"key": "value"}'
+            data-test="request-body-input"
             value={Jason.encode_to_iodata!(f[:headers].value || %{})}
           />
         </div>
