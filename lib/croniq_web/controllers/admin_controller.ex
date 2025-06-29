@@ -5,6 +5,7 @@ defmodule CroniqWeb.AdminController do
 
   defp require_admin(conn, _opts) do
     user = conn.assigns[:current_user]
+
     if user && user.is_admin do
       conn
     else

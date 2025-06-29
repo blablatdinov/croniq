@@ -1,21 +1,42 @@
 <div class="container mx-auto px-4 py-8 max-w-3xl">
   <h1 class="text-2xl font-bold mb-6">Create New User</h1>
 
-  <.form :let={f} for={@changeset} action={~p"/admin/users"} method="post" class="space-y-6 bg-white p-6 rounded-lg shadow-md border border-gray-200">
+  <.form
+    :let={f}
+    for={@changeset}
+    action={~p"/admin/users"}
+    method="post"
+    class="space-y-6 bg-white p-6 rounded-lg shadow-md border border-gray-200"
+  >
     <!-- User fields -->
     <div>
       <.label for={f[:email].id}>Email*</.label>
-      <.input field={f[:email]} type="email" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" />
+      <.input
+        field={f[:email]}
+        type="email"
+        required
+        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+      />
       <.error :for={msg <- f[:email].errors}>{msg}</.error>
     </div>
     <div>
       <.label for={f[:password].id}>Password*</.label>
-      <.input field={f[:password]} type="password" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" />
+      <.input
+        field={f[:password]}
+        type="password"
+        required
+        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+      />
       <.error :for={msg <- f[:password].errors}>{msg}</.error>
     </div>
     <div>
       <.label for={f[:password_confirmation].id}>Password confirmation*</.label>
-      <.input field={f[:password_confirmation]} type="password" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" />
+      <.input
+        field={f[:password_confirmation]}
+        type="password"
+        required
+        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+      />
       <.error :for={msg <- f[:password_confirmation].errors}>{msg}</.error>
     </div>
 
@@ -25,10 +46,13 @@
         The created user will be automatically confirmed and will be able to use all system features immediately.
       </p>
     </div>
-
-    <!-- Buttons -->
+    
+<!-- Buttons -->
     <div class="flex justify-end space-x-4 pt-4">
-      <.link navigate={~p"/admin/users"} class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">
+      <.link
+        navigate={~p"/admin/users"}
+        class="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50"
+      >
         Cancel
       </.link>
       <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
