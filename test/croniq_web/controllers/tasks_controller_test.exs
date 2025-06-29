@@ -209,6 +209,31 @@ defmodule CroniqWeb.TasksControllerTest do
         assert Plug.Conn.get_resp_header(response, "location") == [~p"/users/log_in"]
       end)
     end
+
+    test "create task", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> log_in_user(user)
+        |> post(~p"/tasks",
+          task: %{
+            name: "Test Task",
+            schedule: "* * * * *",
+            url: "https://example.com",
+            method: "POST",
+            headers: %{"Authorization" => "Bearer testtoken"},
+            body: "{\"foo\":\"bar\"}"
+          }
+        )
+
+      assert redirected_to(conn) =~ "/tasks/"
+      assert get_flash(conn, :info) == "Task created successfully!"
+
+      task = Croniq.Repo.get_by!(Croniq.Task, name: "Test Task")
+      assert task.url == "https://example.com"
+      assert task.method == "POST"
+      assert task.headers["Authorization"] == "Bearer testtoken"
+      assert task.body == "{\"foo\":\"bar\"}"
+    end
   end
 
   describe "Test request logs" do
