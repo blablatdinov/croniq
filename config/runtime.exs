@@ -7,6 +7,16 @@ import Config
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 
+registration_enabled =
+  System.get_env("REGISTRATION_ENABLED")
+  |> case do
+    "true" -> true
+    "false" -> false
+    _ -> Application.get_env(:croniq, :registration_enabled, false)
+  end
+
+config :croniq, :registration_enabled, registration_enabled
+
 # ## Using releases
 #
 # If you use `mix release`, you need to explicitly enable the server
