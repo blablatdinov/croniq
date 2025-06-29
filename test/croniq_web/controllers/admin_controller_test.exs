@@ -12,8 +12,8 @@ defmodule CroniqWeb.AdminControllerTest do
   }
 
   setup do
-    admin = user_fixture(%{is_admin: true, email: "admin@example.com"})
-    user = user_fixture(%{is_admin: false, email: "user@example.com"})
+    admin = admin_fixture(%{email: "admin@example.com"})
+    user = user_fixture(%{email: "user@example.com"})
     {:ok, admin: admin, user: user}
   end
 

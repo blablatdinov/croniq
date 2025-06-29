@@ -1,11 +1,11 @@
 <div class="mx-auto max-w-6xl">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">Управление пользователями</h1>
+    <h1 class="text-2xl font-bold">User Management</h1>
     <.link
       navigate={~p"/admin/users/new"}
       class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
     >
-      Создать пользователя
+      Create User
     </.link>
   </div>
 
@@ -29,16 +29,16 @@
                 <div class="text-sm text-gray-500">
                   <%= if user.confirmed_at do %>
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Подтвержден
+                      Confirmed
                     </span>
                   <% else %>
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                      Не подтвержден
+                      Not confirmed
                     </span>
                   <% end %>
                 </div>
                 <div class="text-sm text-gray-500">
-                  Создан: {Calendar.strftime(user.inserted_at, "%d.%m.%Y %H:%M")}
+                  Created: {Calendar.strftime(user.inserted_at, "%d.%m.%Y %H:%M")}
                 </div>
               </div>
             </div>
@@ -47,10 +47,10 @@
                 <.link
                   href={~p"/admin/users/#{user.id}"}
                   method="delete"
-                  data-confirm="Вы уверены, что хотите удалить этого пользователя?"
+                  data-confirm="Are you sure you want to delete this user?"
                   class="text-red-600 hover:text-red-900 text-sm font-medium"
                 >
-                  Удалить
+                  Delete
                 </.link>
               <% end %>
             </div>
@@ -76,16 +76,16 @@
             d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
           />
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">Нет пользователей</h3>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No users</h3>
         <p class="mt-1 text-sm text-gray-500">
-          Начните с создания первого пользователя.
+          Start by creating the first user.
         </p>
         <div class="mt-6">
           <.link
             navigate={~p"/admin/users/new"}
             class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
           >
-            Создать пользователя
+            Create User
           </.link>
         </div>
       </div>

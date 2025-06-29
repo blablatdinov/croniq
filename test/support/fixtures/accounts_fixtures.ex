@@ -23,6 +23,15 @@ defmodule Croniq.AccountsFixtures do
     user
   end
 
+  def admin_fixture(attrs \\ %{}) do
+    {:ok, user} =
+      attrs
+      |> valid_user_attributes()
+      |> Croniq.Accounts.register_admin()
+
+    user
+  end
+
   def confirmed_user_fixture(attrs \\ %{}) do
     user = user_fixture(attrs)
 

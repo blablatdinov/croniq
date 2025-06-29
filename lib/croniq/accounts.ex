@@ -9,6 +9,7 @@ defmodule Croniq.Accounts do
   alias Croniq.Accounts.User
   alias Croniq.Accounts.UserNotifier
   alias Croniq.Accounts.UserToken
+  import Ecto.Changeset
 
   ## Database getters
 
@@ -79,6 +80,15 @@ defmodule Croniq.Accounts do
   def register_user(attrs) do
     %User{}
     |> User.registration_changeset(attrs)
+    |> Repo.insert()
+
+    # |> IO.inspect(label: "register_user")
+  end
+
+  def register_admin(attrs) do
+    %User{}
+    |> User.registration_changeset(attrs)
+    |> put_change(:is_admin, true)
     |> Repo.insert()
   end
 

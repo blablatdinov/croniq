@@ -23,6 +23,11 @@ defmodule CroniqWeb.Router do
     plug :fetch_api_user
   end
 
+  pipeline :admin do
+    plug :require_authenticated_user
+    plug CroniqWeb.Plugs.RequireAdmin
+  end
+
   scope "/", CroniqWeb do
     pipe_through :browser
 
@@ -70,7 +75,7 @@ defmodule CroniqWeb.Router do
   end
 
   scope "/admin", CroniqWeb do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :admin]
 
     get "/users", AdminController, :users_list
     get "/users/new", AdminController, :new_user_form
