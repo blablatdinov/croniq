@@ -15,7 +15,7 @@ defmodule Croniq.Scheduler do
 
   def create_quantum_job(task) do
     parsed_cron = Crontab.CronExpression.Parser.parse!(task.schedule)
-    job_name = String.to_atom("request_by_task_#{task.schedule}")
+    job_name = String.to_atom("request_by_task_#{task.id}")
 
     Croniq.Scheduler.new_job()
     |> Quantum.Job.set_name(job_name)
@@ -26,11 +26,12 @@ defmodule Croniq.Scheduler do
     Croniq.Scheduler.activate_job(job_name)
   end
 
-  def update_quantum_job(task) do
-    parsed_cron = Crontab.CronExpression.Parser.parse!(task.schedule)
-    job_name = String.to_atom("request_by_task_#{task.schedule}")
+  def update_quantum_job(task_id, task_schedule) do
+    parsed_cron = Crontab.CronExpression.Parser.parse!(task_schedule)
+    job_name = String.to_atom("request_by_task_#{task_id}")
 
     Croniq.Scheduler.find_job(job_name)
     |> Quantum.Job.set_schedule(parsed_cron)
+    |> Croniq.Scheduler.add_job()
   end
 end

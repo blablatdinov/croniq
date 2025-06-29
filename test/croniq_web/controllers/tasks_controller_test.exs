@@ -94,7 +94,8 @@ defmodule CroniqWeb.TasksControllerTest do
         |> put(~p"/tasks/#{task.id}",
           task: %{
             name: "new name",
-            headers: %{"Authorization" => "newToken"}
+            headers: %{"Authorization" => "newToken"},
+            schedule: "*/5 * * * *"
           }
         )
 
