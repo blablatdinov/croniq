@@ -71,3 +71,10 @@ jobs:
       run: mix format --check-formatted
     - name: Run credo
       run: mix credo --strict
+    - name: Checking files for compliance with editorconfig
+      run: |
+        VERSION="v3.1.2"
+        curl -O -L -C - https://github.com/editorconfig-checker/editorconfig-checker/releases/download/$VERSION/ec-linux-amd64.tar.gz
+        mkdir ec
+        tar -xzf ec-linux-amd64.tar.gz -C ec
+        git ls-files | xargs ec/bin/ec-linux-amd64 -v

@@ -22,6 +22,7 @@ tasks:
 
   lint:
     cmds:
+      - git ls-files | xargs ec
       - mix format --check-formatted
       - mix credo --strict
 
