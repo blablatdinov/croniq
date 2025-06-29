@@ -23,10 +23,12 @@
     </.form>
 
     <div class="mt-6 pt-6 border-t border-gray-200 text-center space-y-2">
-      <.link href={~p"/users/register"} class="text-gray-600 hover:text-gray-800 text-sm">
-        Create account
-      </.link>
-      <span class="text-gray-400">|</span>
+      <%= if Croniq.FeatureFlags.registration_enabled?() do %>
+        <.link href={~p"/users/register"} class="text-gray-600 hover:text-gray-800 text-sm">
+          Create account
+        </.link>
+        <span class="text-gray-400">|</span>
+      <% end %>
       <.link href={~p"/users/log_in"} class="text-gray-600 hover:text-gray-800 text-sm">
         Log in
       </.link>

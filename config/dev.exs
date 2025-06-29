@@ -10,6 +10,8 @@ config :croniq, Croniq.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+config :croniq, :registration_enabled, false
+
 config :croniq, :recaptcha,
   site_key: System.get_env("RECAPTCHA_SITE_KEY"),
   secret_key: System.get_env("RECAPTCHA_SECRET_KEY"),

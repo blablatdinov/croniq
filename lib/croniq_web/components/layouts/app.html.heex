@@ -69,14 +69,16 @@
                 </.link>
               </li>
             <% else %>
-              <li>
-                <.link
-                  href={~p"/users/register"}
-                  class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-                >
-                  Register
-                </.link>
-              </li>
+              <%= if Croniq.FeatureFlags.registration_enabled?() do %>
+                <li>
+                  <.link
+                    href={~p"/users/register"}
+                    class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+                  >
+                    Register
+                  </.link>
+                </li>
+              <% end %>
               <li>
                 <.link
                   href={~p"/users/log_in"}

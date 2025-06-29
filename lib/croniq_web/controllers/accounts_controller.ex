@@ -9,23 +9,41 @@ defmodule CroniqWeb.AccountsController do
   end
 
   def registration_form(conn, _params) do
-    render(
-      conn,
-      :registration_form,
-      changeset: Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{}),
-      site_key: recaptcha_module().site_key(:v3),
-      error_message: nil
-    )
+    if Croniq.FeatureFlags.registration_enabled?() do
+      render(
+        conn,
+        :registration_form,
+        changeset: Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{}),
+        site_key: recaptcha_module().site_key(:v3),
+        error_message: nil
+      )
+    else
+      conn
+      |> put_flash(
+        :error,
+        "Registration is temporarily unavailable. Please contact the administrator."
+      )
+      |> redirect(to: ~p"/users/log_in")
+    end
   end
 
   def registration(conn, params) do
-    case params do
-      %{"user" => user_params} ->
-        recaptcha_result = verify_recaptcha(params)
-        handle_registration_result(conn, user_params, recaptcha_result)
+    if Croniq.FeatureFlags.registration_enabled?() do
+      case params do
+        %{"user" => user_params} ->
+          recaptcha_result = verify_recaptcha(params)
+          handle_registration_result(conn, user_params, recaptcha_result)
 
-      _ ->
-        render_registration_form(conn, nil, nil)
+        _ ->
+          render_registration_form(conn, nil, nil)
+      end
+    else
+      conn
+      |> put_flash(
+        :error,
+        "Registration is temporarily unavailable. Please contact the administrator."
+      )
+      |> redirect(to: ~p"/users/log_in")
     end
   end
 
