@@ -92,11 +92,27 @@ defmodule Croniq.Requests do
   end
 
   def format_response(response) do
+    body =
+      case Enum.find(response.headers, fn {k, v} ->
+             String.downcase(k) == "content-encoding" and String.downcase(v) == "gzip"
+           end) do
+        nil ->
+          response.body || ""
+
+        _ ->
+          try do
+            decompressed = :zlib.gunzip(response.body)
+            if is_binary(decompressed), do: decompressed, else: response.body || ""
+          rescue
+            _ -> response.body || ""
+          end
+      end
+
     """
     HTTP/1.1 #{response.status_code} #{Plug.Conn.Status.reason_atom(response.status_code)}
     #{headers_str(response.headers)}
 
-    #{response.body || ""}
+    #{body}
     """
     |> String.trim()
   end

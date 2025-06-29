@@ -274,6 +274,41 @@ defmodule Croniq.RequestsTest do
         assert is_nil(log.response)
       end)
     end
+
+    test "обрабатывает gzip-ответ и логирует сжатое тело", %{task: task} do
+      original_body = ~s({"gzipped": true})
+      gzipped_body = :zlib.gzip(original_body)
+
+      expect(Croniq.HttpClientMock, :request, fn request ->
+        assert request.method == "POST"
+        assert request.url == "https://api.example.com/test"
+        assert request.body == ~s({"key": "value"})
+        assert length(request.headers) == 2
+        assert {"Content-Type", "application/json"} in request.headers
+        assert {"Authorization", "Basic token"} in request.headers
+
+        {:ok,
+         %HTTPoison.Response{
+           status_code: 200,
+           body: gzipped_body,
+           headers: [
+             {"Content-Type", "application/json"},
+             {"Content-Encoding", "gzip"}
+           ]
+         }}
+      end)
+
+      assert :ok = Requests.send_request(task.id)
+
+      logs = Repo.all(RequestLog)
+      assert length(logs) == 1
+      log = List.first(logs)
+      assert log.response =~ "HTTP/1.1 200 ok"
+      assert log.response =~ "Content-Encoding: gzip"
+
+      # Проверяем, что в логах хранится уже распакованный текст
+      assert log.response =~ original_body
+    end
   end
 
   describe "private functions" do
