@@ -69,6 +69,15 @@ defmodule CroniqWeb.Router do
     delete "/:id", ApiKeyController, :delete
   end
 
+  scope "/admin", CroniqWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    get "/users", AdminController, :users_list
+    get "/users/new", AdminController, :new_user_form
+    post "/users", AdminController, :create_user
+    delete "/users/:id", AdminController, :delete_user
+  end
+
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:croniq, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put

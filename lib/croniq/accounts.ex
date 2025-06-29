@@ -367,4 +367,37 @@ defmodule Croniq.Accounts do
       _ -> :error
     end
   end
+
+  @doc """
+  Creates a user by admin (automatically confirmed).
+
+  ## Examples
+
+      iex> create_user_by_admin(%{email: "user@example.com", password: "password123"})
+      {:ok, %User{}}
+
+      iex> create_user_by_admin(%{email: "invalid"})
+      {:error, %Ecto.Changeset{}}
+  """
+  def create_user_by_admin(attrs) do
+    %User{}
+    |> User.admin_registration_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for admin user creation.
+
+  ## Examples
+
+      iex> change_admin_user_registration(user)
+      %Ecto.Changeset{data: %User{}}
+  """
+  def change_admin_user_registration(%User{} = user, attrs \\ %{}) do
+    User.admin_registration_changeset(user, attrs, hash_password: false, validate_email: false)
+  end
+
+  def list_users do
+    Repo.all(User)
+  end
 end
