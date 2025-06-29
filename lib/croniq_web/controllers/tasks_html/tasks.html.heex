@@ -73,6 +73,12 @@
           </td>
           <td class="py-2 px-4 border">
             <.link
+              navigate={~p"/tasks/#{task.id}/requests-log"}
+              class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded mr-2 inline-block"
+            >
+              Request Log
+            </.link>
+            <.link
               navigate={~p"/tasks/#{task.id}/edit"}
               class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded mr-2 inline-block"
             >
