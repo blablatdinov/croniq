@@ -14,6 +14,7 @@ defmodule CroniqWeb.AccountsControllerTest do
   end
 
   test "registration form", %{conn: conn} do
+    Application.put_env(:croniq, :registration_enabled, true)
     _response =
       conn
       |> get(~p"/users/register")
@@ -21,6 +22,7 @@ defmodule CroniqWeb.AccountsControllerTest do
   end
 
   test "registration", %{conn: conn} do
+    Application.put_env(:croniq, :registration_enabled, true)
     user_params = %{
       "email" => "test@example.com",
       "password" => "valid_password",
