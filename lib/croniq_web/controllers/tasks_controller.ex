@@ -25,14 +25,29 @@ defmodule CroniqWeb.TasksController do
     end
   end
 
-  def tasks(conn, _params) do
+  def tasks(conn, params) do
+    page = Map.get(params, "page", "1") |> String.to_integer()
+    page_size = Map.get(params, "page_size", "10") |> String.to_integer()
+    user_id = conn.assigns.current_user.id
+
+    base_query = from task in Croniq.Task, where: task.user_id == ^user_id
+    total_tasks = Repo.aggregate(base_query, :count, :id)
+    total_pages = div(total_tasks + page_size - 1, page_size)
+    offset = (page - 1) * page_size
+
+    tasks =
+      base_query
+      |> limit(^page_size)
+      |> offset(^offset)
+      |> Repo.all()
+
     render(conn, :tasks,
-      tasks:
-        Repo.all(
-          from task in Croniq.Task,
-            where: task.user_id == ^conn.assigns.current_user.id
-        ),
-      current_user: conn.assigns.current_user
+      tasks: tasks,
+      current_user: conn.assigns.current_user,
+      page: page,
+      page_size: page_size,
+      total_pages: total_pages,
+      total_tasks: total_tasks
     )
   end
 
