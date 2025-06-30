@@ -3,7 +3,7 @@
     <h1 class="text-2xl font-bold">Cron Tasks</h1>
     <div class="flex items-center gap-4">
       <form method="get" action="/tasks" class="flex items-center gap-2">
-        <label for="page_size" class="text-sm text-gray-700">Показывать по:</label>
+        <label for="page_size" class="text-sm text-gray-700">Show per page:</label>
         <select name="page_size" id="page_size" class="border rounded px-2 pr-8 py-1 text-sm" onchange="this.form.submit()">
           <%= for size <- [5, 10, 20, 50, 100] do %>
             <option value={size} selected={@page_size == size}><%= size %></option>
@@ -112,9 +112,9 @@
 
   <div class="mt-6 flex justify-center items-center gap-2">
     <%= if @page > 1 do %>
-      <.link navigate={~p"/tasks?page=#{@page - 1}&page_size=#{@page_size}"} class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300">Назад</.link>
+      <.link navigate={~p"/tasks?page=#{@page - 1}&page_size=#{@page_size}"} class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300">Prev</.link>
     <% else %>
-      <span class="px-3 py-1 rounded bg-gray-100 text-gray-400 cursor-not-allowed">Назад</span>
+      <span class="px-3 py-1 rounded bg-gray-100 text-gray-400 cursor-not-allowed">Prev</span>
     <% end %>
 
     <% total_pages = @total_pages %>
@@ -162,11 +162,11 @@
     <% end %>
 
     <%= if @page < @total_pages do %>
-      <.link navigate={~p"/tasks?page=#{@page + 1}&page_size=#{@page_size}"} class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300">Вперёд</.link>
+      <.link navigate={~p"/tasks?page=#{@page + 1}&page_size=#{@page_size}"} class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300">Next</.link>
     <% else %>
-      <span class="px-3 py-1 rounded bg-gray-100 text-gray-400 cursor-not-allowed">Вперёд</span>
+      <span class="px-3 py-1 rounded bg-gray-100 text-gray-400 cursor-not-allowed">Next</span>
     <% end %>
 
-    <span class="ml-4 text-gray-500 text-sm">Страница <%= @page %> из <%= @total_pages %> (всего задач: <%= @total_tasks %>)</span>
+    <span class="ml-4 text-gray-500 text-sm">Page <%= @page %> of <%= @total_pages %> (total tasks: <%= @total_tasks %>)</span>
   </div>
 </div>
