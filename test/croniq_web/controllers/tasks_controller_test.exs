@@ -34,7 +34,7 @@ defmodule CroniqWeb.TasksControllerTest do
         Floki.find(parsed, "[data-test=id-cell]")
         |> Enum.at(0)
 
-      assert length(Floki.find(parsed, "[data-test=task-line]")) == 24
+      assert length(Floki.find(parsed, "[data-test=task-line]")) == 10
       assert url == "/tasks/#{Enum.at(tasks, 0).id}/edit"
     end
 
