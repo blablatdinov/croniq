@@ -33,9 +33,11 @@ defmodule CroniqWeb.AccountsController do
         %{"user" => user_params, "g-recaptcha-response" => v2_token} ->
           recaptcha_result = verify_recaptcha(%{"g-recaptcha-response" => v2_token})
           handle_registration_result(conn, user_params, recaptcha_result)
+
         %{"user" => user_params} ->
           recaptcha_result = verify_recaptcha(params)
           handle_registration_result(conn, user_params, recaptcha_result)
+
         _ ->
           render_registration_form(conn, nil, nil)
       end
@@ -84,6 +86,7 @@ defmodule CroniqWeb.AccountsController do
 
   defp handle_registration_result(conn, user_params, {:low_score, score}) do
     Logger.info("low score: #{score}")
+
     render_registration_form(
       conn,
       create_changeset_with_data(user_params),
@@ -109,12 +112,14 @@ defmodule CroniqWeb.AccountsController do
       error_message: error_message,
       changeset: changeset || Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{})
     ]
+
     assigns =
       if opts[:require_v2] do
         Keyword.put(assigns, :site_key_v2, recaptcha_module().site_key(:v2))
       else
         assigns
       end
+
     render(conn, :registration_form, assigns)
   end
 

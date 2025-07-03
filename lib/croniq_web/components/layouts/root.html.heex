@@ -13,7 +13,8 @@
       </script>
     <% end %>
     <%= if Map.get(assigns, :site_key_v2, false) do %>
-      <script src={"https://www.google.com/recaptcha/api.js"} async defer></script>
+      <script src="https://www.google.com/recaptcha/api.js" async defer>
+      </script>
     <% end %>
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>

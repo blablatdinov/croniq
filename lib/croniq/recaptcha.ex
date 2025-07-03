@@ -34,6 +34,7 @@ defmodule Croniq.Recaptcha do
     case HTTPoison.post("https://www.google.com/recaptcha/api/siteverify", body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
         Logger.debug("[reCAPTCHA v3] Response body: #{inspect(response_body)}")
+
         case Jason.decode(response_body) do
           {:ok, %{"success" => true, "score" => score}} when score >= 0.7 ->
             Logger.debug("[reCAPTCHA v3] Success, score: #{score}")
@@ -53,7 +54,10 @@ defmodule Croniq.Recaptcha do
         end
 
       {:ok, %HTTPoison.Response{status_code: code, body: response_body}} ->
-        Logger.error("[reCAPTCHA v3] Unexpected status code: #{code}, body: #{inspect(response_body)}")
+        Logger.error(
+          "[reCAPTCHA v3] Unexpected status code: #{code}, body: #{inspect(response_body)}"
+        )
+
         {:error, "Unexpected status code: #{code}"}
 
       {:error, %HTTPoison.Error{reason: reason}} ->
@@ -72,13 +76,17 @@ defmodule Croniq.Recaptcha do
     case HTTPoison.post("https://www.google.com/recaptcha/api/siteverify", body, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: response_body}} ->
         Logger.debug("[reCAPTCHA v2] Response body: #{inspect(response_body)}")
+
         case Jason.decode(response_body) do
           {:ok, %{"success" => true}} ->
             Logger.debug("[reCAPTCHA v2] Success")
             {:ok, 1.0}
 
           {:ok, %{"success" => false, "error-codes" => error_codes}} ->
-            Logger.error("[reCAPTCHA v2] Verification failed, error codes: #{inspect(error_codes)}")
+            Logger.error(
+              "[reCAPTCHA v2] Verification failed, error codes: #{inspect(error_codes)}"
+            )
+
             {:error, "reCAPTCHA verification failed: #{inspect(error_codes)}"}
 
           {:ok, %{"success" => false}} ->
@@ -91,7 +99,10 @@ defmodule Croniq.Recaptcha do
         end
 
       {:ok, %HTTPoison.Response{status_code: code, body: response_body}} ->
-        Logger.error("[reCAPTCHA v2] Unexpected status code: #{code}, body: #{inspect(response_body)}")
+        Logger.error(
+          "[reCAPTCHA v2] Unexpected status code: #{code}, body: #{inspect(response_body)}"
+        )
+
         {:error, "Unexpected status code: #{code}"}
 
       {:error, %HTTPoison.Error{reason: reason}} ->

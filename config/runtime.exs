@@ -86,7 +86,6 @@ if config_env() == :prod do
     api_key: brevo_api_key
 
   config :swoosh, :api_client, Swoosh.ApiClient.Finch
-
 end
 
 config :croniq, :recaptcha,
