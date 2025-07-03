@@ -103,3 +103,6 @@
     </p>
   </div>
 </div>
+<%= if Map.get(assigns, :site_key_v2, false) do %>
+  <script src={"https://www.google.com/recaptcha/api.js"} async defer></script>
+<% end %>
