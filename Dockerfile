@@ -10,10 +10,11 @@ RUN mix local.hex --force && \
 WORKDIR /app
 
 COPY mix.exs mix.lock ./
-COPY config/config.exs config/prod.exs config/runtime.exs config/
 
 RUN mix deps.get --only prod && \
     mix deps.compile
+
+COPY config/config.exs config/prod.exs config/runtime.exs config/
 
 COPY assets assets
 COPY priv priv

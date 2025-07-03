@@ -30,6 +30,10 @@ defmodule CroniqWeb.AccountsController do
   def registration(conn, params) do
     if Croniq.FeatureFlags.registration_enabled?() do
       case params do
+        %{"user" => user_params, "g-recaptcha-response" => v2_token} ->
+          recaptcha_result = verify_recaptcha(%{"g-recaptcha-response" => v2_token})
+          handle_registration_result(conn, user_params, recaptcha_result)
+
         %{"user" => user_params} ->
           recaptcha_result = verify_recaptcha(params)
           handle_registration_result(conn, user_params, recaptcha_result)
@@ -86,7 +90,8 @@ defmodule CroniqWeb.AccountsController do
     render_registration_form(
       conn,
       create_changeset_with_data(user_params),
-      "Please, resolve captcha"
+      "Please, resolve captcha",
+      require_v2: true
     )
   end
 
@@ -101,14 +106,21 @@ defmodule CroniqWeb.AccountsController do
     })
   end
 
-  defp render_registration_form(conn, changeset, error_message) do
-    render(
-      conn,
-      :registration_form,
+  defp render_registration_form(conn, changeset, error_message, opts \\ []) do
+    assigns = [
       site_key: recaptcha_module().site_key(:v3),
       error_message: error_message,
       changeset: changeset || Croniq.Accounts.change_user_registration(%Croniq.Accounts.User{})
-    )
+    ]
+
+    assigns =
+      if opts[:require_v2] do
+        Keyword.put(assigns, :site_key_v2, recaptcha_module().site_key(:v2))
+      else
+        assigns
+      end
+
+    render(conn, :registration_form, assigns)
   end
 
   def log_in_form(conn, _params) do

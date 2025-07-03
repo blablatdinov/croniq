@@ -42,13 +42,22 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
-grecaptcha.ready(() => {
-  const recaptchaInput = document.getElementById("recaptcha_token")
-  grecaptcha.execute(recaptchaInput.dataset.sitekey, { action: "register" })
-    .then(token => {
-      recaptchaInput.value = token;
+function initRecaptcha() {
+  if (window.grecaptcha && document.getElementById("recaptcha_token")) {
+    console.log('initRecaptcha');
+    grecaptcha.ready(() => {
+      const recaptchaInput = document.getElementById("recaptcha_token")
+      grecaptcha.execute(recaptchaInput.dataset.sitekey, { action: "register" })
+        .then(token => {
+          recaptchaInput.value = token;
+        });
     });
-});
+  } else {
+    console.log('initRecaptcha timeout');
+    setTimeout(initRecaptcha, 100);
+  }
+};
+initRecaptcha();
 
 (() => {
   const wrapper = document.querySelector("#recaptcha-wrapper");
