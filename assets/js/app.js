@@ -44,7 +44,6 @@ window.liveSocket = liveSocket
 
 function initRecaptcha() {
   if (window.grecaptcha && document.getElementById("recaptcha_token")) {
-    console.log('initRecaptcha');
     grecaptcha.ready(() => {
       const recaptchaInput = document.getElementById("recaptcha_token")
       grecaptcha.execute(recaptchaInput.dataset.sitekey, { action: "register" })
@@ -53,7 +52,6 @@ function initRecaptcha() {
         });
     });
   } else {
-    console.log('initRecaptcha timeout');
     setTimeout(initRecaptcha, 100);
   }
 };
@@ -63,7 +61,6 @@ initRecaptcha();
   const wrapper = document.querySelector("#recaptcha-wrapper");
   if (!wrapper) { return };
   if (!document.querySelector(".g-recaptcha")?.hasChildNodes()) {
-    console.log(wrapper.dataset.sitekey);
     grecaptcha.ready(() => {
       grecaptcha.render(wrapper.querySelector(".g-recaptcha"), {
         sitekey: wrapper.dataset.sitekey,
