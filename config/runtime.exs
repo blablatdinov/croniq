@@ -87,10 +87,11 @@ if config_env() == :prod do
 
   config :swoosh, :api_client, Swoosh.ApiClient.Finch
 
-  config :croniq, :recaptcha,
-    site_key: System.get_env("RECAPTCHA_SITE_KEY"),
-    secret_key: System.get_env("RECAPTCHA_SECRET_KEY"),
-    site_key_v2: System.get_env("RECAPTCHA_SITE_KEY_V2"),
-    secret_key_v2: System.get_env("RECAPTCHA_SECRET_KEY_V2"),
-    verify_url: "https://www.google.com/recaptcha/api/siteverify"
 end
+
+config :croniq, :recaptcha,
+  site_key: System.get_env("RECAPTCHA_SITE_KEY"),
+  secret_key: System.get_env("RECAPTCHA_SECRET_KEY"),
+  site_key_v2: System.get_env("RECAPTCHA_SITE_KEY_V2"),
+  secret_key_v2: System.get_env("RECAPTCHA_SECRET_KEY_V2"),
+  verify_url: "https://www.google.com/recaptcha/api/siteverify"
