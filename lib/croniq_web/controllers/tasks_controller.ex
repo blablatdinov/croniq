@@ -30,7 +30,8 @@ defmodule CroniqWeb.TasksController do
       tasks:
         Repo.all(
           from task in Croniq.Task,
-            where: task.user_id == ^conn.assigns.current_user.id
+            where: task.user_id == ^conn.assigns.current_user.id,
+            order_by: [asc: :id]
         ),
       current_user: conn.assigns.current_user
     )
