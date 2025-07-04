@@ -22,7 +22,7 @@ defmodule Croniq.RequestLog do
     field :duration, :integer
     field :error, :string
 
-    timestamps()
+    timestamps(type: :utc_datetime)
   end
 
   def changeset(rq_log, attrs) do

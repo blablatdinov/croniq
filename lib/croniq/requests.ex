@@ -14,46 +14,61 @@ defmodule Croniq.Requests do
   alias Croniq.Repo
   alias Croniq.Task
   require Logger
+  import Ecto.Query
 
   def send_request(task_id) do
     task = Repo.get_by!(Task, id: task_id)
     start_time = System.monotonic_time(:millisecond)
 
-    request = %HTTPoison.Request{
-      method: task.method,
-      url: task.url,
-      body: task.body,
-      headers: Enum.map(task.headers, fn {key, value} -> {to_string(key), to_string(value)} end)
-    }
+    now = DateTime.utc_now()
+    midnight = %{now | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
 
-    http_client = Application.get_env(:croniq, :http_client, Croniq.HttpClient.HTTPoison)
+    count =
+      Croniq.RequestLog
+      |> where([r], r.task_id == ^task_id and r.inserted_at > ^midnight)
+      |> select([r], count(r.id))
+      |> Repo.one()
 
-    Logger.info("Sending request for task: #{task.id}")
+    if count >= 100 do
+      Logger.error("Request limit (100 per day) exceeded for task #{task.id}")
+      :error
+    else
+      request = %HTTPoison.Request{
+        method: task.method,
+        url: task.url,
+        body: task.body,
+        headers: Enum.map(task.headers, fn {key, value} -> {to_string(key), to_string(value)} end)
+      }
 
-    case http_client.request(request) do
-      {:ok, response} ->
-        Logger.info(
-          Enum.join(
-            [
-              "Request for task #{task.id} completed, status_code=#{response.status_code}",
-              "response_body=#{response.body}",
-              "response_headers=#{headers_str(response.headers)}"
-            ],
-            " "
+      http_client = Application.get_env(:croniq, :http_client, Croniq.HttpClient.HTTPoison)
+
+      Logger.info("Sending request for task: #{task.id}")
+
+      case http_client.request(request) do
+        {:ok, response} ->
+          Logger.info(
+            Enum.join(
+              [
+                "Request for task #{task.id} completed, status_code=#{response.status_code}",
+                "response_body=#{response.body}",
+                "response_headers=#{headers_str(response.headers)}"
+              ],
+              " "
+            )
           )
-        )
 
-        duration = System.monotonic_time(:millisecond) - start_time
-        log_successful_response(request, response, duration, task)
+          duration = System.monotonic_time(:millisecond) - start_time
+          log_successful_response(request, response, duration, task)
 
-      {:error, error} ->
-        Logger.error("Request for task #{task.id} failed, error=#{inspect(error)}")
+        {:error, error} ->
+          Logger.error("Request for task #{task.id} failed, error=#{inspect(error)}")
 
-        duration = System.monotonic_time(:millisecond) - start_time
-        log_failed_response(request, error, duration, task)
+          duration = System.monotonic_time(:millisecond) - start_time
+          log_failed_response(request, error, duration, task)
+      end
+
+      :ok
     end
-
-    :ok
   end
 
   def log_successful_response(request, response, duration, task) do
