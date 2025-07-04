@@ -23,14 +23,22 @@ defmodule Croniq.Requests do
     now = DateTime.utc_now()
     midnight = %{now | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
 
+    user_id = task.user_id
+
+    user_task_ids =
+      Task
+      |> where([t], t.user_id == ^user_id)
+      |> select([t], t.id)
+      |> Repo.all()
+
     count =
       Croniq.RequestLog
-      |> where([r], r.task_id == ^task_id and r.inserted_at > ^midnight)
+      |> where([r], r.task_id in ^user_task_ids and r.inserted_at > ^midnight)
       |> select([r], count(r.id))
       |> Repo.one()
 
     if count >= 100 do
-      Logger.error("Request limit (100 per day) exceeded for task #{task.id}")
+      Logger.error("Request limit (100 per day) exceeded for user #{user_id}")
       :error
     else
       request = %HTTPoison.Request{

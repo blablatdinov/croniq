@@ -309,10 +309,26 @@ defmodule Croniq.RequestsTest do
       assert log.response =~ original_body
     end
 
-    test "does not allow more than 100 requests per day", %{task: task} do
+    test "does not allow more than 100 requests per day across all user's tasks", %{user: user, task: task} do
+      # Create a second task for the same user
+      task2 =
+        Repo.insert!(%Task{
+          user_id: user.id,
+          name: "Second Task",
+          schedule: "*/5 * * * *",
+          url: "https://api.example.com/second",
+          method: "POST",
+          headers: %{},
+          body: "",
+          status: "active",
+          retry_count: 0
+        })
+
       now = DateTime.utc_now()
       midnight = %{now | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
-      for _ <- 1..100 do
+
+      # 50 logs for each task
+      for _ <- 1..50 do
         Repo.insert!(%RequestLog{
           task_id: task.id,
           request: "req",
@@ -322,16 +338,43 @@ defmodule Croniq.RequestsTest do
           inserted_at: DateTime.add(midnight, 1, :second),
           updated_at: DateTime.add(midnight, 1, :second)
         })
+        Repo.insert!(%RequestLog{
+          task_id: task2.id,
+          request: "req",
+          response: "resp",
+          duration: 1,
+          error: nil,
+          inserted_at: DateTime.add(midnight, 2, :second),
+          updated_at: DateTime.add(midnight, 2, :second)
+        })
       end
 
+      # 101st request should not pass for either task
       refute_receive {:http_client_called, _}, 10
       assert :error = Requests.send_request(task.id)
+      assert :error = Requests.send_request(task2.id)
     end
 
-    test "allows the 100th request but not the 101st", %{task: task} do
+    test "allows the 100th request but not the 101st across all user's tasks", %{user: user, task: task} do
+      # Create a second task for the same user
+      task2 =
+        Repo.insert!(%Task{
+          user_id: user.id,
+          name: "Second Task",
+          schedule: "*/5 * * * *",
+          url: "https://api.example.com/second",
+          method: "POST",
+          headers: %{},
+          body: "",
+          status: "active",
+          retry_count: 0
+        })
+
       now = DateTime.utc_now()
       midnight = %{now | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
-      for _ <- 1..99 do
+
+      # 99 logs: 60 for task, 39 for task2
+      for _ <- 1..60 do
         Repo.insert!(%RequestLog{
           task_id: task.id,
           request: "req",
@@ -342,23 +385,51 @@ defmodule Croniq.RequestsTest do
           updated_at: DateTime.add(midnight, 1, :second)
         })
       end
+      for _ <- 1..39 do
+        Repo.insert!(%RequestLog{
+          task_id: task2.id,
+          request: "req",
+          response: "resp",
+          duration: 1,
+          error: nil,
+          inserted_at: DateTime.add(midnight, 2, :second),
+          updated_at: DateTime.add(midnight, 2, :second)
+        })
+      end
 
-      expect(Croniq.HttpClientMock, :request, fn _ ->
+      expect(Croniq.HttpClientMock, :request, 1, fn _ ->
         send(self(), {:http_client_called, :ok})
         {:ok, %HTTPoison.Response{status_code: 200, body: "ok", headers: []}}
       end)
       assert :ok = Requests.send_request(task.id)
       assert_received {:http_client_called, :ok}
 
+      # 101st request should not pass for either task
       refute_receive {:http_client_called, _}, 10
       assert :error = Requests.send_request(task.id)
+      assert :error = Requests.send_request(task2.id)
     end
 
-    test "does not count requests from previous days", %{task: task} do
+    test "does not count requests from previous days for all user's tasks", %{user: user, task: task} do
+      # Create a second task for the same user
+      task2 =
+        Repo.insert!(%Task{
+          user_id: user.id,
+          name: "Second Task",
+          schedule: "*/5 * * * *",
+          url: "https://api.example.com/second",
+          method: "POST",
+          headers: %{},
+          body: "",
+          status: "active",
+          retry_count: 0
+        })
+
       now = DateTime.utc_now()
       midnight = %{now | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
       yesterday = DateTime.add(midnight, -60*60*24, :second)
-      for _ <- 1..150 do
+      # 150 logs for yesterday (should not be counted)
+      for _ <- 1..75 do
         Repo.insert!(%RequestLog{
           task_id: task.id,
           request: "req",
@@ -368,13 +439,24 @@ defmodule Croniq.RequestsTest do
           inserted_at: yesterday,
           updated_at: yesterday
         })
+        Repo.insert!(%RequestLog{
+          task_id: task2.id,
+          request: "req",
+          response: "resp",
+          duration: 1,
+          error: nil,
+          inserted_at: yesterday,
+          updated_at: yesterday
+        })
       end
 
-      expect(Croniq.HttpClientMock, :request, fn _ ->
+      expect(Croniq.HttpClientMock, :request, 2, fn _ ->
         send(self(), {:http_client_called, :ok})
         {:ok, %HTTPoison.Response{status_code: 200, body: "ok", headers: []}}
       end)
       assert :ok = Requests.send_request(task.id)
+      assert_received {:http_client_called, :ok}
+      assert :ok = Requests.send_request(task2.id)
       assert_received {:http_client_called, :ok}
     end
   end
