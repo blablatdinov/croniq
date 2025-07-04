@@ -35,7 +35,7 @@ defmodule Croniq.RequestsTest do
       {:ok, %{user: user, task: task}}
     end
 
-    test "успешно выполняет HTTP запрос и логирует ответ", %{task: task} do
+    test "successfully sends HTTP request and logs the response", %{task: task} do
       expect(Croniq.HttpClientMock, :request, fn request ->
         assert request.method == "POST"
         assert request.url == "https://api.example.com/test"
@@ -70,7 +70,7 @@ defmodule Croniq.RequestsTest do
       assert log.response =~ ~s({"success": true})
     end
 
-    test "обрабатывает ошибку HTTP запроса и логирует её", %{task: task} do
+    test "handles HTTP request errors and logs them", %{task: task} do
       expect(Croniq.HttpClientMock, :request, fn request ->
         assert request.method == "POST"
         assert request.url == "https://api.example.com/test"
@@ -95,7 +95,7 @@ defmodule Croniq.RequestsTest do
       assert log.request =~ "POST /test HTTP/1.1"
     end
 
-    test "обрабатывает задачу с пустыми заголовками", %{user: user} do
+    test "handles task with empty headers", %{user: user} do
       task_without_headers =
         Repo.insert!(%Task{
           user_id: user.id,
@@ -133,7 +133,7 @@ defmodule Croniq.RequestsTest do
       refute log.request =~ "Authorization:"
     end
 
-    test "обрабатывает задачу с пустым телом запроса", %{user: user} do
+    test "handles task with empty request body", %{user: user} do
       task_without_body =
         Repo.insert!(%Task{
           user_id: user.id,
@@ -163,18 +163,15 @@ defmodule Croniq.RequestsTest do
          }}
       end)
 
-      # Выполняем тест
       assert :ok = Requests.send_request(task_without_body.id)
 
-      # Проверяем результат
       logs = Repo.all(RequestLog)
       log = List.first(logs)
       assert log.request =~ "POST /test HTTP/1.1"
-      # Проверяем, что тело запроса пустое
       refute log.request =~ ~s({"key": "value"})
     end
 
-    test "правильно форматирует GET запрос", %{user: user} do
+    test "correctly formats GET request", %{user: user} do
       get_task =
         Repo.insert!(%Task{
           user_id: user.id,
@@ -183,13 +180,11 @@ defmodule Croniq.RequestsTest do
           url: "https://api.example.com/test",
           method: "GET",
           headers: %{"Content-Type" => "application/json", "Authorization" => "Basic token"},
-          # Используем пустую строку вместо nil
           body: "",
           status: "active",
           retry_count: 0
         })
 
-      # Мокируем HTTPoison.request для успешного ответа
       expect(Croniq.HttpClientMock, :request, fn request ->
         assert request.method == "GET"
         assert request.url == "https://api.example.com/test"
@@ -206,18 +201,15 @@ defmodule Croniq.RequestsTest do
          }}
       end)
 
-      # Выполняем тест
       assert :ok = Requests.send_request(get_task.id)
 
-      # Проверяем результат
       logs = Repo.all(RequestLog)
       log = List.first(logs)
       assert log.request =~ "GET /test HTTP/1.1"
       assert log.request =~ "HOST: api.example.com"
     end
 
-    test "правильно форматирует ответ с различными статус кодами", %{task: task} do
-      # Мокируем HTTPoison.request для ответа с 404 статусом
+    test "correctly formats response with different status codes", %{task: task} do
       expect(Croniq.HttpClientMock, :request, fn request ->
         assert request.method == "POST"
         assert request.url == "https://api.example.com/test"
@@ -234,17 +226,15 @@ defmodule Croniq.RequestsTest do
          }}
       end)
 
-      # Выполняем тест
       assert :ok = Requests.send_request(task.id)
 
-      # Проверяем результат
       logs = Repo.all(RequestLog)
       log = List.first(logs)
       assert log.response =~ "HTTP/1.1 404 not_found"
       assert log.response =~ ~s({"error": "Not Found"})
     end
 
-    test "обрабатывает различные типы ошибок HTTPoison", %{task: task} do
+    test "handles different HTTPoison error types", %{task: task} do
       errors = [
         %HTTPoison.Error{reason: :timeout},
         %HTTPoison.Error{reason: :econnrefused},
@@ -264,10 +254,8 @@ defmodule Croniq.RequestsTest do
           {:error, error}
         end)
 
-        # Выполняем тест
         assert :ok = Requests.send_request(task.id)
 
-        # Проверяем результат
         logs = Repo.all(RequestLog)
         log = List.last(logs)
         assert log.error == to_string(error.reason)
@@ -275,7 +263,7 @@ defmodule Croniq.RequestsTest do
       end)
     end
 
-    test "обрабатывает gzip-ответ и логирует сжатое тело", %{task: task} do
+    test "handles gzip response and logs compressed body", %{task: task} do
       original_body = ~s({"gzipped": true})
       gzipped_body = :zlib.gzip(original_body)
 
@@ -306,13 +294,170 @@ defmodule Croniq.RequestsTest do
       assert log.response =~ "HTTP/1.1 200 ok"
       assert log.response =~ "Content-Encoding: gzip"
 
-      # Проверяем, что в логах хранится уже распакованный текст
       assert log.response =~ original_body
+    end
+
+    test "does not allow more than 100 requests per day across all user's tasks", %{
+      user: user,
+      task: task
+    } do
+      task2 =
+        Repo.insert!(%Task{
+          user_id: user.id,
+          name: "Second Task",
+          schedule: "*/5 * * * *",
+          url: "https://api.example.com/second",
+          method: "POST",
+          headers: %{},
+          body: "",
+          status: "active",
+          retry_count: 0
+        })
+
+      now = DateTime.utc_now()
+      midnight = %{now | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
+
+      for _ <- 1..50 do
+        Repo.insert!(%RequestLog{
+          task_id: task.id,
+          request: "req",
+          response: "resp",
+          duration: 1,
+          error: nil,
+          inserted_at: DateTime.add(midnight, 1, :second),
+          updated_at: DateTime.add(midnight, 1, :second)
+        })
+
+        Repo.insert!(%RequestLog{
+          task_id: task2.id,
+          request: "req",
+          response: "resp",
+          duration: 1,
+          error: nil,
+          inserted_at: DateTime.add(midnight, 2, :second),
+          updated_at: DateTime.add(midnight, 2, :second)
+        })
+      end
+
+      refute_receive {:http_client_called, _}, 10
+      assert :error = Requests.send_request(task.id)
+      assert :error = Requests.send_request(task2.id)
+    end
+
+    test "allows the 100th request but not the 101st across all user's tasks", %{
+      user: user,
+      task: task
+    } do
+      task2 =
+        Repo.insert!(%Task{
+          user_id: user.id,
+          name: "Second Task",
+          schedule: "*/5 * * * *",
+          url: "https://api.example.com/second",
+          method: "POST",
+          headers: %{},
+          body: "",
+          status: "active",
+          retry_count: 0
+        })
+
+      now = DateTime.utc_now()
+      midnight = %{now | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
+
+      for _ <- 1..60 do
+        Repo.insert!(%RequestLog{
+          task_id: task.id,
+          request: "req",
+          response: "resp",
+          duration: 1,
+          error: nil,
+          inserted_at: DateTime.add(midnight, 1, :second),
+          updated_at: DateTime.add(midnight, 1, :second)
+        })
+      end
+
+      for _ <- 1..39 do
+        Repo.insert!(%RequestLog{
+          task_id: task2.id,
+          request: "req",
+          response: "resp",
+          duration: 1,
+          error: nil,
+          inserted_at: DateTime.add(midnight, 2, :second),
+          updated_at: DateTime.add(midnight, 2, :second)
+        })
+      end
+
+      expect(Croniq.HttpClientMock, :request, 1, fn _ ->
+        send(self(), {:http_client_called, :ok})
+        {:ok, %HTTPoison.Response{status_code: 200, body: "ok", headers: []}}
+      end)
+
+      assert :ok = Requests.send_request(task.id)
+      assert_received {:http_client_called, :ok}
+
+      refute_receive {:http_client_called, _}, 10
+      assert :error = Requests.send_request(task.id)
+      assert :error = Requests.send_request(task2.id)
+    end
+
+    test "does not count requests from previous days for all user's tasks", %{
+      user: user,
+      task: task
+    } do
+      task2 =
+        Repo.insert!(%Task{
+          user_id: user.id,
+          name: "Second Task",
+          schedule: "*/5 * * * *",
+          url: "https://api.example.com/second",
+          method: "POST",
+          headers: %{},
+          body: "",
+          status: "active",
+          retry_count: 0
+        })
+
+      now = DateTime.utc_now()
+      midnight = %{now | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
+      yesterday = DateTime.add(midnight, -60 * 60 * 24, :second)
+
+      for _ <- 1..75 do
+        Repo.insert!(%RequestLog{
+          task_id: task.id,
+          request: "req",
+          response: "resp",
+          duration: 1,
+          error: nil,
+          inserted_at: yesterday,
+          updated_at: yesterday
+        })
+
+        Repo.insert!(%RequestLog{
+          task_id: task2.id,
+          request: "req",
+          response: "resp",
+          duration: 1,
+          error: nil,
+          inserted_at: yesterday,
+          updated_at: yesterday
+        })
+      end
+
+      expect(Croniq.HttpClientMock, :request, 2, fn _ ->
+        send(self(), {:http_client_called, :ok})
+        {:ok, %HTTPoison.Response{status_code: 200, body: "ok", headers: []}}
+      end)
+
+      assert :ok = Requests.send_request(task.id)
+      assert_received {:http_client_called, :ok}
+      assert :ok = Requests.send_request(task2.id)
+      assert_received {:http_client_called, :ok}
     end
   end
 
   describe "private functions" do
-    test "format_request правильно форматирует HTTP запрос" do
+    test "format_request correctly formats HTTP request" do
       request = %HTTPoison.Request{
         method: :POST,
         url: "https://api.example.com/path/to/resource",
@@ -329,7 +474,7 @@ defmodule Croniq.RequestsTest do
       assert formatted =~ ~s({"data": "value"})
     end
 
-    test "format_response правильно форматирует HTTP ответ" do
+    test "format_response correctly formats HTTP response" do
       response = %HTTPoison.Response{
         status_code: 201,
         body: ~s({"id": 123, "status": "created"}),
@@ -338,14 +483,13 @@ defmodule Croniq.RequestsTest do
 
       formatted = Requests.format_response(response)
 
-      # Исправляем регистр
       assert formatted =~ "HTTP/1.1 201 created"
       assert formatted =~ "Content-Type: application/json"
       assert formatted =~ "Location: /api/resource/123"
       assert formatted =~ ~s({"id": 123, "status": "created"})
     end
 
-    test "headers_str правильно форматирует заголовки" do
+    test "headers_str correctly formats headers" do
       headers = [{"Content-Type", "application/json"}, {"Authorization", "Basic token"}]
       formatted = Requests.headers_str(headers)
 
