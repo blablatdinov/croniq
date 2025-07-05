@@ -103,4 +103,33 @@ defmodule Croniq.Accounts.UserNotifier do
     ==============================
     """)
   end
+
+  @doc """
+  Sends an email to the user about exceeding the request limit.
+  """
+  def deliver_limit_exceeded_notification(user) do
+    import Swoosh.Email
+    request_limit = Application.get_env(:croniq, :request_limit_per_day)
+    email =
+      new()
+      |> to(user.email)
+      |> from({"Croniq", "dev@croniq.ilaletdinov.ru"})
+      |> subject("Request Limit Exceeded - Croniq")
+      |> text_body("""
+
+      ==============================
+
+      Hello!
+
+      You have exceeded your daily request limit (#{request_limit} per day) in Croniq. New requests will not be processed until the next day.
+
+      If you need a higher limit, please contact support.
+
+      Best regards,
+      The Croniq Team
+
+      ==============================
+      """)
+    Croniq.Mailer.deliver(email)
+  end
 end
