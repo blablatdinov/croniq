@@ -1,30 +1,26 @@
 defmodule Croniq.LimitNotification do
-  use GenServer
-  @table :limit_notification_sent
-
-  def start_link(_opts \\ []) do
-    GenServer.start_link(__MODULE__, [], name: __MODULE__)
-  end
-
-  @impl true
-  def init(_) do
-    :ets.new(@table, [:named_table, :public, :set, {:read_concurrency, true}])
-    {:ok, %{}}
-  end
+  @prefix "limit_notification_sent"
 
   def notified_today?(user_id) do
-    case :ets.lookup(@table, user_id) do
-      [{^user_id, date}] -> date == Date.utc_today()
+    key = "#{@prefix}:#{user_id}"
+    case Redix.command!(:redix, ["GET", key]) do
+      date when is_binary(date) -> date == Date.to_iso8601(Date.utc_today())
       _ -> false
     end
   end
 
   def mark_notified(user_id) do
-    :ets.insert(@table, {user_id, Date.utc_today()})
+    key = "#{@prefix}:#{user_id}"
+    today = Date.to_iso8601(Date.utc_today())
+    # TTL 1 день
+    Redix.command!(:redix, ["SET", key, today, "EX", "86400"])
     :ok
   end
 
   def clear do
-    :ets.delete_all_objects(@table)
+    # Удалить все ключи с префиксом (для тестов)
+    {:ok, keys} = Redix.command(:redix, ["KEYS", "#{@prefix}:*"])
+    Enum.each(keys, fn key -> Redix.command(:redix, ["DEL", key]) end)
+    :ok
   end
 end

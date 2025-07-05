@@ -93,3 +93,5 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+config :redix, url: System.get_env("REDIS_URL") || "redis://localhost:6379"
