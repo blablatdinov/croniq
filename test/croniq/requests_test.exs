@@ -9,32 +9,32 @@ defmodule Croniq.RequestsTest do
 
   setup :verify_on_exit!
 
+  setup do
+    user =
+      %User{}
+      |> User.registration_changeset(%{
+        email: "test@example.com",
+        password: "password123456"
+      })
+      |> Repo.insert!()
+
+    task =
+      Repo.insert!(%Task{
+        user_id: user.id,
+        name: "Test Task",
+        schedule: "*/5 * * * *",
+        url: "https://api.example.com/test",
+        method: "POST",
+        headers: %{"Content-Type" => "application/json", "Authorization" => "Basic token"},
+        body: ~s({"key": "value"}),
+        status: "active",
+        retry_count: 0
+      })
+
+    {:ok, %{user: user, task: task}}
+  end
+
   describe "send_request/1" do
-    setup do
-      user =
-        %User{}
-        |> User.registration_changeset(%{
-          email: "test@example.com",
-          password: "password123456"
-        })
-        |> Repo.insert!()
-
-      task =
-        Repo.insert!(%Task{
-          user_id: user.id,
-          name: "Test Task",
-          schedule: "*/5 * * * *",
-          url: "https://api.example.com/test",
-          method: "POST",
-          headers: %{"Content-Type" => "application/json", "Authorization" => "Basic token"},
-          body: ~s({"key": "value"}),
-          status: "active",
-          retry_count: 0
-        })
-
-      {:ok, %{user: user, task: task}}
-    end
-
     test "successfully sends HTTP request and logs the response", %{task: task} do
       expect(Croniq.HttpClientMock, :request, fn request ->
         assert request.method == "POST"
@@ -453,6 +453,69 @@ defmodule Croniq.RequestsTest do
       assert_received {:http_client_called, :ok}
       assert :ok = Requests.send_request(task2.id)
       assert_received {:http_client_called, :ok}
+    end
+  end
+
+  describe "limit notification and ETS" do
+    setup %{user: user, task: task} do
+      Croniq.LimitNotification.start_link()
+      :ets.delete_all_objects(:limit_notification_sent)
+
+      # Swoosh.Adapters.Test.flush() больше не существует, просто "прочитаем" все письма
+      receive do
+        {:email, _} -> :ok
+      after
+        10 -> :ok
+      end
+
+      {:ok, %{user: user, task: task}}
+    end
+
+    test "sends email notification on first limit exceed", %{user: user, task: task} do
+      import Swoosh.TestAssertions
+      # Fill the log up to the limit
+      request_limit = Application.get_env(:croniq, :request_limit_per_day)
+
+      for _ <- 1..request_limit do
+        Repo.insert!(%RequestLog{
+          task_id: task.id,
+          request: "req",
+          response: "resp",
+          duration: 1,
+          error: nil,
+          inserted_at: DateTime.truncate(DateTime.utc_now(), :second),
+          updated_at: DateTime.truncate(DateTime.utc_now(), :second)
+        })
+      end
+
+      Requests.send_request(task.id)
+      # :timer.sleep(20)
+      assert_email_sent(fn email ->
+        email.subject =~ "Request Limit Exceeded" and
+          Enum.any?(email.to, fn {_name, addr} -> addr == user.email end)
+      end)
+    end
+
+    test "does not send email twice in the same day", %{user: user, task: task} do
+      import Swoosh.TestAssertions
+      request_limit = Application.get_env(:croniq, :request_limit_per_day)
+
+      for _ <- 1..request_limit do
+        Repo.insert!(%RequestLog{
+          task_id: task.id,
+          request: "req",
+          response: "resp",
+          duration: 1,
+          error: nil,
+          inserted_at: DateTime.truncate(DateTime.utc_now(), :second),
+          updated_at: DateTime.truncate(DateTime.utc_now(), :second)
+        })
+      end
+
+      Requests.send_request(task.id)
+      assert_email_sent()
+      Requests.send_request(task.id)
+      refute_receive {:email, _}, 50
     end
   end
 

@@ -11,6 +11,8 @@ config :croniq,
   ecto_repos: [Croniq.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+config :croniq, :request_limit_per_day, 100
+
 # Configures the endpoint
 config :croniq, CroniqWeb.Endpoint,
   url: [host: "localhost"],

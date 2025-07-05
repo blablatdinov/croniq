@@ -17,6 +17,7 @@ defmodule Croniq.Requests do
   import Ecto.Query
 
   def send_request(task_id) do
+    Croniq.LimitNotification.start_link()
     task = Repo.get_by!(Task, id: task_id)
     start_time = System.monotonic_time(:millisecond)
 
@@ -37,8 +38,17 @@ defmodule Croniq.Requests do
       |> select([r], count(r.id))
       |> Repo.one()
 
-    if count >= 100 do
-      Logger.error("Request limit (100 per day) exceeded for user #{user_id}")
+    request_limit = Application.get_env(:croniq, :request_limit_per_day)
+
+    if count >= request_limit do
+      Logger.error("Request limit (#{request_limit} per day) exceeded for user #{user_id}")
+      user = Croniq.Accounts.get_user!(user_id)
+
+      unless Croniq.LimitNotification.notified_today?(user_id) do
+        Croniq.Accounts.UserNotifier.deliver_limit_exceeded_notification(user)
+        Croniq.LimitNotification.mark_notified(user_id)
+      end
+
       :error
     else
       request = %HTTPoison.Request{
