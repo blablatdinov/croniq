@@ -35,7 +35,6 @@ defmodule Croniq.RequestsTest do
   end
 
   describe "send_request/1" do
-
     test "successfully sends HTTP request and logs the response", %{task: task} do
       expect(Croniq.HttpClientMock, :request, fn request ->
         assert request.method == "POST"
@@ -461,12 +460,14 @@ defmodule Croniq.RequestsTest do
     setup %{user: user, task: task} do
       Croniq.LimitNotification.start_link()
       :ets.delete_all_objects(:limit_notification_sent)
+
       # Swoosh.Adapters.Test.flush() больше не существует, просто "прочитаем" все письма
       receive do
         {:email, _} -> :ok
       after
         10 -> :ok
       end
+
       {:ok, %{user: user, task: task}}
     end
 
@@ -474,6 +475,7 @@ defmodule Croniq.RequestsTest do
       import Swoosh.TestAssertions
       # Fill the log up to the limit
       request_limit = Application.get_env(:croniq, :request_limit_per_day)
+
       for _ <- 1..request_limit do
         Repo.insert!(%RequestLog{
           task_id: task.id,
@@ -490,13 +492,14 @@ defmodule Croniq.RequestsTest do
       # :timer.sleep(20)
       assert_email_sent(fn email ->
         email.subject =~ "Request Limit Exceeded" and
-        Enum.any?(email.to, fn {_name, addr} -> addr == user.email end)
+          Enum.any?(email.to, fn {_name, addr} -> addr == user.email end)
       end)
     end
 
     test "does not send email twice in the same day", %{user: user, task: task} do
       import Swoosh.TestAssertions
       request_limit = Application.get_env(:croniq, :request_limit_per_day)
+
       for _ <- 1..request_limit do
         Repo.insert!(%RequestLog{
           task_id: task.id,
