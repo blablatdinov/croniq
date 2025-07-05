@@ -110,6 +110,7 @@ defmodule Croniq.Accounts.UserNotifier do
   def deliver_limit_exceeded_notification(user) do
     import Swoosh.Email
     request_limit = Application.get_env(:croniq, :request_limit_per_day)
+
     email =
       new()
       |> to(user.email)
@@ -130,6 +131,7 @@ defmodule Croniq.Accounts.UserNotifier do
 
       ==============================
       """)
+
     Croniq.Mailer.deliver(email)
   end
 end
