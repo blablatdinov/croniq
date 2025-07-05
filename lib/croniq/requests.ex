@@ -43,7 +43,7 @@ defmodule Croniq.Requests do
       Logger.error("Request limit (#{request_limit} per day) exceeded for user #{user_id}")
       user = Croniq.Accounts.get_user!(user_id)
       unless Croniq.LimitNotification.notified_today?(user_id) do
-        Croniq.UserNotifier.deliver_limit_exceeded_notification(user)
+        Croniq.Accounts.UserNotifier.deliver_limit_exceeded_notification(user)
         Croniq.LimitNotification.mark_notified(user_id)
       end
       :error
