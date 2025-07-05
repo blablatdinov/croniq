@@ -456,6 +456,58 @@ defmodule Croniq.RequestsTest do
     end
   end
 
+  describe "limit notification and ETS" do
+    setup %{user: user, task: task} do
+      # Clear ETS and Swoosh mailbox before each test
+      :ets.delete_all_objects(:limit_notification_sent)
+      Swoosh.Adapters.Test.flush()
+      {:ok, %{user: user, task: task}}
+    end
+
+    test "sends email notification on first limit exceed", %{user: user, task: task} do
+      # Fill the log up to the limit
+      request_limit = Application.get_env(:croniq, :request_limit_per_day)
+      for _ <- 1..request_limit do
+        Repo.insert!(%RequestLog{
+          task_id: task.id,
+          request: "req",
+          response: "resp",
+          duration: 1,
+          error: nil,
+          inserted_at: DateTime.utc_now(),
+          updated_at: DateTime.utc_now()
+        })
+      end
+
+      assert Swoosh.Adapters.Test.deliveries() == []
+      Requests.send_request(task.id)
+      [email] = Swoosh.Adapters.Test.deliveries()
+      assert email.subject =~ "Request Limit Exceeded"
+      assert Enum.any?(email.to, fn {_name, addr} -> addr == user.email end)
+    end
+
+    test "does not send email twice in the same day", %{user: user, task: task} do
+      request_limit = Application.get_env(:croniq, :request_limit_per_day)
+      for _ <- 1..request_limit do
+        Repo.insert!(%RequestLog{
+          task_id: task.id,
+          request: "req",
+          response: "resp",
+          duration: 1,
+          error: nil,
+          inserted_at: DateTime.utc_now(),
+          updated_at: DateTime.utc_now()
+        })
+      end
+
+      Requests.send_request(task.id)
+      assert length(Swoosh.Adapters.Test.deliveries()) == 1
+
+      Requests.send_request(task.id)
+      assert length(Swoosh.Adapters.Test.deliveries()) == 1
+    end
+  end
+
   describe "private functions" do
     test "format_request correctly formats HTTP request" do
       request = %HTTPoison.Request{
