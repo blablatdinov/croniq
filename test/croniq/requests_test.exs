@@ -9,31 +9,32 @@ defmodule Croniq.RequestsTest do
 
   setup :verify_on_exit!
 
+  setup do
+    user =
+      %User{}
+      |> User.registration_changeset(%{
+        email: "test@example.com",
+        password: "password123456"
+      })
+      |> Repo.insert!()
+
+    task =
+      Repo.insert!(%Task{
+        user_id: user.id,
+        name: "Test Task",
+        schedule: "*/5 * * * *",
+        url: "https://api.example.com/test",
+        method: "POST",
+        headers: %{"Content-Type" => "application/json", "Authorization" => "Basic token"},
+        body: ~s({"key": "value"}),
+        status: "active",
+        retry_count: 0
+      })
+
+    {:ok, %{user: user, task: task}}
+  end
+
   describe "send_request/1" do
-    setup do
-      user =
-        %User{}
-        |> User.registration_changeset(%{
-          email: "test@example.com",
-          password: "password123456"
-        })
-        |> Repo.insert!()
-
-      task =
-        Repo.insert!(%Task{
-          user_id: user.id,
-          name: "Test Task",
-          schedule: "*/5 * * * *",
-          url: "https://api.example.com/test",
-          method: "POST",
-          headers: %{"Content-Type" => "application/json", "Authorization" => "Basic token"},
-          body: ~s({"key": "value"}),
-          status: "active",
-          retry_count: 0
-        })
-
-      {:ok, %{user: user, task: task}}
-    end
 
     test "successfully sends HTTP request and logs the response", %{task: task} do
       expect(Croniq.HttpClientMock, :request, fn request ->
@@ -458,7 +459,6 @@ defmodule Croniq.RequestsTest do
 
   describe "limit notification and ETS" do
     setup %{user: user, task: task} do
-      # Clear ETS and Swoosh mailbox before each test
       :ets.delete_all_objects(:limit_notification_sent)
       Swoosh.Adapters.Test.flush()
       {:ok, %{user: user, task: task}}
