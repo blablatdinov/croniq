@@ -3,6 +3,7 @@ defmodule Croniq.LimitNotification do
 
   def notified_today?(user_id) do
     key = "#{@prefix}:#{user_id}"
+
     case Redix.command!(:redix, ["GET", key]) do
       date when is_binary(date) -> date == Date.to_iso8601(Date.utc_today())
       _ -> false
