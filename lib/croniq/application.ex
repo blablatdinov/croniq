@@ -31,8 +31,8 @@ defmodule Croniq.Application do
       # Start a worker by calling: Croniq.Worker.start_link(arg)
       # {Croniq.Worker, arg},
       Croniq.Scheduler,
-      # Start to serve requests, typically the last entry
-      CroniqWeb.Endpoint
+      CroniqWeb.Endpoint,
+      Croniq.LimitNotification
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
