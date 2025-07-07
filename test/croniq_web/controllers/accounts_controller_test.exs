@@ -42,6 +42,8 @@ defmodule CroniqWeb.AccountsControllerTest do
   test "reset_password_form with invalid token redirects with error", %{conn: conn} do
     conn = get(conn, ~p"/users/reset_password/invalidtoken")
     assert redirected_to(conn) == ~p"/"
-    assert get_flash(conn, :error) == "Reset password link is invalid or it has expired."
+
+    assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+             "Reset password link is invalid or it has expired."
   end
 end

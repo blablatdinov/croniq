@@ -76,13 +76,10 @@ defmodule CroniqWeb.TasksControllerTest do
     test "Task edit form", %{conn: conn, user_token: user_token, user: user} do
       [task] = task_list_for_user(user)
 
-      response =
-        conn
-        |> put_session(:user_token, user_token)
-        |> get(~p"/tasks/#{task.id}/edit")
-        |> html_response(200)
-
-      assert true
+      conn
+      |> put_session(:user_token, user_token)
+      |> get(~p"/tasks/#{task.id}/edit")
+      |> html_response(200)
     end
 
     test "edit task", %{conn: conn, user: user} do
@@ -99,7 +96,7 @@ defmodule CroniqWeb.TasksControllerTest do
           }
         )
 
-      response = html_response(conn, 302)
+      html_response(conn, 302)
 
       updated_form =
         conn
@@ -226,7 +223,7 @@ defmodule CroniqWeb.TasksControllerTest do
         )
 
       assert redirected_to(conn) =~ "/tasks/"
-      assert get_flash(conn, :info) == "Task created successfully!"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) == "Task created successfully!"
 
       task = Croniq.Repo.get_by!(Croniq.Task, name: "Test Task")
       assert task.url == "https://example.com"
