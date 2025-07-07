@@ -87,8 +87,7 @@ if config_env() == :prod do
 
   config :swoosh, :api_client, Swoosh.ApiClient.Finch
 
-  config :redix,
-    url: System.get_env("REDIS_URL") || "redis://localhost:6379", port: 6379
+  config :redix, url: System.get_env("REDIS_URL") || "redis://localhost:6379"
 end
 
 config :croniq, :recaptcha,
