@@ -1,4 +1,8 @@
 defmodule Croniq.LimitNotification do
+  @moduledoc """
+  Stores information about whether a user has been notified about exceeding their request limit today.
+  Uses Redis for storage (keys like limit_notification_sent:<user_id> with 1 day TTL).
+  """
   @prefix "limit_notification_sent"
 
   def notified_today?(user_id) do
