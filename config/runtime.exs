@@ -86,6 +86,8 @@ if config_env() == :prod do
     api_key: brevo_api_key
 
   config :swoosh, :api_client, Swoosh.ApiClient.Finch
+
+  config :redix, url: System.get_env("REDIS_URL") || "redis://localhost:6379"
 end
 
 config :croniq, :recaptcha,
