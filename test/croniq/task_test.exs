@@ -24,7 +24,7 @@ defmodule Croniq.TaskTest do
       "schedule" => new_schedule
     }
 
-    {:ok, updated_task} = Task.update_task(task, attrs)
+    {:ok, _} = Task.update_task(task, attrs)
     job = Croniq.Scheduler.find_job(job_name)
     assert job.schedule == Crontab.CronExpression.Parser.parse!(new_schedule)
   end

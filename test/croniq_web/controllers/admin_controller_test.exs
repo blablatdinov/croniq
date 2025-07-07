@@ -2,7 +2,6 @@ defmodule CroniqWeb.AdminControllerTest do
   use CroniqWeb.ConnCase
 
   alias Croniq.Accounts
-  alias Croniq.Accounts.User
   import Croniq.AccountsFixtures
 
   @valid_attrs %{
@@ -28,7 +27,7 @@ defmodule CroniqWeb.AdminControllerTest do
       conn = log_in_user(conn, user)
       conn = get(conn, "/admin/users")
       assert redirected_to(conn) == "/"
-      assert get_flash(conn, :error) =~ "not authorized"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "not authorized"
     end
 
     test "not logged in cannot access users list", %{conn: conn} do
@@ -88,7 +87,7 @@ defmodule CroniqWeb.AdminControllerTest do
       conn = delete(conn, "/admin/users/#{user.id}")
       assert redirected_to(conn) =~ "/admin/users"
       refute Accounts.get_user_by_email(user.email)
-      assert get_flash(conn, :info) =~ "successfully deleted"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "successfully deleted"
     end
   end
 end

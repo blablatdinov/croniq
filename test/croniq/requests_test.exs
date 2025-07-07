@@ -496,7 +496,7 @@ defmodule Croniq.RequestsTest do
       end)
     end
 
-    test "does not send email twice in the same day", %{user: user, task: task} do
+    test "does not send email twice in the same day", %{task: task} do
       import Swoosh.TestAssertions
       request_limit = Application.get_env(:croniq, :request_limit_per_day)
 

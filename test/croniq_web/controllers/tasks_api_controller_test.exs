@@ -2,10 +2,6 @@ defmodule CroniqWeb.TasksAPIControllerTest do
   use CroniqWeb.ConnCase, async: true
   import Croniq.AccountsFixtures
   import Croniq.TaskFixtures
-  import Ecto.Query
-  alias Croniq.Accounts
-  alias Croniq.Accounts.UserToken
-  alias Croniq.Repo
 
   setup %{conn: conn} do
     user = user_fixture()
