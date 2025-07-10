@@ -103,9 +103,11 @@ curl -X DELETE https://your-croniq-domain.com/api/v1/tasks/TASK_ID \
         All HTTP requests and responses are logged. You can view execution history and details in your dashboard. For advanced users, API access to logs will be available soon.
       </p>
     </div>
-    
+
     <div class="mt-16 bg-white/50 backdrop-blur-sm rounded-xl p-8 max-w-3xl mx-auto border border-gray-200">
-      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Create a One-Time (Delayed) Task via API</h2>
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+        Create a One-Time (Delayed) Task via API
+      </h2>
       <p class="text-gray-700 mb-4">
         You can create a one-time task that will be executed only once at the specified time. Use the following endpoint:
       </p>
@@ -125,7 +127,9 @@ curl -X POST https://your-croniq-domain.com/api/v1/tasks/delayed \
         <li><b>body</b> — request body (optional)</li>
         <li><b>scheduled_at</b> — execution time in ISO8601 format (UTC)</li>
       </ul>
-      <p class="text-gray-700 mb-2">The response will contain the created task. The task will be executed only once at the specified time.</p>
+      <p class="text-gray-700 mb-2">
+        The response will contain the created task. The task will be executed only once at the specified time.
+      </p>
     </div>
     
 <!-- Support -->

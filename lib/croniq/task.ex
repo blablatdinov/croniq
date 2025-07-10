@@ -28,7 +28,8 @@ defmodule Croniq.Task do
     field :body, :string
     field :status, :string
     field :retry_count, :integer
-    field :task_type, :string, default: "recurring"  # "recurring" или "delayed"
+    # "recurring" или "delayed"
+    field :task_type, :string, default: "recurring"
     field :scheduled_at, :utc_datetime
     field :executed_at, :utc_datetime
 
@@ -81,6 +82,7 @@ defmodule Croniq.Task do
             {:error, error} -> [schedule: error]
           end
         end)
+
       _ ->
         changeset
     end
@@ -97,6 +99,7 @@ defmodule Croniq.Task do
             [scheduled_at: "must be in the future"]
           end
         end)
+
       _ ->
         changeset
     end
@@ -141,6 +144,7 @@ defmodule Croniq.Task do
     case %Croniq.Task{} |> Croniq.Task.create_changeset(attrs, user_id) do
       %{valid?: false} = changeset ->
         {:error, changeset}
+
       changeset ->
         task = Repo.insert!(changeset)
         Croniq.Scheduler.create_delayed_job(task)

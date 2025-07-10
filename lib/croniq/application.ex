@@ -48,7 +48,8 @@ defmodule Croniq.Application do
     |> Enum.each(fn task ->
       if Map.get(task, :task_type) == "delayed" do
         if task.status == "active" and is_nil(task.executed_at) do
-          if not is_nil(task.scheduled_at) and DateTime.compare(task.scheduled_at, DateTime.utc_now()) != :gt do
+          if not is_nil(task.scheduled_at) and
+               DateTime.compare(task.scheduled_at, DateTime.utc_now()) != :gt do
             Croniq.Scheduler.execute_delayed_task(task.id)
           else
             Croniq.Scheduler.create_delayed_job(task)

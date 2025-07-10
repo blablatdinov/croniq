@@ -12,6 +12,7 @@ defmodule CroniqWeb.TasksController do
       case get_task_type(task_params) do
         "delayed" ->
           create_delayed_task(conn, task_params)
+
         _ ->
           create_recurring_task(conn, task_params)
       end
@@ -30,8 +31,12 @@ defmodule CroniqWeb.TasksController do
     case Croniq.Task.create_delayed_task(conn.assigns.current_user.id, task_params) do
       {:ok, task} ->
         conn
-        |> put_flash(:info, "Delayed task created successfully! Will execute at #{format_datetime(task.scheduled_at)}")
+        |> put_flash(
+          :info,
+          "Delayed task created successfully! Will execute at #{format_datetime(task.scheduled_at)}"
+        )
         |> redirect(to: ~p"/tasks/#{task.id}/edit")
+
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :new_task, changeset: changeset)
     end
@@ -43,6 +48,7 @@ defmodule CroniqWeb.TasksController do
         conn
         |> put_flash(:info, "Recurring task created successfully!")
         |> redirect(to: ~p"/tasks/#{task.id}/edit")
+
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :new_task, changeset: changeset)
     end

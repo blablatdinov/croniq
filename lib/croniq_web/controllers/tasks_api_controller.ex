@@ -72,6 +72,7 @@ defmodule CroniqWeb.TasksAPIController do
           |> Map.drop([:user, :__meta__])
 
         render(conn, :detail, task: response_task)
+
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
