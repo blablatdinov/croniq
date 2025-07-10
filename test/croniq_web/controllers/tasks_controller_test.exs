@@ -223,7 +223,7 @@ defmodule CroniqWeb.TasksControllerTest do
         )
 
       assert redirected_to(conn) =~ "/tasks/"
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) == "Task created successfully!"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) == "Recurring task created successfully!"
 
       task = Croniq.Repo.get_by!(Croniq.Task, name: "Test Task")
       assert task.url == "https://example.com"

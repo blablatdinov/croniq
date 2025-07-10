@@ -34,4 +34,35 @@ defmodule Croniq.Scheduler do
     |> Quantum.Job.set_schedule(parsed_cron)
     |> Croniq.Scheduler.add_job()
   end
+
+  def create_delayed_job(task) do
+    job_name = String.to_atom("delayed_task_#{task.id}")
+    delay_seconds = DateTime.diff(task.scheduled_at, DateTime.utc_now(), :second)
+    if delay_seconds > 0 do
+      Task.start(fn ->
+        Process.sleep(delay_seconds * 1000)
+        __MODULE__.execute_delayed_task(task.id)
+      end)
+    end
+  end
+
+  def execute_delayed_task(task_id) do
+    case Croniq.Repo.get(Croniq.Task, task_id) do
+      %Croniq.Task{task_type: "delayed", status: "active"} = task ->
+        case Croniq.Requests.send_request(task.id) do
+          {:ok, _} ->
+            task
+            |> Ecto.Changeset.change(%{
+              status: "completed",
+              executed_at: DateTime.utc_now()
+            })
+            |> Croniq.Repo.update()
+            Logger.info("Delayed task #{task.id} executed successfully")
+          {:error, reason} ->
+            Logger.error("Failed to execute delayed task #{task.id}: #{inspect(reason)}")
+        end
+      _ ->
+        Logger.warn("Delayed task #{task_id} not found or already executed")
+    end
+  end
 end

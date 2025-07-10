@@ -63,6 +63,22 @@ defmodule CroniqWeb.TasksAPIController do
     end
   end
 
+  def create_delayed(conn, params) do
+    case Croniq.Task.create_delayed_task(conn.assigns.current_user.id, params) do
+      {:ok, task} ->
+        response_task =
+          task
+          |> Map.from_struct()
+          |> Map.drop([:user, :__meta__])
+
+        render(conn, :detail, task: response_task)
+      {:error, changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json(%{errors: changeset.errors})
+    end
+  end
+
   def edit(conn, params) do
     task = Repo.get_by!(Task, id: params["task_id"], user_id: conn.assigns.current_user.id)
     {:ok, task} = Task.update_task(task, params)
