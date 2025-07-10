@@ -48,7 +48,7 @@ defmodule CroniqWeb.TasksAPIController do
     end
   end
 
-  def create conn, params do
+  def create(conn, params) do
     case Croniq.Task.create_task(conn.assigns.current_user.id, params) do
       {:ok, task} ->
         response_task =
