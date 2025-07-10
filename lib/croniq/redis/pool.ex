@@ -1,4 +1,8 @@
 defmodule Croniq.Redis.Pool do
+  @moduledoc """
+  Redis connection pool based on poolboy for asynchronous access to Redis via Redix.
+  Use Croniq.Redis.Pool.command/1 to execute Redis commands with automatic connection management.
+  """
   @pool_name :redix_pool
 
   def child_spec(_args) do
