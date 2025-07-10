@@ -135,8 +135,10 @@ defmodule Croniq.Task do
         if Map.has_key?(attrs, "scheduled_at") and not is_nil(updated.scheduled_at) do
           Croniq.Scheduler.create_delayed_job(updated)
         end
+
         Logger.info("Delayed task record id=#{updated.id} updated")
         {:ok, updated}
+
       other ->
         other
     end
@@ -160,6 +162,7 @@ defmodule Croniq.Task do
 
   def create_delayed_task(user_id, attrs) do
     attrs = Map.put(attrs, "task_type", "delayed")
+
     case %Croniq.Task{} |> Croniq.Task.create_changeset(attrs, user_id) do
       %{valid?: false} = changeset ->
         {:error, changeset}
