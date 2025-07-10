@@ -28,4 +28,41 @@ defmodule Croniq.TaskTest do
     job = Croniq.Scheduler.find_job(job_name)
     assert job.schedule == Crontab.CronExpression.Parser.parse!(new_schedule)
   end
+
+  test "create_delayed_task creates a valid delayed task" do
+    user = user_fixture()
+    future_time = DateTime.add(DateTime.utc_now(), 3600, :second) |> DateTime.truncate(:second)
+
+    {:ok, task} =
+      Task.create_delayed_task(user.id, %{
+        "name" => "Delayed task",
+        "url" => "https://example.com",
+        "method" => "POST",
+        "headers" => %{},
+        "body" => "",
+        "scheduled_at" => future_time
+      })
+
+    assert task.task_type == "delayed"
+    assert task.scheduled_at == future_time
+    assert task.status == "active"
+    assert is_nil(task.executed_at)
+  end
+
+  test "create_delayed_task fails with past scheduled_at" do
+    user = user_fixture()
+    past_time = DateTime.add(DateTime.utc_now(), -3600, :second) |> DateTime.truncate(:second)
+
+    {:error, changeset} =
+      Task.create_delayed_task(user.id, %{
+        "name" => "Delayed task",
+        "url" => "https://example.com",
+        "method" => "POST",
+        "headers" => %{},
+        "body" => "",
+        "scheduled_at" => past_time
+      })
+
+    assert %{scheduled_at: ["must be in the future"]} = errors_on(changeset)
+  end
 end

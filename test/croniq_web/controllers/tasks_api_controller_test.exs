@@ -307,4 +307,45 @@ defmodule CroniqWeb.TasksAPIControllerTest do
     assert length(results2) == 1
     assert Enum.at(results2, 0)["name"] == "Gamma"
   end
+
+  test "Delayed task create via API", %{conn: conn, user: user, user_token: user_token} do
+    future_time = DateTime.add(DateTime.utc_now(), 3600, :second) |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+
+    response =
+      conn
+      |> put_req_header("authorization", "Basic " <> user_token)
+      |> post(~p"/api/v1/tasks/delayed", %{
+        "name" => "Delayed API task",
+        "url" => "https://example.com",
+        "method" => "POST",
+        "headers" => %{},
+        "body" => "",
+        "scheduled_at" => future_time
+      })
+      |> json_response(200)
+
+    assert response["task_type"] == "delayed"
+    assert response["scheduled_at"] == future_time
+    assert response["status"] == "active"
+  end
+
+  test "Delayed task create via API fails with past scheduled_at", %{conn: conn, user: user, user_token: user_token} do
+    past_time = DateTime.add(DateTime.utc_now(), -3600, :second) |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+
+    response =
+      conn
+      |> put_req_header("authorization", "Basic " <> user_token)
+      |> post(~p"/api/v1/tasks/delayed", %{
+        "name" => "Delayed API task",
+        "url" => "https://example.com",
+        "method" => "POST",
+        "headers" => %{},
+        "body" => "",
+        "scheduled_at" => past_time
+      })
+      |> json_response(422)
+
+    assert %{"errors" => %{"scheduled_at" => [msg]}} = response
+    assert msg == "must be in the future"
+  end
 end
