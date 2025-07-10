@@ -8,15 +8,17 @@ defmodule Croniq.LimitNotification do
 
   defp redis_command_with_retry(command, retries \\ @max_retries)
   defp redis_command_with_retry(_command, 0), do: {:error, :max_retries_exceeded}
+
   defp redis_command_with_retry(command, retries) do
     case Croniq.Redis.Pool.command(command) do
-      {:ok, result} -> {:ok, result}
+      {:ok, result} ->
+        {:ok, result}
+
       {:error, _} ->
         Process.sleep(100)
         redis_command_with_retry(command, retries - 1)
     end
   end
-
 
   def notified_today?(user_id) do
     key = "#{@prefix}:#{user_id}"
@@ -24,8 +26,10 @@ defmodule Croniq.LimitNotification do
     case redis_command_with_retry(["GET", key]) do
       {:ok, date} when is_binary(date) ->
         date == Date.to_iso8601(Date.utc_today())
+
       {:ok, _} ->
         false
+
       {:error, _} ->
         false
     end

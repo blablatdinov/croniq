@@ -32,7 +32,7 @@ defmodule Croniq.Application do
       # {Croniq.Worker, arg},
       Croniq.Scheduler,
       CroniqWeb.Endpoint,
-      Croniq.Redis.Pool,
+      Croniq.Redis.Pool
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
