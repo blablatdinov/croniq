@@ -51,3 +51,5 @@ config :croniq, :recaptcha,
 config :croniq, :recaptcha_module, Croniq.RecaptchaMock
 
 config :croniq, :http_client, Croniq.HttpClientMock
+
+config :redix, url: System.get_env("REDIS_URL") || "redis://localhost:6379"

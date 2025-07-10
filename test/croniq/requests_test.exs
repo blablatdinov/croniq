@@ -458,16 +458,7 @@ defmodule Croniq.RequestsTest do
 
   describe "limit notification and ETS" do
     setup %{user: user, task: task} do
-      Croniq.LimitNotification.start_link()
-      :ets.delete_all_objects(:limit_notification_sent)
-
-      # Swoosh.Adapters.Test.flush() больше не существует, просто "прочитаем" все письма
-      receive do
-        {:email, _} -> :ok
-      after
-        10 -> :ok
-      end
-
+      Croniq.LimitNotification.clear()
       {:ok, %{user: user, task: task}}
     end
 

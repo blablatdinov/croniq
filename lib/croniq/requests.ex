@@ -17,7 +17,6 @@ defmodule Croniq.Requests do
   import Ecto.Query
 
   def send_request(task_id) do
-    Croniq.LimitNotification.start_link()
     task = Repo.get_by!(Task, id: task_id)
     start_time = System.monotonic_time(:millisecond)
 
