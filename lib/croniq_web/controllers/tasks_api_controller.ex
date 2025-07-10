@@ -48,8 +48,23 @@ defmodule CroniqWeb.TasksAPIController do
     end
   end
 
-  def create conn, params do
+  def create(conn, params) do
     case Croniq.Task.create_task(conn.assigns.current_user.id, params) do
+      {:ok, task} ->
+        response_task =
+          task
+          |> Map.from_struct()
+          |> Map.drop([:user, :__meta__])
+
+        render(conn, :detail, task: response_task)
+
+      another ->
+        another
+    end
+  end
+
+  def create_delayed(conn, params) do
+    case Croniq.Task.create_delayed_task(conn.assigns.current_user.id, params) do
       {:ok, task} ->
         response_task =
           task
@@ -73,6 +88,24 @@ defmodule CroniqWeb.TasksAPIController do
       |> Map.drop([:user, :__meta__])
 
     render(conn, :detail, task: response_task)
+  end
+
+  def edit_delayed(conn, %{"task_id" => task_id} = params) do
+    user_id = conn.assigns.current_user.id
+    task = Croniq.Repo.get_by!(Task, id: task_id, user_id: user_id, task_type: "delayed")
+
+    case Task.update_delayed_task(task, params) do
+      {:ok, task} ->
+        response_task =
+          task
+          |> Map.from_struct()
+          |> Map.drop([:user, :__meta__])
+
+        json(conn, response_task)
+
+      another ->
+        another
+    end
   end
 
   def delete(conn, %{"task_id" => task_id}) do

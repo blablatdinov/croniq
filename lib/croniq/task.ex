@@ -28,6 +28,9 @@ defmodule Croniq.Task do
     field :body, :string
     field :status, :string
     field :retry_count, :integer
+    field :task_type, :string, default: "recurring"
+    field :scheduled_at, :utc_datetime
+    field :executed_at, :utc_datetime
 
     timestamps()
   end
@@ -48,27 +51,66 @@ defmodule Croniq.Task do
       :body,
       :status,
       :retry_count,
-      :user_id
+      :user_id,
+      :task_type,
+      :scheduled_at,
+      :task_type,
+      :executed_at
     ])
-    |> validate_required([:name, :schedule, :url])
+    |> validate_required([:name, :url])
     |> put_default(:body, "")
     |> put_default(:status, "active")
     |> put_default(:retry_count, 0)
-    |> validate_change(:schedule, fn :schedule, schedule ->
+    |> validate_task_type()
+    |> validate_schedule_for_recurring()
+    |> validate_scheduled_at_for_delayed()
+    |> put_default(:schedule, "")
+    |> validate_inclusion(:method, ~w(GET POST PUT DELETE))
+  end
+
+  defp validate_task_type(changeset) do
+    validate_inclusion(changeset, :task_type, ~w(recurring delayed))
+  end
+
+  defp validate_schedule_for_recurring(changeset) do
+    if get_field(changeset, :task_type) == "recurring" do
+      changeset
+      |> validate_required([:schedule])
+      |> validate_cron_schedule()
+    else
+      changeset
+    end
+  end
+
+  defp validate_cron_schedule(changeset) do
+    validate_change(changeset, :schedule, fn :schedule, schedule ->
       case Crontab.CronExpression.Parser.parse(schedule) do
         {:ok, _} -> []
         {:error, error} -> [schedule: error]
       end
     end)
-    |> validate_inclusion(:method, ~w(GET POST PUT DELETE))
+  end
+
+  defp validate_scheduled_at_for_delayed(changeset) do
+    if get_field(changeset, :task_type) == "delayed" do
+      changeset
+      |> validate_required([:scheduled_at])
+      |> validate_change(:scheduled_at, fn :scheduled_at, scheduled_at ->
+        cond do
+          is_nil(scheduled_at) -> []
+          DateTime.compare(scheduled_at, DateTime.utc_now()) == :gt -> []
+          true -> [scheduled_at: "must be in the future"]
+        end
+      end)
+    else
+      changeset
+    end
   end
 
   def create_changeset(task, attrs, user_id) do
     task
     |> changeset(attrs)
     |> put_default(:user_id, user_id)
-
-    # |> put_assoc(:user, user)
   end
 
   def update_task(task, attrs) do
@@ -80,6 +122,26 @@ defmodule Croniq.Task do
     Croniq.Scheduler.update_quantum_job(task.id, attrs["schedule"])
     Logger.info("Quantum job for task record id=#{task.id} updated")
     updated_task
+  end
+
+  def update_delayed_task(task, attrs) do
+    updated_task =
+      task
+      |> changeset(attrs)
+      |> Repo.update()
+
+    case updated_task do
+      {:ok, updated} ->
+        if Map.has_key?(attrs, "scheduled_at") and not is_nil(updated.scheduled_at) do
+          Croniq.Scheduler.create_delayed_job(updated)
+        end
+
+        Logger.info("Delayed task record id=#{updated.id} updated")
+        {:ok, updated}
+
+      other ->
+        other
+    end
   end
 
   def create_task(user_id, attrs) do
@@ -94,6 +156,21 @@ defmodule Croniq.Task do
 
         Croniq.Scheduler.activate_job(job_name)
         Logger.info("Quantum job for task record id=#{task.id} created from form input")
+        {:ok, task}
+    end
+  end
+
+  def create_delayed_task(user_id, attrs) do
+    attrs = Map.put(attrs, "task_type", "delayed")
+
+    case %Croniq.Task{} |> Croniq.Task.create_changeset(attrs, user_id) do
+      %{valid?: false} = changeset ->
+        {:error, changeset}
+
+      changeset ->
+        task = Repo.insert!(changeset)
+        Croniq.Scheduler.create_delayed_job(task)
+        Logger.info("Delayed task created with id=#{task.id}, scheduled for #{task.scheduled_at}")
         {:ok, task}
     end
   end

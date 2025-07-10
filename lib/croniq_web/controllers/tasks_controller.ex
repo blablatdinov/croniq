@@ -7,22 +7,55 @@ defmodule CroniqWeb.TasksController do
   import Plug.Conn
   import Phoenix.Controller
 
-  def create conn, %{"task" => task_params} do
+  def create(conn, %{"task" => task_params}) do
     if conn.assigns.current_user.confirmed_at do
-      case Croniq.Task.create_task(conn.assigns.current_user.id, task_params) do
-        {:ok, task} ->
-          conn
-          |> put_flash(:info, "Task created successfully!")
-          |> redirect(to: ~p"/tasks/#{task.id}/edit")
+      case get_task_type(task_params) do
+        "delayed" ->
+          create_delayed_task(conn, task_params)
 
-        {:error, %Ecto.Changeset{} = changeset} ->
-          render(conn, :new_task, changeset: changeset)
+        _ ->
+          create_recurring_task(conn, task_params)
       end
     else
       conn
       |> put_flash(:error, "Please confirm your email address before creating tasks.")
       |> redirect(to: ~p"/tasks")
     end
+  end
+
+  defp get_task_type(%{"task_type" => task_type}), do: task_type
+  defp get_task_type(%{"scheduled_at" => _}), do: "delayed"
+  defp get_task_type(_), do: "recurring"
+
+  defp create_delayed_task(conn, task_params) do
+    case Croniq.Task.create_delayed_task(conn.assigns.current_user.id, task_params) do
+      {:ok, task} ->
+        conn
+        |> put_flash(
+          :info,
+          "Delayed task created successfully! Will execute at #{format_datetime(task.scheduled_at)}"
+        )
+        |> redirect(to: ~p"/tasks/#{task.id}/edit")
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        render(conn, :new_task, changeset: changeset)
+    end
+  end
+
+  defp create_recurring_task(conn, task_params) do
+    case Croniq.Task.create_task(conn.assigns.current_user.id, task_params) do
+      {:ok, task} ->
+        conn
+        |> put_flash(:info, "Recurring task created successfully!")
+        |> redirect(to: ~p"/tasks/#{task.id}/edit")
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        render(conn, :new_task, changeset: changeset)
+    end
+  end
+
+  defp format_datetime(datetime) do
+    Calendar.strftime(datetime, "%Y-%m-%d %H:%M:%S UTC")
   end
 
   def tasks(conn, _params) do

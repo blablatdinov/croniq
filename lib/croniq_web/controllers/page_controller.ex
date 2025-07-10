@@ -33,10 +33,24 @@ defmodule CroniqWeb.PageController do
         pretty: true
       )
 
+    delayed_task_json =
+      Jason.encode!(
+        %{
+          "name" => "One-time task",
+          "url" => "https://example.com",
+          "method" => "POST",
+          "headers" => %{},
+          "body" => "",
+          "scheduled_at" => "2024-07-01T18:00:00Z"
+        },
+        pretty: true
+      )
+
     render(conn, :docs,
       auth_json: auth_json,
       create_task_json: create_task_json,
-      update_task_json: update_task_json
+      update_task_json: update_task_json,
+      delayed_task_json: delayed_task_json
     )
   end
 end
