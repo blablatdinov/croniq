@@ -124,6 +124,24 @@ defmodule Croniq.Task do
     updated_task
   end
 
+  def update_delayed_task(task, attrs) do
+    updated_task =
+      task
+      |> changeset(attrs)
+      |> Repo.update()
+
+    case updated_task do
+      {:ok, updated} ->
+        if Map.has_key?(attrs, "scheduled_at") and not is_nil(updated.scheduled_at) do
+          Croniq.Scheduler.create_delayed_job(updated)
+        end
+        Logger.info("Delayed task record id=#{updated.id} updated")
+        {:ok, updated}
+      other ->
+        other
+    end
+  end
+
   def create_task(user_id, attrs) do
     case %Croniq.Task{} |> Croniq.Task.create_changeset(attrs, user_id) do
       %{valid?: false} = changeset ->

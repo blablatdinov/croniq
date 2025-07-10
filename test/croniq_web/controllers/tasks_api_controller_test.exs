@@ -348,4 +348,34 @@ defmodule CroniqWeb.TasksAPIControllerTest do
     assert %{"errors" => %{"scheduled_at" => [msg]}} = response
     assert msg == "must be in the future"
   end
+
+  test "Delayed task edit via API", %{conn: conn, user: user, user_token: user_token} do
+    future_time = DateTime.add(DateTime.utc_now(), 3600, :second) |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+    {:ok, task} =
+      Croniq.Task.create_delayed_task(user.id, %{
+        "name" => "Delayed API task",
+        "url" => "https://example.com",
+        "method" => "POST",
+        "headers" => %{},
+        "body" => "",
+        "scheduled_at" => future_time,
+        "task_type" => "delayed"
+      })
+
+    new_time = DateTime.add(DateTime.utc_now(), 7200, :second) |> DateTime.truncate(:second) |> DateTime.to_iso8601()
+
+    response =
+      conn
+      |> put_req_header("authorization", "Basic " <> user_token)
+      |> put(~p"/api/v1/tasks/delayed/#{task.id}", %{
+        "name" => "Updated delayed task",
+        "scheduled_at" => new_time,
+        "task_type" => "delayed"
+      })
+      |> json_response(200)
+
+    assert response["name"] == "Updated delayed task"
+    assert response["scheduled_at"] == new_time
+    assert response["task_type"] == "delayed"
+  end
 end
