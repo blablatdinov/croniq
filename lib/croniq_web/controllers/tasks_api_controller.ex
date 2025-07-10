@@ -73,14 +73,12 @@ defmodule CroniqWeb.TasksAPIController do
 
         render(conn, :detail, task: response_task)
 
-      {:error, changeset} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> json(%{errors: changeset.errors})
+      another -> another
     end
   end
 
   def edit(conn, params) do
+    IO.inspect(params)
     task = Repo.get_by!(Task, id: params["task_id"], user_id: conn.assigns.current_user.id)
     {:ok, task} = Task.update_task(task, params)
 

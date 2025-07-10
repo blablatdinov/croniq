@@ -308,7 +308,7 @@ defmodule CroniqWeb.TasksAPIControllerTest do
     assert Enum.at(results2, 0)["name"] == "Gamma"
   end
 
-  test "Delayed task create via API", %{conn: conn, user: user, user_token: user_token} do
+  test "Delayed task create via API", %{conn: conn, user_token: user_token} do
     future_time = DateTime.add(DateTime.utc_now(), 3600, :second) |> DateTime.truncate(:second) |> DateTime.to_iso8601()
 
     response =
@@ -329,7 +329,7 @@ defmodule CroniqWeb.TasksAPIControllerTest do
     assert response["status"] == "active"
   end
 
-  test "Delayed task create via API fails with past scheduled_at", %{conn: conn, user: user, user_token: user_token} do
+  test "Delayed task create via API fails with past scheduled_at", %{conn: conn, user_token: user_token} do
     past_time = DateTime.add(DateTime.utc_now(), -3600, :second) |> DateTime.truncate(:second) |> DateTime.to_iso8601()
 
     response =

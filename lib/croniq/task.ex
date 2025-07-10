@@ -28,7 +28,6 @@ defmodule Croniq.Task do
     field :body, :string
     field :status, :string
     field :retry_count, :integer
-    # "recurring" или "delayed"
     field :task_type, :string, default: "recurring"
     field :scheduled_at, :utc_datetime
     field :executed_at, :utc_datetime
@@ -55,16 +54,17 @@ defmodule Croniq.Task do
       :user_id,
       :task_type,
       :scheduled_at,
+      :task_type,
       :executed_at
     ])
     |> validate_required([:name, :url])
     |> put_default(:body, "")
     |> put_default(:status, "active")
     |> put_default(:retry_count, 0)
-    |> put_default(:task_type, "recurring")
     |> validate_task_type()
     |> validate_schedule_for_recurring()
     |> validate_scheduled_at_for_delayed()
+    |> put_default(:schedule, "")
     |> validate_inclusion(:method, ~w(GET POST PUT DELETE))
   end
 
@@ -111,8 +111,6 @@ defmodule Croniq.Task do
     task
     |> changeset(attrs)
     |> put_default(:user_id, user_id)
-
-    # |> put_assoc(:user, user)
   end
 
   def update_task(task, attrs) do
@@ -143,6 +141,7 @@ defmodule Croniq.Task do
   end
 
   def create_delayed_task(user_id, attrs) do
+    attrs = Map.put(attrs, "task_type", "delayed")
     case %Croniq.Task{} |> Croniq.Task.create_changeset(attrs, user_id) do
       %{valid?: false} = changeset ->
         {:error, changeset}

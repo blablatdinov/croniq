@@ -61,9 +61,9 @@ defmodule CroniqWeb.Router do
 
     get "/", TasksAPIController, :list
     post "/", TasksAPIController, :create
+    put "/:task_id", TasksAPIController, :edit
     post "/delayed", TasksAPIController, :create_delayed
     get "/:task_id", TasksAPIController, :detail
-    put "/:task_id", TasksAPIController, :edit
     delete "/:task_id", TasksAPIController, :delete
   end
 
