@@ -73,35 +73,37 @@ defmodule Croniq.Task do
   end
 
   defp validate_schedule_for_recurring(changeset) do
-    case get_field(changeset, :task_type) do
-      "recurring" ->
-        validate_required(changeset, [:schedule])
-        |> validate_change(:schedule, fn :schedule, schedule ->
-          case Crontab.CronExpression.Parser.parse(schedule) do
-            {:ok, _} -> []
-            {:error, error} -> [schedule: error]
-          end
-        end)
-
-      _ ->
-        changeset
+    if get_field(changeset, :task_type) == "recurring" do
+      changeset
+      |> validate_required([:schedule])
+      |> validate_cron_schedule()
+    else
+      changeset
     end
   end
 
-  defp validate_scheduled_at_for_delayed(changeset) do
-    case get_field(changeset, :task_type) do
-      "delayed" ->
-        validate_required(changeset, [:scheduled_at])
-        |> validate_change(:scheduled_at, fn :scheduled_at, scheduled_at ->
-          if is_nil(scheduled_at) or DateTime.compare(scheduled_at, DateTime.utc_now()) == :gt do
-            []
-          else
-            [scheduled_at: "must be in the future"]
-          end
-        end)
+  defp validate_cron_schedule(changeset) do
+    validate_change(changeset, :schedule, fn :schedule, schedule ->
+      case Crontab.CronExpression.Parser.parse(schedule) do
+        {:ok, _} -> []
+        {:error, error} -> [schedule: error]
+      end
+    end)
+  end
 
-      _ ->
-        changeset
+  defp validate_scheduled_at_for_delayed(changeset) do
+    if get_field(changeset, :task_type) == "delayed" do
+      changeset
+      |> validate_required([:scheduled_at])
+      |> validate_change(:scheduled_at, fn :scheduled_at, scheduled_at ->
+        cond do
+          is_nil(scheduled_at) -> []
+          DateTime.compare(scheduled_at, DateTime.utc_now()) == :gt -> []
+          true -> [scheduled_at: "must be in the future"]
+        end
+      end)
+    else
+      changeset
     end
   end
 

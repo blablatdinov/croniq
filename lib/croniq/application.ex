@@ -45,22 +45,35 @@ defmodule Croniq.Application do
 
   defp load_job_from_db do
     Croniq.Repo.all(Croniq.Task)
-    |> Enum.each(fn task ->
-      if Map.get(task, :task_type) == "delayed" do
-        if task.status == "active" and is_nil(task.executed_at) do
-          if not is_nil(task.scheduled_at) and
-               DateTime.compare(task.scheduled_at, DateTime.utc_now()) != :gt do
-            Croniq.Scheduler.execute_delayed_task(task.id)
-          else
-            Croniq.Scheduler.create_delayed_job(task)
-          end
-        end
-      else
-        # Обычные cron-задачи
-        Croniq.Scheduler.create_quantum_job(task)
-        Logger.info("Quantum job for task record id=#{task.id} created from DB on start")
-      end
-    end)
+    |> Enum.each(&start_task_on_boot/1)
+  end
+
+  defp start_task_on_boot(
+         %{
+           task_type: "delayed",
+           status: "active",
+           executed_at: nil,
+           scheduled_at: scheduled_at,
+           id: id
+         } = task
+       ) do
+    cond do
+      is_nil(scheduled_at) ->
+        :noop
+
+      DateTime.compare(scheduled_at, DateTime.utc_now()) != :gt ->
+        Croniq.Scheduler.execute_delayed_task(id)
+
+      true ->
+        Croniq.Scheduler.create_delayed_job(task)
+    end
+  end
+
+  defp start_task_on_boot(%{task_type: "delayed"}), do: :noop
+
+  defp start_task_on_boot(task) do
+    Croniq.Scheduler.create_quantum_job(task)
+    Logger.info("Quantum job for task record id=#{task.id} created from DB on start")
   end
 
   # Tell Phoenix to update the endpoint configuration
