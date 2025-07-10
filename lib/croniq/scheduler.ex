@@ -12,6 +12,7 @@ defmodule Croniq.Scheduler do
   and maintains runtime consistency.
   """
   use Quantum, otp_app: :croniq_scheduler
+  require Logger
 
   def create_quantum_job(task) do
     parsed_cron = Crontab.CronExpression.Parser.parse!(task.schedule)
@@ -36,7 +37,6 @@ defmodule Croniq.Scheduler do
   end
 
   def create_delayed_job(task) do
-    job_name = String.to_atom("delayed_task_#{task.id}")
     delay_seconds = DateTime.diff(task.scheduled_at, DateTime.utc_now(), :second)
 
     if delay_seconds > 0 do
@@ -50,23 +50,23 @@ defmodule Croniq.Scheduler do
   def execute_delayed_task(task_id) do
     case Croniq.Repo.get(Croniq.Task, task_id) do
       %Croniq.Task{task_type: "delayed", status: "active"} = task ->
-        case Croniq.Requests.send_request(task.id) do
-          {:ok, _} ->
-            task
-            |> Ecto.Changeset.change(%{
-              status: "completed",
-              executed_at: DateTime.utc_now()
-            })
-            |> Croniq.Repo.update()
+        result = Croniq.Requests.send_request(task.id)
 
-            Logger.info("Delayed task #{task.id} executed successfully")
+        if result == :ok do
+          task
+          |> Ecto.Changeset.change(%{
+            status: "completed",
+            executed_at: DateTime.utc_now()
+          })
+          |> Croniq.Repo.update()
 
-          {:error, reason} ->
-            Logger.error("Failed to execute delayed task #{task.id}: #{inspect(reason)}")
+          Logger.info("Delayed task #{task.id} executed successfully")
+        else
+          Logger.error("Failed to execute delayed task #{task.id}: #{inspect(result)}")
         end
 
       _ ->
-        Logger.warn("Delayed task #{task_id} not found or already executed")
+        Logger.warning("Delayed task #{task_id} not found or already executed")
     end
   end
 end
