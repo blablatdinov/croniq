@@ -233,6 +233,50 @@ defmodule CroniqWeb.TasksControllerTest do
       assert task.headers["Authorization"] == "Bearer testtoken"
       assert task.body == "{\"foo\":\"bar\"}"
     end
+
+    test "create task with status", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> log_in_user(user)
+        |> post(~p"/tasks",
+          task: %{
+            name: "Test Task 2",
+            schedule: "* * * * *",
+            url: "https://example.com",
+            method: "POST",
+            headers: %{"Authorization" => "Bearer testtoken2"},
+            body: "{\"foo\":\"bar\"}",
+            status: "disabled"
+          }
+        )
+
+      assert redirected_to(conn) =~ "/tasks/"
+
+      task = Croniq.Repo.get_by!(Croniq.Task, name: "Test Task 2")
+      assert task.status == "disabled"
+    end
+
+    test "edit task status", %{conn: conn, user: user} do
+      [task] = task_list_for_user(user)
+
+      conn =
+        conn
+        |> log_in_user(user)
+        |> put(~p"/tasks/#{task.id}",
+          task: %{
+            name: "edited name",
+            headers: %{"Authorization" => "editedToken"},
+            schedule: "*/5 * * * *",
+            status: "disabled"
+          }
+        )
+
+      html_response(conn, 302)
+
+      updated_task = Croniq.Repo.get_by!(Croniq.Task, id: task.id)
+      assert updated_task.status == "disabled"
+      assert updated_task.name == "edited name"
+    end
   end
 
   describe "Test request logs" do
