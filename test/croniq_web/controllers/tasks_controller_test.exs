@@ -103,15 +103,6 @@ defmodule CroniqWeb.TasksControllerTest do
         |> get(~p"/tasks/#{task.id}/edit")
         |> html_response(200)
 
-      elem =
-        Floki.parse_document!(updated_form)
-        |> Floki.find("[data-test=task-headers] textarea")
-
-      [{"textarea", [_, _, _, _, {"placeholder", placeholder}], _}] = elem
-
-      assert placeholder ==
-               "{\"Authorization\":\"newToken\"}"
-
       assert Plug.Conn.get_resp_header(conn, "location") == [~p"/tasks/#{task.id}/edit"]
 
       assert %{
@@ -120,7 +111,6 @@ defmodule CroniqWeb.TasksControllerTest do
              } = Croniq.Repo.get_by(Croniq.Task, id: task.id) |> Map.from_struct()
     end
 
-    @tag :skip
     test "edit task contain schedule", %{conn: conn, user: user} do
       [task] = task_list_for_user(user)
 
@@ -146,10 +136,43 @@ defmodule CroniqWeb.TasksControllerTest do
         Floki.parse_document!(updated_form)
         |> Floki.find("[data-test=schedule-input]")
 
-      [{"input", [_, _, _, {"value", input_value}, _, _, _, _, _], _}] = elem
+      [{"input", attrs, _}] = elem
+      input_value = Enum.into(attrs, %{})["value"]
 
       assert input_value ==
                "*/5 * * * *"
+    end
+
+    test "edit task contain headers", %{conn: conn, user: user} do
+      [task] = task_list_for_user(user)
+
+      conn =
+        conn
+        |> log_in_user(user)
+        |> put(~p"/tasks/#{task.id}",
+          task: %{
+            name: "new name",
+            headers: %{"MyHeader" => "MyValue"},
+            schedule: "*/5 * * * *"
+          }
+        )
+
+      html_response(conn, 302)
+
+      updated_form =
+        conn
+        |> get(~p"/tasks/#{task.id}/edit")
+        |> html_response(200)
+
+      elem =
+        Floki.parse_document!(updated_form)
+        |> Floki.find("[data-test=headers-input]")
+
+      [{"textarea", _attrs, [input_value]}] = elem
+      input_value = input_value |> String.trim() |> Floki.parse_fragment!() |> Floki.text()
+
+      assert input_value ==
+               "{\"MyHeader\":\"MyValue\"}"
     end
 
     test "edit alien task", %{conn: conn, user: user} do

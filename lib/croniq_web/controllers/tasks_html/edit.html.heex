@@ -76,10 +76,6 @@
           <.input
             field={f[:headers]}
             type="textarea"
-            class="w-full px-3 py-2 border rounded-lg font-mono h-20 focus:ring-2 focus:ring-blue-500"
-            placeholder={
-              if is_map(@task.headers), do: Jason.encode!(@task.headers), else: @task.headers
-            }
             value={
               cond do
                 is_map(f[:headers].value) ->
@@ -91,6 +87,11 @@
                 true ->
                   f[:headers].value
               end
+            }
+            class="w-full px-3 py-2 border rounded-lg font-mono h-20 focus:ring-2 focus:ring-blue-500"
+            data-test="headers-input"
+            placeholder={
+              if is_map(@task.headers), do: Jason.encode!(@task.headers), else: @task.headers
             }
           />
         </div>
