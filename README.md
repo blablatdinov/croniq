@@ -1,4 +1,4 @@
-# Croniq <img src="priv/static/images/logo.svg" alt="Croniq Logo" height="32"/>
+# Croniq
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/blablatdinov/croniq/pr-check.yml?branch=master)](https://github.com/yourusername/blablatdinov/croniq)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -17,13 +17,29 @@ _A modern, open-source job scheduler built with Elixir and Phoenix_
 
 ---
 
-## 🖥️ Demo
+**Live demo:** [croniq.ilaletdinov.ru](https://croniq.ilaletdinov.ru)
 
-https://croniq.ilaletdinov.ru
+The Croniq web interface allows you to manage scheduled jobs through a modern dashboard:
 
-![UI Screenshot 1](docs/images/screen_task_list.png)
-![UI Screenshot 2](docs/images/screen_create_task.png)
-![UI Screenshot 3](docs/images/screen_request_log.png)
+<table>
+  <tr>
+    <td align="center">
+      <img src="docs/images/screen_task_list.png" alt="Task List" width="350"/><br/>
+      <b>Task List</b><br/>
+      View all jobs, their statuses, and schedules
+    </td>
+    <td align="center">
+      <img src="docs/images/screen_create_task.png" alt="Create Task" width="350"/><br/>
+      <b>Create Task</b><br/>
+      Convenient form for creating a new job
+    </td>
+    <td align="center">
+      <img src="docs/images/screen_request_log.png" alt="Request Log" width="350"/><br/>
+      <b>Request Log</b><br/>
+      Execution history and HTTP request logs
+    </td>
+  </tr>
+</table>
 
 ---
 
