@@ -161,7 +161,7 @@ defmodule CroniqWeb.TasksControllerTest do
         |> put(~p"/tasks/#{task.id}",
           task: %{
             name: "new name",
-            headers: %{"Authorization" => "newToken"},
+            headers: %{"MyHeader" => "MyValue"},
             schedule: "*/5 * * * *"
           }
         )
@@ -177,11 +177,11 @@ defmodule CroniqWeb.TasksControllerTest do
         Floki.parse_document!(updated_form)
         |> Floki.find("[data-test=headers-input]")
 
-      [{"textarea", attrs, _}] = elem
-      input_value = Enum.into(attrs, %{})["value"]
+      [{"textarea", _attrs, [input_value]}] = elem
+      input_value = input_value |> String.trim() |> Floki.parse_fragment!() |> Floki.text()
 
       assert input_value ==
-               "{\"Authorization\":\"newToken\"}"
+               "{\"MyHeader\":\"MyValue\"}"
     end
 
     test "edit alien task", %{conn: conn, user: user} do
