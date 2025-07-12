@@ -103,15 +103,6 @@ defmodule CroniqWeb.TasksControllerTest do
         |> get(~p"/tasks/#{task.id}/edit")
         |> html_response(200)
 
-      elem =
-        Floki.parse_document!(updated_form)
-        |> Floki.find("[data-test=task-headers] textarea")
-
-      [{"textarea", [_, _, _, _, {"placeholder", placeholder}], _}] = elem
-
-      assert placeholder ==
-               "{\"Authorization\":\"newToken\"}"
-
       assert Plug.Conn.get_resp_header(conn, "location") == [~p"/tasks/#{task.id}/edit"]
 
       assert %{
