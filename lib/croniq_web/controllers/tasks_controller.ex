@@ -89,7 +89,9 @@ defmodule CroniqWeb.TasksController do
   def edit_form(conn, %{"task_id" => task_id}) do
     case user_task(task_id, conn.assigns.current_user.id) do
       task = %Croniq.Task{} ->
-        changeset = Task.changeset(task, %{"headers" => task.headers})
+        changeset =
+          Task.changeset(task, %{"headers" => task.headers, "schedule" => task.schedule})
+
         render(conn, :edit, task: task, changeset: changeset)
 
       _ ->

@@ -16,8 +16,18 @@ defmodule Croniq.Requests do
   require Logger
   import Ecto.Query
 
-  def send_request(task_id) do
-    task = Repo.get_by!(Task, id: task_id)
+  def send_request(task_id) when is_integer(task_id) do
+    case Repo.get_by(Task, id: task_id, status: "active") do
+      nil ->
+        Logger.error("Task #{task_id} is not active")
+        :ok
+
+      task ->
+        send_request(task)
+    end
+  end
+
+  def send_request(task) do
     start_time = System.monotonic_time(:millisecond)
 
     now = DateTime.utc_now()

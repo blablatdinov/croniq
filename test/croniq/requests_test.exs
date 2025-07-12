@@ -454,6 +454,23 @@ defmodule Croniq.RequestsTest do
       assert :ok = Requests.send_request(task2.id)
       assert_received {:http_client_called, :ok}
     end
+
+    test "does not send request if task is disabled", %{user: user} do
+      task =
+        Repo.insert!(%Task{
+          user_id: user.id,
+          name: "Disabled Task",
+          schedule: "* * * * *",
+          url: "https://example.com",
+          method: "POST",
+          headers: %{},
+          body: "",
+          status: "disabled",
+          retry_count: 0
+        })
+
+      assert :ok = Requests.send_request(task.id)
+    end
   end
 
   describe "limit notification and ETS" do
