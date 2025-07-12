@@ -78,10 +78,14 @@
             type="textarea"
             value={
               cond do
-                is_map(f[:headers].value) -> Jason.encode!(f[:headers].value)
+                is_map(f[:headers].value) ->
+                  Jason.encode!(f[:headers].value)
+
                 is_nil(f[:headers].value) or f[:headers].value == "" ->
                   if is_map(@task.headers), do: Jason.encode!(@task.headers), else: @task.headers
-                true -> f[:headers].value
+
+                true ->
+                  f[:headers].value
               end
             }
             class="w-full px-3 py-2 border rounded-lg font-mono h-20 focus:ring-2 focus:ring-blue-500"
