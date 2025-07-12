@@ -146,8 +146,6 @@ defmodule CroniqWeb.TasksControllerTest do
         Floki.parse_document!(updated_form)
         |> Floki.find("[data-test=schedule-input]")
 
-      IO.inspect(elem)
-
       [{"input", [_, _, _, {"value", input_value}, _, _, _, _, _], _}] = elem
 
       assert input_value ==
