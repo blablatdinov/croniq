@@ -2,6 +2,8 @@
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/blablatdinov/croniq/pr-check.yml?branch=master)](https://github.com/yourusername/blablatdinov/croniq)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Lines of code](https://tokei.rs/b1/github/blablatdinov/croniq)](https://github.com/XAMPPRocky/tokei_rs)
+[![Hits-of-Code](https://hitsofcode.com/github/blablatdinov/croniq)](https://hitsofcode.com/github/blablatdinov/croniq/view)
 
 _A modern, open-source job scheduler built with Elixir and Phoenix_
 
