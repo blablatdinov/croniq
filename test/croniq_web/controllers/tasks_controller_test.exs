@@ -152,6 +152,38 @@ defmodule CroniqWeb.TasksControllerTest do
                "*/5 * * * *"
     end
 
+    test "edit task contain headers", %{conn: conn, user: user} do
+      [task] = task_list_for_user(user)
+
+      conn =
+        conn
+        |> log_in_user(user)
+        |> put(~p"/tasks/#{task.id}",
+          task: %{
+            name: "new name",
+            headers: %{"Authorization" => "newToken"},
+            schedule: "*/5 * * * *"
+          }
+        )
+
+      html_response(conn, 302)
+
+      updated_form =
+        conn
+        |> get(~p"/tasks/#{task.id}/edit")
+        |> html_response(200)
+
+      elem =
+        Floki.parse_document!(updated_form)
+        |> Floki.find("[data-test=headers-input]")
+
+      [{"textarea", attrs, _}] = elem
+      input_value = Enum.into(attrs, %{})["value"]
+
+      assert input_value ==
+               "{\"Authorization\":\"newToken\"}"
+    end
+
     test "edit alien task", %{conn: conn, user: user} do
       alien_user = user_fixture()
       [alien_task] = task_list_for_user(alien_user)
