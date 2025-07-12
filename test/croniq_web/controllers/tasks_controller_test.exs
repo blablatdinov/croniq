@@ -120,7 +120,6 @@ defmodule CroniqWeb.TasksControllerTest do
              } = Croniq.Repo.get_by(Croniq.Task, id: task.id) |> Map.from_struct()
     end
 
-    @tag :skip
     test "edit task contain schedule", %{conn: conn, user: user} do
       [task] = task_list_for_user(user)
 
@@ -146,7 +145,8 @@ defmodule CroniqWeb.TasksControllerTest do
         Floki.parse_document!(updated_form)
         |> Floki.find("[data-test=schedule-input]")
 
-      [{"input", [_, _, _, {"value", input_value}, _, _, _, _, _], _}] = elem
+      [{"input", attrs, _}] = elem
+      input_value = Enum.into(attrs, %{})["value"]
 
       assert input_value ==
                "*/5 * * * *"
