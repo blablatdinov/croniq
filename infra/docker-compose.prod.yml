@@ -3,13 +3,24 @@ services:
   croniq:
     image: blablatdinov/croniq:${TAG_NAME}
     command: bin/croniq start
-    restart: always
     ports:
       - 4010:4010
-    environment:
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4010/"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    secrets:
       DATABASE_URL: ${DATABASE_URL}
       DOMAIN: ${DOMAIN}
-      PHX_SERVER: true
+      PHX_SERVER: 'true'
       PHX_HOST: ${PHX_HOST}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       PORT: 4010
