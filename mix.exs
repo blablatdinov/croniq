@@ -57,7 +57,7 @@ defmodule Croniq.MixProject do
       {:bcrypt_elixir, "== 3.3.2"},
       {:guardian, "== 2.3.2"},
       {:quantum, "== 3.5.3"},
-      {:crontab, "== 1.1.14"},
+      {:crontab, "== 1.2.0"},
       {:httpoison, "== 2.2.3"},
       {:redix, "== 1.5.2"},
       {:poolboy, "== 1.5.2"},
