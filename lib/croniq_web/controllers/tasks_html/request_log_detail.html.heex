@@ -22,7 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 
-<div class="container mx-auto px-4 py-8 max-w-6xl">
+<div class="container mx-auto px-4 py-8">
   <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
     <!-- Основная информация -->
     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
@@ -38,9 +38,9 @@ OR OTHER DEALINGS IN THE SOFTWARE.
         </div>
       </div>
     </div>
-    
+
 <!-- Детали запроса -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+    <div class="p-6">
       <!-- Блок запроса -->
       <div class="space-y-4">
         <div>
@@ -54,24 +54,26 @@ OR OTHER DEALINGS IN THE SOFTWARE.
               <pre class="mt-1 p-3 bg-gray-100 rounded text-sm overflow-x-auto"><code>{ @rq_log.request }</code></pre>
             </div>
 
-            <div>
-              <h4 class="font-medium text-gray-700">Task ID</h4>
-              <p class="mt-1 text-gray-900">
-                {@rq_log.task_id}
-              </p>
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h4 class="font-medium text-gray-700">Task ID</h4>
+                <p class="mt-1 text-gray-900">
+                  {@rq_log.task_id}
+                </p>
+              </div>
 
-            <div>
-              <h4 class="font-medium text-gray-700">Duration</h4>
-              <p class="mt-1 text-gray-900">
-                {@rq_log.duration} ms
-              </p>
+              <div>
+                <h4 class="font-medium text-gray-700">Duration</h4>
+                <p class="mt-1 text-gray-900">
+                  {@rq_log.duration} ms
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    
+
 <!-- Блок тела ответа (если есть) -->
     <%= if @rq_log.response&& @rq_log.response !="" do %>
       <div class="px-6 py-4 border-t border-gray-200">
