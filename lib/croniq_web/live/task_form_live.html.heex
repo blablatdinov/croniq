@@ -15,29 +15,29 @@
         <label class="block text-sm font-medium text-gray-700 mb-2">Task Type</label>
         <div class="flex space-x-4">
           <label class="flex items-center">
-            <input 
-              type="radio" 
-              name="task[task_type]" 
-              value="recurring" 
+            <input
+              type="radio"
+              name="task[task_type]"
+              value="recurring"
               checked={@task_type == "recurring"}
-              class="mr-2" 
+              class="mr-2"
             />
             <span>Recurring Task</span>
           </label>
           <label class="flex items-center">
-            <input 
-              type="radio" 
-              name="task[task_type]" 
-              value="delayed" 
+            <input
+              type="radio"
+              name="task[task_type]"
+              value="delayed"
               checked={@task_type == "delayed"}
-              class="mr-2" 
+              class="mr-2"
             />
             <span>Delayed Task</span>
           </label>
         </div>
       </div>
       
-      <!-- Common Fields -->
+<!-- Common Fields -->
       <div>
         <label class="block text-gray-700 mb-1">Task Name*</label>
         <.input
@@ -110,8 +110,12 @@
         />
       </div>
       
-      <!-- Conditional Fields -->
-      <div id="recurring-fields" class="space-y-4" style={if @show_recurring_fields, do: "display: block;", else: "display: none;"}>
+<!-- Conditional Fields -->
+      <div
+        id="recurring-fields"
+        class="space-y-4"
+        style={if @show_recurring_fields, do: "display: block;", else: "display: none;"}
+      >
         <div>
           <.input
             field={f[:schedule]}
@@ -122,7 +126,11 @@
         </div>
       </div>
 
-      <div id="delayed-fields" class="space-y-4" style={if @show_delayed_fields, do: "display: block;", else: "display: none;"}>
+      <div
+        id="delayed-fields"
+        class="space-y-4"
+        style={if @show_delayed_fields, do: "display: block;", else: "display: none;"}
+      >
         <div>
           <.input field={f[:scheduled_at]} type="datetime-local" label="Execute At" />
         </div>
@@ -144,4 +152,4 @@
       </div>
     </div>
   </.form>
-</div> 
+</div>

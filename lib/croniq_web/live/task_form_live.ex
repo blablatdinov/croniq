@@ -5,7 +5,9 @@ defmodule CroniqWeb.TaskFormLive do
   def mount(_params, _session, socket) do
     if socket.assigns.current_user.confirmed_at do
       headers_string = Jason.encode!(%{})
-      changeset = Task.changeset(%Task{}, %{"headers" => headers_string, "task_type" => "recurring"})
+
+      changeset =
+        Task.changeset(%Task{}, %{"headers" => headers_string, "task_type" => "recurring"})
 
       {:ok,
        assign(socket,
@@ -43,6 +45,7 @@ defmodule CroniqWeb.TaskFormLive do
     case get_task_type(task_params) do
       "delayed" ->
         create_delayed_task(socket, task_params)
+
       _ ->
         create_recurring_task(socket, task_params)
     end
@@ -79,7 +82,10 @@ defmodule CroniqWeb.TaskFormLive do
       {:ok, task} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Delayed task created successfully! Will execute at #{format_datetime(task.scheduled_at)}")
+         |> put_flash(
+           :info,
+           "Delayed task created successfully! Will execute at #{format_datetime(task.scheduled_at)}"
+         )
          |> push_navigate(to: ~p"/tasks/#{task.id}/edit")}
 
       {:error, %Ecto.Changeset{} = changeset} ->

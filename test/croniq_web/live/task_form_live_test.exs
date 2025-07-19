@@ -9,7 +9,7 @@ defmodule CroniqWeb.TaskFormLiveTest do
   end
 
   describe "Task form live view" do
-        test "redirects if user is not authenticated", %{conn: conn} do
+    test "redirects if user is not authenticated", %{conn: conn} do
       assert {:error, {:redirect, %{to: "/users/log_in"}}} =
                live(conn, ~p"/create-task")
     end
@@ -21,7 +21,7 @@ defmodule CroniqWeb.TaskFormLiveTest do
                live(conn, ~p"/create-task")
     end
 
-        test "shows form for confirmed user", %{conn: conn, user: user} do
+    test "shows form for confirmed user", %{conn: conn, user: user} do
       conn = log_in_user(conn, user)
 
       {:ok, view, _html} = live(conn, ~p"/create-task")
@@ -32,7 +32,7 @@ defmodule CroniqWeb.TaskFormLiveTest do
       assert has_element?(view, "select[name='task[method]']")
     end
 
-            test "toggles task type fields", %{conn: conn, user: user} do
+    test "toggles task type fields", %{conn: conn, user: user} do
       conn = log_in_user(conn, user)
 
       {:ok, view, _html} = live(conn, ~p"/create-task")
@@ -49,7 +49,7 @@ defmodule CroniqWeb.TaskFormLiveTest do
       assert has_element?(view, "#delayed-fields")
     end
 
-            test "validates form on change", %{conn: conn, user: user} do
+    test "validates form on change", %{conn: conn, user: user} do
       conn = log_in_user(conn, user)
 
       {:ok, view, _html} = live(conn, ~p"/create-task")
@@ -63,7 +63,7 @@ defmodule CroniqWeb.TaskFormLiveTest do
       refute has_element?(view, ".error")
     end
 
-            test "creates recurring task successfully", %{conn: conn, user: user} do
+    test "creates recurring task successfully", %{conn: conn, user: user} do
       conn = log_in_user(conn, user)
 
       {:ok, view, _html} = live(conn, ~p"/create-task")
@@ -84,7 +84,7 @@ defmodule CroniqWeb.TaskFormLiveTest do
       assert_redirect(view, ~p"/tasks/1/edit")
     end
 
-            test "creates delayed task successfully", %{conn: conn, user: user} do
+    test "creates delayed task successfully", %{conn: conn, user: user} do
       conn = log_in_user(conn, user)
 
       {:ok, view, _html} = live(conn, ~p"/create-task")
