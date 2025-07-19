@@ -18,5 +18,8 @@ config :swoosh, local: false
 # Do not print debug messages in production
 config :logger, level: :info
 
+# Enable dev routes for dashboard and mailbox
+config :croniq, dev_routes: true
+
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.
