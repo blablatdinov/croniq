@@ -37,3 +37,16 @@ tasks:
   migrate:
     cmds:
       - mix ecto.migrate
+
+  deploy:
+    desc: "Deploy the application to Docker Swarm (usage: task deploy --tag v0.1.0)"
+    vars:
+      tag:
+        sh: 'echo ${tag:-}'
+    cmds:
+      - |
+        if [ -z "{{.tag}}" ]; then
+          echo "Error: tag is not provided! Example: task deploy --tag v0.1.0"
+          exit 1
+        fi
+        TAG_NAME={{.tag}} envsubst < infra/docker-compose.prod.yml | docker stack deploy -c - croniq

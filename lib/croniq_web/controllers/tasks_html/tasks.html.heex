@@ -1,12 +1,20 @@
 <div class="container mx-auto px-4 py-8">
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold">Cron Tasks</h1>
-    <.link
-      href={~p"/tasks/new"}
-      class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors"
-    >
-      + Create New Task
-    </.link>
+    <div class="flex space-x-2">
+      <.link
+        href={~p"/create-task"}
+        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+      >
+        + Create Task (LiveView)
+      </.link>
+      <.link
+        href={~p"/tasks/new"}
+        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors"
+      >
+        + Create Task (Classic)
+      </.link>
+    </div>
   </div>
 
   <%= if @current_user && !@current_user.confirmed_at do %>

@@ -42,7 +42,7 @@ defmodule CroniqWeb.Router do
     post "/", TasksController, :create
     get "/new", TasksController, :new_task
     get "/:task_id/edit", TasksController, :edit_form
-    get "/:task_id", TasksController, :task_details
+    # get "/:task_id", TasksController, :task_details
     put "/:task_id", TasksController, :edit
     # TODO: make post
     delete "/:task_id", TasksController, :delete
@@ -124,6 +124,7 @@ defmodule CroniqWeb.Router do
       on_mount: [{CroniqWeb.UserAuth, :ensure_authenticated}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+      live "/create-task", TaskFormLive, :new
     end
   end
 
