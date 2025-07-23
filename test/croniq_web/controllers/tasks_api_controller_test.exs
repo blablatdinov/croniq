@@ -265,23 +265,16 @@ defmodule CroniqWeb.TasksAPIControllerTest do
     assert txt == "Can't parse 68 as minute."
   end
 
-  test "Tasks list search by name", %{conn: conn, user: user, user_token: user_token} do
+  test "Tasks list search by name strictly", %{conn: conn, user: user, user_token: user_token} do
     Croniq.Task.create_task(user.id, %{
-      "name" => "Alpha task",
+      "name" => "Alpha",
       "schedule" => "* * * * *",
       "url" => "https://example.com",
       "method" => "GET"
     })
 
     Croniq.Task.create_task(user.id, %{
-      "name" => "Beta task",
-      "schedule" => "* * * * *",
-      "url" => "https://example.com",
-      "method" => "GET"
-    })
-
-    Croniq.Task.create_task(user.id, %{
-      "name" => "Gamma",
+      "name" => "Alp",
       "schedule" => "* * * * *",
       "url" => "https://example.com",
       "method" => "GET"
@@ -290,22 +283,13 @@ defmodule CroniqWeb.TasksAPIControllerTest do
     response =
       conn
       |> put_req_header("authorization", "Basic " <> user_token)
-      |> get(~p"/api/v1/tasks?name=task")
+      |> get(~p"/api/v1/tasks?name=Alp")
       |> json_response(200)
 
     assert %{"results" => results} = response
-    assert length(results) == 2
-    assert Enum.all?(results, fn t -> String.contains?(String.downcase(t["name"]), "task") end)
-
-    response2 =
-      conn
-      |> put_req_header("authorization", "Basic " <> user_token)
-      |> get(~p"/api/v1/tasks?name=gamma")
-      |> json_response(200)
-
-    assert %{"results" => results2} = response2
-    assert length(results2) == 1
-    assert Enum.at(results2, 0)["name"] == "Gamma"
+    assert length(results) == 1
+    [%{"name" => name}] = results
+    assert name == "Alp"
   end
 
   test "Delayed task create via API", %{conn: conn, user_token: user_token} do
