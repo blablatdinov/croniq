@@ -147,14 +147,14 @@
     <% start_page = max(start_page, 1) %>
     <% end_page = min(end_page, total_pages) %>
 
-    <% if start_page > 1 do %>
+    <%= if start_page > 1 do %>
       <.link
         navigate={~p"/tasks?page=1&page_size=#{@page_size}"}
         class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
       >
         1
       </.link>
-      <% if start_page > 2 do %>
+      <%= if start_page > 2 do %>
         <span class="px-2">...</span>
       <% end %>
     <% end %>
@@ -172,8 +172,8 @@
       <% end %>
     <% end %>
 
-    <% if end_page < total_pages do %>
-      <% if end_page < total_pages - 1 do %>
+    <%= if end_page < total_pages do %>
+      <%= if end_page < total_pages - 1 do %>
         <span class="px-2">...</span>
       <% end %>
       <.link
