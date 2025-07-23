@@ -4,9 +4,14 @@
     <div class="flex items-center gap-4">
       <form method="get" action="/tasks" class="flex items-center gap-2">
         <label for="page_size" class="text-sm text-gray-700">Show per page:</label>
-        <select name="page_size" id="page_size" class="border rounded px-2 pr-8 py-1 text-sm" onchange="this.form.submit()">
+        <select
+          name="page_size"
+          id="page_size"
+          class="border rounded px-2 pr-8 py-1 text-sm"
+          onchange="this.form.submit()"
+        >
           <%= for size <- [5, 10, 20, 50, 100] do %>
-            <option value={size} selected={@page_size == size}><%= size %></option>
+            <option value={size} selected={@page_size == size}>{size}</option>
           <% end %>
         </select>
         <input type="hidden" name="page" value="1" />
@@ -112,7 +117,12 @@
 
   <div class="mt-6 flex justify-center items-center gap-2">
     <%= if @page > 1 do %>
-      <.link navigate={~p"/tasks?page=#{@page - 1}&page_size=#{@page_size}"} class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300">Prev</.link>
+      <.link
+        navigate={~p"/tasks?page=#{@page - 1}&page_size=#{@page_size}"}
+        class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+      >
+        Prev
+      </.link>
     <% else %>
       <span class="px-3 py-1 rounded bg-gray-100 text-gray-400 cursor-not-allowed">Prev</span>
     <% end %>
@@ -126,21 +136,24 @@
         page <= 3 -> 1
         page >= total_pages - 2 -> total_pages - 4
         true -> page - 2
-      end
-    %>
+      end %>
     <% end_page =
       cond do
         total_pages <= visible_pages -> total_pages
         page <= 3 -> visible_pages
         page >= total_pages - 2 -> total_pages
         true -> page + 2
-      end
-    %>
+      end %>
     <% start_page = max(start_page, 1) %>
     <% end_page = min(end_page, total_pages) %>
 
     <% if start_page > 1 do %>
-      <.link navigate={~p"/tasks?page=1&page_size=#{@page_size}"} class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300">1</.link>
+      <.link
+        navigate={~p"/tasks?page=1&page_size=#{@page_size}"}
+        class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+      >
+        1
+      </.link>
       <% if start_page > 2 do %>
         <span class="px-2">...</span>
       <% end %>
@@ -148,9 +161,14 @@
 
     <%= for p <- start_page..end_page do %>
       <%= if p == @page do %>
-        <span class="px-3 py-1 rounded bg-blue-500 text-white font-bold"><%= p %></span>
+        <span class="px-3 py-1 rounded bg-blue-500 text-white font-bold">{p}</span>
       <% else %>
-        <.link navigate={~p"/tasks?page=#{p}&page_size=#{@page_size}"} class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"><%= p %></.link>
+        <.link
+          navigate={~p"/tasks?page=#{p}&page_size=#{@page_size}"}
+          class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+        >
+          {p}
+        </.link>
       <% end %>
     <% end %>
 
@@ -158,15 +176,27 @@
       <% if end_page < total_pages - 1 do %>
         <span class="px-2">...</span>
       <% end %>
-      <.link navigate={~p"/tasks?page=#{total_pages}&page_size=#{@page_size}"} class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"><%= total_pages %></.link>
+      <.link
+        navigate={~p"/tasks?page=#{total_pages}&page_size=#{@page_size}"}
+        class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+      >
+        {total_pages}
+      </.link>
     <% end %>
 
     <%= if @page < @total_pages do %>
-      <.link navigate={~p"/tasks?page=#{@page + 1}&page_size=#{@page_size}"} class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300">Next</.link>
+      <.link
+        navigate={~p"/tasks?page=#{@page + 1}&page_size=#{@page_size}"}
+        class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+      >
+        Next
+      </.link>
     <% else %>
       <span class="px-3 py-1 rounded bg-gray-100 text-gray-400 cursor-not-allowed">Next</span>
     <% end %>
 
-    <span class="ml-4 text-gray-500 text-sm">Page <%= @page %> of <%= @total_pages %> (total tasks: <%= @total_tasks %>)</span>
+    <span class="ml-4 text-gray-500 text-sm">
+      Page {@page} of {@total_pages} (total tasks: {@total_tasks})
+    </span>
   </div>
 </div>
