@@ -308,6 +308,33 @@ defmodule CroniqWeb.TasksAPIControllerTest do
     assert Enum.at(results2, 0)["name"] == "Gamma"
   end
 
+  test "Tasks list search by name strictly", %{conn: conn, user: user, user_token: user_token} do
+    Croniq.Task.create_task(user.id, %{
+      "name" => "Alpha",
+      "schedule" => "* * * * *",
+      "url" => "https://example.com",
+      "method" => "GET"
+    })
+
+    Croniq.Task.create_task(user.id, %{
+      "name" => "Alp",
+      "schedule" => "* * * * *",
+      "url" => "https://example.com",
+      "method" => "GET"
+    })
+
+    response =
+      conn
+      |> put_req_header("authorization", "Basic " <> user_token)
+      |> get(~p"/api/v1/tasks?name=Alp")
+      |> json_response(200)
+
+    assert %{"results" => results} = response
+    assert length(results) == 1
+    [%{"name" => name}] = results
+    assert name == "Alp"
+  end
+
   test "Delayed task create via API", %{conn: conn, user_token: user_token} do
     future_time =
       DateTime.add(DateTime.utc_now(), 3600, :second)

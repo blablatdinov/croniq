@@ -15,8 +15,7 @@ defmodule CroniqWeb.TasksAPIController do
 
     query =
       if name && name != "" do
-        pattern = "%" <> name <> "%"
-        from task in query, where: ilike(task.name, ^pattern)
+        from task in query, where: ilike(task.name, ^name)
       else
         query
       end
