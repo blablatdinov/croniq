@@ -34,7 +34,7 @@ defmodule CroniqWeb.TasksControllerTest do
         Floki.find(parsed, "[data-test=id-cell]")
         |> Enum.at(0)
 
-      assert length(Floki.find(parsed, "[data-test=task-line]")) == 24
+      assert length(Floki.find(parsed, "[data-test=task-line]")) == 10
       assert url == "/tasks/#{Enum.at(tasks, 0).id}/edit"
     end
 
@@ -331,6 +331,66 @@ defmodule CroniqWeb.TasksControllerTest do
       updated_task = Croniq.Repo.get_by!(Croniq.Task, id: task.id)
       assert updated_task.status == "disabled"
       assert updated_task.name == "edited name"
+    end
+
+    test "Pagination: only page_size tasks are shown on a page", %{
+      conn: conn,
+      user_token: user_token,
+      user: user
+    } do
+      tasks = task_list_for_user(user, 25)
+
+      response =
+        conn
+        |> put_session(:user_token, user_token)
+        |> get(~p"/tasks?page=2&page_size=10")
+        |> html_response(200)
+
+      parsed = Floki.parse_document!(response)
+      # There should be 10 tasks on the second page
+      assert length(Floki.find(parsed, "[data-test=task-line]")) == 10
+      # The first task on the second page should be the 11th in order
+      assert Floki.text(Floki.find(parsed, "[data-test=id-cell]") |> Enum.at(0)) |> String.strip() ==
+               Integer.to_string(Enum.at(tasks, 10).id)
+    end
+
+    test "Pagination: page_size selection works correctly", %{
+      conn: conn,
+      user_token: user_token,
+      user: user
+    } do
+      task_list_for_user(user, 55)
+
+      response =
+        conn
+        |> put_session(:user_token, user_token)
+        |> get(~p"/tasks?page=1&page_size=50")
+        |> html_response(200)
+
+      parsed = Floki.parse_document!(response)
+      # There should be 50 tasks on the first page
+      assert length(Floki.find(parsed, "[data-test=task-line]")) == 50
+    end
+
+    test "Pagination: selected page_size is shown in select", %{
+      conn: conn,
+      user_token: user_token,
+      user: user
+    } do
+      task_list_for_user(user, 10)
+
+      response =
+        conn
+        |> put_session(:user_token, user_token)
+        |> get(~p"/tasks?page=1&page_size=20")
+        |> html_response(200)
+
+      parsed = Floki.parse_document!(response)
+
+      selected =
+        Floki.find(parsed, "select[name=page_size] option[selected]") |> Floki.attribute("value")
+
+      assert selected == ["20"]
     end
   end
 
