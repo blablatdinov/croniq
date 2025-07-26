@@ -196,7 +196,7 @@ defmodule CroniqWeb.TasksControllerTest do
       |> delete(~p"/tasks/#{task.id}")
       |> html_response(302)
 
-      refute Croniq.Repo.exists?(from t in Croniq.Task, where: t.id == ^task.id)
+      refute Croniq.Repo.exists?(from(t in Croniq.Task, where: t.id == ^task.id))
     end
 
     test "delete not exist task", %{conn: conn, user: user} do
@@ -205,7 +205,7 @@ defmodule CroniqWeb.TasksControllerTest do
       |> delete(~p"/tasks/4895")
       |> html_response(302)
 
-      refute Croniq.Repo.exists?(from t in Croniq.Task, where: t.id == 4895)
+      refute Croniq.Repo.exists?(from(t in Croniq.Task, where: t.id == 4895))
     end
 
     test "delete alien task", %{conn: conn, user: user} do
@@ -217,7 +217,20 @@ defmodule CroniqWeb.TasksControllerTest do
       |> delete(~p"/tasks/#{alien_task.id}")
       |> html_response(404)
 
-      assert Croniq.Repo.exists?(from t in Croniq.Task, where: t.id == ^alien_task.id)
+      assert Croniq.Repo.exists?(from(t in Croniq.Task, where: t.id == ^alien_task.id))
+    end
+
+    test "deletion request log", %{conn: conn, user_token: user_token, user: user} do
+      [task] = task_list_for_user(user)
+      [rq_log] = requests_log(task)
+
+      conn
+      |> put_session(:user_token, user_token)
+      |> delete(~p"/tasks/#{task.id}")
+      |> html_response(200)
+
+      refute Croniq.Repo.exists?(from(t in Croniq.Task, where: t.id == ^task.id))
+      refute Croniq.Repo.exists?(from(rql in Croniq.RequestLog, where: rql.id == ^rq_log.id))
     end
 
     test "Task create form", %{conn: conn, user_token: user_token} do

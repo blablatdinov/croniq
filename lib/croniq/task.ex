@@ -175,6 +175,12 @@ defmodule Croniq.Task do
     end
   end
 
+  def delete_task(task) do
+    rq_logs = Repo.get_by(Croniq.RequestLog, task_id: task.id)
+    Croniq.Repo.delete!(rq_logs)
+    Croniq.Repo.delete!(task)
+  end
+
   defp decode_json(""), do: %{}
 
   defp decode_json(str) when is_binary(str) do
