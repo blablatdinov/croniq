@@ -189,17 +189,38 @@ defmodule CroniqWeb.TasksController do
     end
   end
 
-  def requests_log(conn, %{"task_id" => task_id}) do
-    rq_logs =
-      Repo.all(
-        from rq_log in Croniq.RequestLog,
-          join: task in Croniq.Task,
-          on: rq_log.task_id == task.id,
-          where: rq_log.task_id == ^task_id and task.user_id == ^conn.assigns.current_user.id,
-          order_by: [desc: rq_log.id]
-      )
+  def requests_log(conn, %{"task_id" => task_id} = params) do
+    page = Map.get(params, "page", "1") |> String.to_integer()
+    page_size = Map.get(params, "page_size", "10") |> String.to_integer()
+    user_id = conn.assigns.current_user.id
 
-    render(conn, :requests_logs, rq_logs: rq_logs)
+    base_query =
+      from rq_log in Croniq.RequestLog,
+        join: task in Croniq.Task,
+        on: rq_log.task_id == task.id,
+        where: rq_log.task_id == ^task_id and task.user_id == ^user_id,
+        order_by: [desc: rq_log.id]
+
+    total_logs = Repo.aggregate(base_query, :count, :id)
+    total_pages = div(total_logs + page_size - 1, page_size)
+    offset = (page - 1) * page_size
+
+    rq_logs =
+      base_query
+      |> limit(^page_size)
+      |> offset(^offset)
+      |> Repo.all()
+
+    render(
+      conn,
+      :requests_logs,
+      rq_logs: rq_logs,
+      task_id: task_id,
+      page: page,
+      page_size: page_size,
+      total_pages: total_pages,
+      total_logs: total_logs
+    )
   end
 
   def request_log_detail(conn, %{"rq_log_id" => rq_log_id}) do

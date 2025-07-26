@@ -98,10 +98,9 @@ defmodule CroniqWeb.TasksControllerTest do
 
       html_response(conn, 302)
 
-      updated_form =
-        conn
-        |> get(~p"/tasks/#{task.id}/edit")
-        |> html_response(200)
+      conn
+      |> get(~p"/tasks/#{task.id}/edit")
+      |> html_response(200)
 
       assert Plug.Conn.get_resp_header(conn, "location") == [~p"/tasks/#{task.id}/edit"]
 
@@ -350,7 +349,7 @@ defmodule CroniqWeb.TasksControllerTest do
       # There should be 10 tasks on the second page
       assert length(Floki.find(parsed, "[data-test=task-line]")) == 10
       # The first task on the second page should be the 11th in order
-      assert Floki.text(Floki.find(parsed, "[data-test=id-cell]") |> Enum.at(0)) |> String.strip() ==
+      assert Floki.text(Floki.find(parsed, "[data-test=id-cell]") |> Enum.at(0)) |> String.trim() ==
                Integer.to_string(Enum.at(tasks, 10).id)
     end
 
@@ -406,7 +405,7 @@ defmodule CroniqWeb.TasksControllerTest do
         |> html_response(200)
 
       parsed = Floki.parse_document!(response)
-      assert length(Floki.find(parsed, "[data-test=rq-log-line]")) == 15
+      assert length(Floki.find(parsed, "[data-test=rq-log-line]")) == 10
     end
 
     test "Read log detail", %{conn: conn, user_token: user_token, user: user} do
@@ -457,6 +456,99 @@ defmodule CroniqWeb.TasksControllerTest do
              |> Floki.parse_document!()
              |> Floki.find("[data-test=rq-log-line]")
              |> Enum.empty?()
+    end
+
+    test "Pagination: only page_size logs are shown on a page", %{
+      conn: conn,
+      user_token: user_token,
+      user: user
+    } do
+      [task] = task_list_for_user(user)
+      logs = requests_log(task, 25)
+
+      response =
+        conn
+        |> put_session(:user_token, user_token)
+        |> get(~p"/tasks/#{task.id}/requests-log?page=2&page_size=10")
+        |> html_response(200)
+
+      parsed = Floki.parse_document!(response)
+      assert length(Floki.find(parsed, "[data-test=rq-log-line]")) == 10
+
+      first_log_id_on_page_2 =
+        Floki.text(
+          Floki.find(parsed, "[data-test=rq-log-line]")
+          |> Enum.at(0)
+          |> Floki.find("td")
+          |> Enum.at(0)
+          |> Floki.find("a")
+          |> Enum.at(0)
+        )
+        |> String.trim()
+
+      assert first_log_id_on_page_2 != Integer.to_string(Enum.at(logs, 0).id)
+    end
+
+    test "Request log pagination: null response body", %{
+      conn: conn,
+      user_token: user_token,
+      user: user
+    } do
+      [task] = task_list_for_user(user)
+
+      Croniq.RequestLog.create_rq_log(%{
+        "task_id" => task.id,
+        "request" => "string",
+        "response" => nil,
+        "duration" => 430,
+        "error" => ""
+      })
+
+      conn
+      |> put_session(:user_token, user_token)
+      |> get(~p"/tasks/#{task.id}/requests-log")
+      |> html_response(200)
+    end
+
+    test "Pagination: page_size selection works correctly", %{
+      conn: conn,
+      user_token: user_token,
+      user: user
+    } do
+      [task] = task_list_for_user(user)
+      requests_log(task, 55)
+
+      response =
+        conn
+        |> put_session(:user_token, user_token)
+        |> get(~p"/tasks/#{task.id}/requests-log?page=1&page_size=50")
+        |> html_response(200)
+
+      parsed = Floki.parse_document!(response)
+      # There should be 50 logs on the first page
+      assert length(Floki.find(parsed, "[data-test=rq-log-line]")) == 50
+    end
+
+    test "Pagination: selected page_size is shown in select", %{
+      conn: conn,
+      user_token: user_token,
+      user: user
+    } do
+      [task] = task_list_for_user(user)
+      requests_log(task, 10)
+
+      response =
+        conn
+        |> put_session(:user_token, user_token)
+        |> get(~p"/tasks/#{task.id}/requests-log?page=1&page_size=20")
+        |> html_response(200)
+
+      parsed = Floki.parse_document!(response)
+
+      selected =
+        Floki.find(parsed, "select[name=page_size] option[selected]") |> Floki.attribute("value")
+
+      assert selected == ["20"]
     end
   end
 end
