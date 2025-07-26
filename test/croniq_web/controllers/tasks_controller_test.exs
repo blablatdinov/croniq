@@ -222,7 +222,7 @@ defmodule CroniqWeb.TasksControllerTest do
 
     test "deletion request log", %{conn: conn, user_token: user_token, user: user} do
       [task] = task_list_for_user(user)
-      [rq_log] = requests_log(task)
+      rq_logs = requests_log(task, 5)
 
       conn
       |> put_session(:user_token, user_token)
@@ -230,7 +230,10 @@ defmodule CroniqWeb.TasksControllerTest do
       |> html_response(302)
 
       refute Croniq.Repo.exists?(from t in Croniq.Task, where: t.id == ^task.id)
-      refute Croniq.Repo.exists?(from rql in Croniq.RequestLog, where: rql.id == ^rq_log.id)
+
+      Enum.each(rq_logs, fn rq_log ->
+        refute Croniq.Repo.exists?(from rql in Croniq.RequestLog, where: rql.id == ^rq_log.id)
+      end)
     end
 
     test "Task create form", %{conn: conn, user_token: user_token} do

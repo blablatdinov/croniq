@@ -13,6 +13,7 @@ defmodule Croniq.Task do
   on a defined schedule.
   """
   use Ecto.Schema
+  import Ecto.Query
   alias Croniq.Repo
   import Ecto.Changeset
   require Logger
@@ -176,10 +177,9 @@ defmodule Croniq.Task do
   end
 
   def delete_task(task) do
-    case Repo.get_by(Croniq.RequestLog, task_id: task.id) do
-      nil -> nil
-      rq_logs -> Croniq.Repo.delete!(rq_logs)
-    end
+    Croniq.RequestLog
+    |> where(task_id: ^task.id)
+    |> Repo.delete_all()
 
     Croniq.Repo.delete!(task)
   end
