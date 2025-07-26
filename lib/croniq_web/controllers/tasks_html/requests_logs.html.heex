@@ -2,7 +2,11 @@
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold">Request Logs</h1>
     <div class="flex items-center gap-4">
-      <form method="get" action={~p"/tasks/#{@task_id}/requests-log"} class="flex items-center gap-2">
+      <form
+        method="get"
+        action={~p"/tasks/#{@task_id}/requests-log"}
+        class="flex items-center gap-2"
+      >
         <label for="page_size" class="text-sm text-gray-700">Show per page:</label>
         <select
           name="page_size"
