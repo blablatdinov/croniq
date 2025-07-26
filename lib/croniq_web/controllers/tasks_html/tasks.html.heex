@@ -159,7 +159,7 @@
       <% end %>
     <% end %>
 
-    <%= for p <- start_page..end_page do %>
+    <%= for p <- start_page..end_page//1 do %>
       <%= if p == @page do %>
         <span class="px-3 py-1 rounded bg-blue-500 text-white font-bold">{p}</span>
       <% else %>
