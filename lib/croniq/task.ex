@@ -14,9 +14,10 @@ defmodule Croniq.Task do
   """
   use Ecto.Schema
   import Ecto.Query
-  alias Croniq.Repo
+
   import Ecto.Changeset
   require Logger
+  alias Croniq.Repo
 
   schema "tasks" do
     belongs_to :user, Croniq.Accounts.User
@@ -176,12 +177,14 @@ defmodule Croniq.Task do
     end
   end
 
-  def delete_task(task) do
-    Croniq.RequestLog
-    |> where(task_id: ^task.id)
-    |> Repo.delete_all()
+  def delete_with_logs(task) do
+    Repo.transaction(fn ->
+      Croniq.RequestLog
+      |> where(task_id: ^task.id)
+      |> Repo.delete_all()
 
-    Croniq.Repo.delete!(task)
+      Repo.delete!(task)
+    end)
   end
 
   defp decode_json(""), do: %{}
