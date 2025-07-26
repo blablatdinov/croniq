@@ -227,7 +227,7 @@ defmodule CroniqWeb.TasksControllerTest do
       conn
       |> put_session(:user_token, user_token)
       |> delete(~p"/tasks/#{task.id}")
-      |> html_response(200)
+      |> html_response(302)
 
       refute Croniq.Repo.exists?(from t in Croniq.Task, where: t.id == ^task.id)
       refute Croniq.Repo.exists?(from rql in Croniq.RequestLog, where: rql.id == ^rq_log.id)

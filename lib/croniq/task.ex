@@ -176,8 +176,11 @@ defmodule Croniq.Task do
   end
 
   def delete_task(task) do
-    rq_logs = Repo.get_by(Croniq.RequestLog, task_id: task.id)
-    Croniq.Repo.delete!(rq_logs)
+    case Repo.get_by(Croniq.RequestLog, task_id: task.id) do
+      nil -> nil
+      rq_logs -> Croniq.Repo.delete!(rq_logs)
+    end
+
     Croniq.Repo.delete!(task)
   end
 
