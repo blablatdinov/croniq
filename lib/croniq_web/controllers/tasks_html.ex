@@ -3,16 +3,22 @@ defmodule CroniqWeb.TasksHTML do
 
   embed_templates "tasks_html/*"
 
-  def extract_status(response) do
-    response
-    |> String.split("\n", parts: 2)
-    |> Enum.at(0)
-    |> String.split(" ")
-    |> Enum.at(1)
+  def extract_status(response_body) do
+    case response_body do
+      nil ->
+        "Error"
+
+      _ ->
+        response_body
+        |> String.split("\n", parts: 2)
+        |> Enum.at(0)
+        |> String.split(" ")
+        |> Enum.at(1)
+    end
   end
 
-  def extract_headers(response) do
-    response
+  def extract_headers(response_body) do
+    response_body
     |> String.split("\n")
     |> Enum.map(&String.trim/1)
     |> Enum.slice(1..-1//1)
