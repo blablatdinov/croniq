@@ -13,9 +13,11 @@ defmodule Croniq.Task do
   on a defined schedule.
   """
   use Ecto.Schema
-  alias Croniq.Repo
+  import Ecto.Query
+
   import Ecto.Changeset
   require Logger
+  alias Croniq.Repo
 
   schema "tasks" do
     belongs_to :user, Croniq.Accounts.User
@@ -173,6 +175,16 @@ defmodule Croniq.Task do
         Logger.info("Delayed task created with id=#{task.id}, scheduled for #{task.scheduled_at}")
         {:ok, task}
     end
+  end
+
+  def delete_with_logs(task) do
+    Repo.transaction(fn ->
+      Croniq.RequestLog
+      |> where(task_id: ^task.id)
+      |> Repo.delete_all()
+
+      Repo.delete!(task)
+    end)
   end
 
   defp decode_json(""), do: %{}

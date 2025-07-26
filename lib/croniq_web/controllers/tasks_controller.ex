@@ -169,7 +169,7 @@ defmodule CroniqWeb.TasksController do
       task = %Croniq.Task{} ->
         case task.user_id do
           ^user_id ->
-            Croniq.Repo.delete!(task)
+            Croniq.Task.delete_with_logs(task)
 
             conn
             |> put_flash(:info, "Task deleted successfully")
