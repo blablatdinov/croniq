@@ -191,7 +191,7 @@ defmodule CroniqWeb.TasksController do
 
   def requests_log(conn, %{"task_id" => task_id} = params) do
     page = Map.get(params, "page", "1") |> String.to_integer()
-    page_size = Map.get(params, "page_size", "10") |> String.to_integer()
+    page_size = Map.get(params, "page_size", "10") |> String.to_integer() |> min(100)
     user_id = conn.assigns.current_user.id
 
     base_query =
