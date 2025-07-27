@@ -60,7 +60,7 @@ defmodule CroniqWeb.TasksController do
 
   def tasks(conn, params) do
     page = Map.get(params, "page", "1") |> String.to_integer()
-    page_size = Map.get(params, "page_size", "10") |> String.to_integer()
+    page_size = Map.get(params, "page_size", "10") |> String.to_integer() |> min(100)
     user_id = conn.assigns.current_user.id
 
     base_query = from task in Croniq.Task, where: task.user_id == ^user_id, order_by: [asc: :id]

@@ -407,6 +407,20 @@ defmodule CroniqWeb.TasksControllerTest do
 
       assert selected == ["20"]
     end
+
+    test "Page size limit", %{conn: conn, user_token: user_token, user: user} do
+      task_list_for_user(user, 101)
+
+      response =
+        conn
+        |> put_session(:user_token, user_token)
+        |> get(~p"/tasks?page=1&page_size=1000")
+        |> html_response(200)
+
+      parsed = Floki.parse_document!(response)
+      # There should be 50 tasks on the first page
+      assert length(Floki.find(parsed, "[data-test=task-line]")) == 100
+    end
   end
 
   describe "Test request logs" do
