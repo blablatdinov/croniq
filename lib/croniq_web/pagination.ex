@@ -1,4 +1,8 @@
 defmodule CroniqWeb.Pagination do
+  @moduledoc """
+  Provides pagination utilities for controllers.
+  Handles parsing, validation and calculation of pagination parameters.
+  """
   def parse_params(params) do
     page = get_integer(params, "page", 1)
     page_size = get_integer(params, "page_size", 10) |> min(100)
@@ -31,9 +35,10 @@ defmodule CroniqWeb.Pagination do
   end
 
   defp valid(value, default) do
-    cond do
-      value < 1 -> default
-      true -> value
+    if value < 1 do
+      default
+    else
+      value
     end
   end
 end
