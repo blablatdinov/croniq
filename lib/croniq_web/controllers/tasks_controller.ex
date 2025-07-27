@@ -59,14 +59,13 @@ defmodule CroniqWeb.TasksController do
   end
 
   def tasks(conn, params) do
-    page = Map.get(params, "page", "1") |> String.to_integer()
-    page_size = Map.get(params, "page_size", "10") |> String.to_integer()
     user_id = conn.assigns.current_user.id
-
     base_query = from task in Croniq.Task, where: task.user_id == ^user_id, order_by: [asc: :id]
-    total_tasks = Repo.aggregate(base_query, :count, :id)
-    total_pages = div(total_tasks + page_size - 1, page_size)
-    offset = (page - 1) * page_size
+
+    {page, page_size} = CroniqWeb.Pagination.parse_params(params)
+    total_tasks = CroniqWeb.Pagination.total(base_query)
+    total_pages = CroniqWeb.Pagination.total_pages(total_tasks, page_size)
+    offset = CroniqWeb.Pagination.offset(page, page_size)
 
     tasks =
       base_query
@@ -190,8 +189,7 @@ defmodule CroniqWeb.TasksController do
   end
 
   def requests_log(conn, %{"task_id" => task_id} = params) do
-    page = Map.get(params, "page", "1") |> String.to_integer()
-    page_size = Map.get(params, "page_size", "10") |> String.to_integer()
+    {page, page_size} = CroniqWeb.Pagination.parse_params(params)
     user_id = conn.assigns.current_user.id
 
     base_query =
@@ -201,9 +199,9 @@ defmodule CroniqWeb.TasksController do
         where: rq_log.task_id == ^task_id and task.user_id == ^user_id,
         order_by: [desc: rq_log.id]
 
-    total_logs = Repo.aggregate(base_query, :count, :id)
-    total_pages = div(total_logs + page_size - 1, page_size)
-    offset = (page - 1) * page_size
+    total_logs = CroniqWeb.Pagination.total(base_query)
+    total_pages = CroniqWeb.Pagination.total_pages(total_logs, page_size)
+    offset = CroniqWeb.Pagination.offset(page, page_size)
 
     rq_logs =
       base_query
