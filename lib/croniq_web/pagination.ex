@@ -9,12 +9,18 @@ defmodule CroniqWeb.Pagination do
     {page, page_size}
   end
 
+  def parse_params(params, total_pages) do
+    {page, page_size} = parse_params(params)
+    page = min(page, total_pages)
+    {page, page_size}
+  end
+
   def total(base_query) do
     Croniq.Repo.aggregate(base_query, :count, :id)
   end
 
   def total_pages(total_records, page_size) do
-    div(total_records + page_size - 1, page_size)
+    div(total_records + page_size - 1, page_size) |> max(1)
   end
 
   def offset(page, page_size) do

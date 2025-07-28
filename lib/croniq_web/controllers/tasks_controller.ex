@@ -84,9 +84,10 @@ defmodule CroniqWeb.TasksController do
     user_id = conn.assigns.current_user.id
     base_query = from task in Croniq.Task, where: task.user_id == ^user_id, order_by: [asc: :id]
 
-    {page, page_size} = CroniqWeb.Pagination.parse_params(params)
+    {_, page_size} = CroniqWeb.Pagination.parse_params(params)
     total_tasks = CroniqWeb.Pagination.total(base_query)
     total_pages = CroniqWeb.Pagination.total_pages(total_tasks, page_size)
+    {page, page_size} = CroniqWeb.Pagination.parse_params(params, total_pages)
     offset = CroniqWeb.Pagination.offset(page, page_size)
 
     tasks =
@@ -211,7 +212,7 @@ defmodule CroniqWeb.TasksController do
   end
 
   def requests_log(conn, %{"task_id" => task_id} = params) do
-    {page, page_size} = CroniqWeb.Pagination.parse_params(params)
+    {_, page_size} = CroniqWeb.Pagination.parse_params(params)
     user_id = conn.assigns.current_user.id
 
     base_query =
@@ -223,6 +224,7 @@ defmodule CroniqWeb.TasksController do
 
     total_logs = CroniqWeb.Pagination.total(base_query)
     total_pages = CroniqWeb.Pagination.total_pages(total_logs, page_size)
+    {page, page_size} = CroniqWeb.Pagination.parse_params(params, total_pages)
     offset = CroniqWeb.Pagination.offset(page, page_size)
 
     rq_logs =
