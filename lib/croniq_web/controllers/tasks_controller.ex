@@ -87,6 +87,7 @@ defmodule CroniqWeb.TasksController do
     {page, page_size} = CroniqWeb.Pagination.parse_params(params)
     total_tasks = CroniqWeb.Pagination.total(base_query)
     total_pages = CroniqWeb.Pagination.total_pages(total_tasks, page_size)
+    {page, page_size} = CroniqWeb.Pagination.parse_params(params, total_pages)
     offset = CroniqWeb.Pagination.offset(page, page_size)
 
     tasks =
@@ -223,6 +224,7 @@ defmodule CroniqWeb.TasksController do
 
     total_logs = CroniqWeb.Pagination.total(base_query)
     total_pages = CroniqWeb.Pagination.total_pages(total_logs, page_size)
+    {page, page_size} = CroniqWeb.Pagination.parse_params(params, total_pages)
     offset = CroniqWeb.Pagination.offset(page, page_size)
 
     rq_logs =
