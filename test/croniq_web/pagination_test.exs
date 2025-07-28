@@ -63,10 +63,6 @@ defmodule CroniqWeb.PaginationTest do
       assert page == 5
       assert page_size == 17
     end
-
-    # test "from parse_params/1" do
-    #   {page, page_size} = CroniqWeb.Pagination.parse_params(1, 10)
-    # end
   end
 
   describe "total_pages/2" do
