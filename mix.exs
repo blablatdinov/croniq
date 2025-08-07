@@ -68,7 +68,7 @@ defmodule Croniq.MixProject do
        app: false,
        compile: false,
        depth: 1},
-      {:swoosh, "== 1.19.4"},
+      {:swoosh, "== 1.19.5"},
       {:finch, "== 0.20.0"},
       {:telemetry_metrics, "== 1.1.0"},
       {:telemetry_poller, "== 1.3.0"},
