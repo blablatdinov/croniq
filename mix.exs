@@ -57,7 +57,7 @@ defmodule Croniq.MixProject do
       {:phoenix, "== 1.8.0"},
       {:phoenix_ecto, "== 4.6.5"},
       {:ecto_sql, "== 3.13.2"},
-      {:postgrex, "== 0.20.0"},
+      {:postgrex, "== 0.21.1"},
       {:phoenix_html, "== 4.2.1"},
       {:phoenix_live_view, "== 1.1.3"},
       {:phoenix_live_dashboard, "== 0.8.7"},
