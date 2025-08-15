@@ -14,7 +14,7 @@ jobs:
   build:
     services:
       postgres:
-        image: postgres:17.5
+        image: postgres:17.6
         env:
           POSTGRES_USER: almazilaletdinov
           POSTGRES_DB: croniq_db
