@@ -75,7 +75,7 @@ defmodule Croniq.MixProject do
       {:gettext, "== 0.26.2"},
       {:jason, "== 1.4.4"},
       {:dns_cluster, "== 0.2.0"},
-      {:bandit, "== 1.7.0"},
+      {:bandit, "== 1.8.0"},
       {:bcrypt_elixir, "== 3.3.2"},
       {:guardian, "== 2.4.0"},
       {:quantum, "== 3.5.3"},
