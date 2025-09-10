@@ -86,7 +86,7 @@ defmodule Croniq.MixProject do
       # Dev/test dependencies
       {:phoenix_live_reload, "== 1.6.1", only: :dev},
       {:esbuild, "== 0.10.0", runtime: Mix.env() == :dev},
-      {:tailwind, "== 0.3.1", runtime: Mix.env() == :dev},
+      {:tailwind, "== 0.4.0", runtime: Mix.env() == :dev},
       {:floki, "== 0.38.0", only: :test},
       {:credo, "== 1.7.12", only: :dev},
       {:recode, "== 0.7.3", only: :dev},
