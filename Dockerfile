@@ -46,7 +46,7 @@ RUN mix assets.deploy && \
     mix compile && \
     mix release
 
-FROM alpine:3.22.1 AS app
+FROM alpine:3.22.2 AS app
 
 RUN apk add --no-cache openssl ncurses libstdc++
 
