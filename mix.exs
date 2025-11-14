@@ -80,7 +80,7 @@ defmodule Croniq.MixProject do
       {:guardian, "== 2.4.0"},
       {:quantum, "== 3.5.3"},
       {:crontab, "== 1.2.0"},
-      {:httpoison, "== 2.2.3"},
+      {:httpoison, "== 2.3.0"},
       {:redix, "== 1.5.2"},
       {:poolboy, "== 1.5.2"},
       # Dev/test dependencies
