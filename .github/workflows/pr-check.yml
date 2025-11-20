@@ -31,7 +31,7 @@ jobs:
     name: Build and test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Set up Elixir
       uses: erlef/setup-beam@566deebc640988a494af16ecdf6f820fe0d3fea4
       with:
@@ -58,7 +58,7 @@ jobs:
     name: Lint code
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Set up Elixir
       uses: erlef/setup-beam@566deebc640988a494af16ecdf6f820fe0d3fea4
       with:
