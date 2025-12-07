@@ -132,7 +132,7 @@ defmodule CroniqWeb.UserAuth do
   end
 
   defp ensure_user_token(conn) do
-    case get_sesion(conn, :user_token) do
+    case get_session(conn, :user_token) do
       token when not is_nil(token) ->
         {token, conn}
 
