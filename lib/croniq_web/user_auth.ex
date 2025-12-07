@@ -135,11 +135,14 @@ defmodule CroniqWeb.UserAuth do
     case get_sesion(conn, :user_token) do
       token when not is_nil(token) ->
         {token, conn}
+
       nil ->
         conn = fetch_cookies(conn, signed: [@remember_me_cookie])
+
         case conn.cookies[@remember_me_cookie] do
           token when not is_nil(token) ->
             {token, put_token_in_session(conn, token)}
+
           nil ->
             {nil, conn}
         end
