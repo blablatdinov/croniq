@@ -41,14 +41,16 @@ defmodule Croniq.Application do
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Croniq.Supervisor]
+
     case Supervisor.start_link(children, opts) do
       {:ok, supervisor} ->
-        Task.start(fn -> 
+        Task.start(fn ->
           :timer.sleep(500)
           load_job_from_db()
         end)
+
         {:ok, supervisor}
-        
+
       error ->
         error
     end
