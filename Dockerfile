@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025-2026 Almaz Ilaletdinov <a.ilaletdinov@yandex.ru>
 # SPDX-License-Identifier: MIT
 
-FROM hexpm/elixir:1.18.4-erlang-28.0.1-alpine-3.21.3 AS builder
+FROM hexpm/elixir:1.19.4-erlang-28.3-alpine-3.23.2 AS builder
 
 ENV MIX_ENV=prod
 
