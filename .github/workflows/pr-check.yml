@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 Almaz Ilaletdinov <a.ilaletdinov@yandex.ru>
+# SPDX-License-Identifier: MIT
 ---
 name: Elixir CI
 
@@ -44,7 +46,9 @@ jobs:
     - name: Restore dependencies cache
       uses: actions/cache@v5
       with:
-        path: deps
+        path: |
+          deps
+          _build
         key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
         restore-keys: ${{ runner.os }}-mix-
     - name: Install dependencies
@@ -67,7 +71,9 @@ jobs:
     - name: Restore dependencies cache
       uses: actions/cache@v5
       with:
-        path: deps
+        path: |
+          deps
+          _build
         key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
         restore-keys: ${{ runner.os }}-mix-
     - name: Install dependencies
