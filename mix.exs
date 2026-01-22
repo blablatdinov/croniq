@@ -50,7 +50,7 @@ defmodule Croniq.MixProject do
        compile: false,
        depth: 1},
       {:swoosh, "== 1.21.0"},
-      {:finch, "== 0.20.0"},
+      {:finch, "== 0.21.0"},
       {:telemetry_metrics, "== 1.1.0"},
       {:telemetry_poller, "== 1.3.0"},
       {:gettext, "== 1.0.2"},
