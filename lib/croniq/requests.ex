@@ -52,13 +52,41 @@ defmodule Croniq.Requests do
 
     request_limit = Application.get_env(:croniq, :request_limit_per_day)
 
+    # Emit usage metric
+    user_id_str = Integer.to_string(user_id)
+
+    :telemetry.execute(
+      [:croniq, :limits, :usage, :requests_today],
+      %{count: count},
+      %{user_id: user_id_str}
+    )
+
     if count >= request_limit do
       Logger.error("Request limit (#{request_limit} per day) exceeded for user #{user_id}")
+
+      # Emit limit exceeded metric
+      user_id_str = Integer.to_string(user_id)
+
+      :telemetry.execute(
+        [:croniq, :limits, :exceeded],
+        %{count: 1},
+        %{user_id: user_id_str}
+      )
+
       user = Croniq.Accounts.get_user!(user_id)
 
       unless Croniq.LimitNotification.notified_today?(user_id) do
         Croniq.Accounts.UserNotifier.deliver_limit_exceeded_notification(user)
         Croniq.LimitNotification.mark_notified(user_id)
+
+        # Emit notification sent metric
+        user_id_str = Integer.to_string(user_id)
+
+        :telemetry.execute(
+          [:croniq, :limits, :notifications, :sent],
+          %{count: 1},
+          %{user_id: user_id_str}
+        )
       end
 
       :error
@@ -74,6 +102,8 @@ defmodule Croniq.Requests do
 
       Logger.info("Sending request for task: #{task.id}")
 
+      request_size = if request.body, do: byte_size(request.body), else: 0
+
       case http_client.request(request) do
         {:ok, response} ->
           Logger.info(
@@ -88,12 +118,107 @@ defmodule Croniq.Requests do
           )
 
           duration = System.monotonic_time(:millisecond) - start_time
+          response_size = if response.body, do: byte_size(response.body), else: 0
+          status_code = response.status_code
+
+          # Emit success metrics
+          task_id_str = Integer.to_string(task.id)
+          method_atom = String.to_atom(String.downcase(task.method))
+
+          :telemetry.execute(
+            [:croniq, :request, :success],
+            %{duration: duration, count: 1},
+            %{task_id: task_id_str, method: method_atom, status_code: status_code}
+          )
+
+          :telemetry.execute(
+            [:croniq, :request, :status_code],
+            %{count: 1},
+            %{status_code: status_code, task_id: task_id_str}
+          )
+
+          :telemetry.execute(
+            [:croniq, :request, :duration],
+            %{duration: duration},
+            %{task_id: task_id_str, method: method_atom, status_code: status_code}
+          )
+
+          :telemetry.execute(
+            [:croniq, :request, :request_size],
+            %{request_size: request_size},
+            %{task_id: task_id_str}
+          )
+
+          :telemetry.execute(
+            [:croniq, :request, :response_size],
+            %{response_size: response_size},
+            %{task_id: task_id_str, status_code: status_code}
+          )
+
+          # Emit client/server error metrics
+          cond do
+            status_code >= 400 and status_code < 500 ->
+              :telemetry.execute(
+                [:croniq, :request, :client_error],
+                %{count: 1},
+                %{status_code: status_code}
+              )
+
+            status_code >= 500 ->
+              :telemetry.execute(
+                [:croniq, :request, :server_error],
+                %{count: 1},
+                %{status_code: status_code}
+              )
+
+            true ->
+              :ok
+          end
+
           log_successful_response(request, response, duration, task)
 
         {:error, error} ->
           Logger.error("Request for task #{task.id} failed, error=#{inspect(error)}")
 
           duration = System.monotonic_time(:millisecond) - start_time
+
+          # Extract error type safely
+          error_type =
+            case error do
+              %{__struct__: struct} when is_atom(struct) ->
+                struct
+                |> Module.split()
+                |> List.last()
+                |> String.to_atom()
+
+              _ ->
+                :unknown_error
+            end
+
+          # Check if it's a timeout
+          is_timeout = case error do
+            %HTTPoison.Error{reason: :timeout} -> true
+            %HTTPoison.Error{reason: {:timeout, _}} -> true
+            _ -> false
+          end
+
+          # Emit error metrics
+          task_id_str = Integer.to_string(task.id)
+
+          :telemetry.execute(
+            [:croniq, :request, :error],
+            %{duration: duration, count: 1},
+            %{task_id: task_id_str, error_type: error_type}
+          )
+
+          if is_timeout do
+            :telemetry.execute(
+              [:croniq, :request, :timeout],
+              %{count: 1},
+              %{task_id: task_id_str}
+            )
+          end
+
           log_failed_response(request, error, duration, task)
       end
 
