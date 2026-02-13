@@ -24,10 +24,28 @@ defmodule Croniq.Scheduler do
     Croniq.Scheduler.new_job()
     |> Quantum.Job.set_name(job_name)
     |> Quantum.Job.set_schedule(parsed_cron)
-    |> Quantum.Job.set_task(fn -> Croniq.Requests.send_request(task.id) end)
+    |> Quantum.Job.set_task(fn ->
+      # Emit job executed metrics
+      :telemetry.execute(
+        [:croniq, :scheduler, :jobs, :executed],
+        %{count: 1},
+        %{task_type: "recurring"}
+      )
+
+      :telemetry.execute(
+        [:croniq, :tasks, :recurring, :executed],
+        %{count: 1},
+        %{}
+      )
+
+      Croniq.Requests.send_request(task.id)
+    end)
     |> Croniq.Scheduler.add_job()
 
     Croniq.Scheduler.activate_job(job_name)
+
+    # Emit job count update
+    update_job_count_metrics()
   end
 
   def update_quantum_job(task_id, task_schedule) do
@@ -53,6 +71,19 @@ defmodule Croniq.Scheduler do
   def execute_delayed_task(task_id) do
     case Croniq.Repo.get(Croniq.Task, task_id) do
       %Croniq.Task{task_type: "delayed", status: "active"} = task ->
+        # Emit delayed task executed metric
+        :telemetry.execute(
+          [:croniq, :tasks, :delayed, :executed],
+          %{count: 1},
+          %{}
+        )
+
+        :telemetry.execute(
+          [:croniq, :scheduler, :jobs, :executed],
+          %{count: 1},
+          %{task_type: "delayed"}
+        )
+
         result = Croniq.Requests.send_request(task.id)
 
         if result == :ok do
@@ -71,5 +102,27 @@ defmodule Croniq.Scheduler do
       _ ->
         Logger.warning("Delayed task #{task_id} not found or already executed")
     end
+  end
+
+  defp update_job_count_metrics do
+    # Get task counts from database
+    alias Croniq.Repo
+    alias Croniq.Task
+    import Ecto.Query
+
+    total_tasks = Repo.aggregate(Task, :count, :id)
+    active_tasks = Repo.aggregate(from(t in Task, where: t.status == "active"), :count, :id)
+
+    :telemetry.execute(
+      [:croniq, :scheduler, :jobs],
+      %{count: total_tasks},
+      %{}
+    )
+
+    :telemetry.execute(
+      [:croniq, :scheduler, :active_jobs],
+      %{count: active_tasks},
+      %{}
+    )
   end
 end
