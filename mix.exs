@@ -40,7 +40,7 @@ defmodule Croniq.MixProject do
       {:ecto_sql, "== 3.13.5"},
       {:postgrex, "== 0.22.0"},
       {:phoenix_html, "== 4.3.0"},
-      {:phoenix_live_view, "== 1.1.28"},
+      {:phoenix_live_view, "== 1.1.29"},
       {:phoenix_live_dashboard, "== 0.8.7"},
       {:heroicons,
        github: "tailwindlabs/heroicons",
