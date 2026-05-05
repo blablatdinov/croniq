@@ -54,7 +54,7 @@ defmodule Croniq.MixProject do
       {:telemetry_metrics, "== 1.1.0"},
       {:telemetry_poller, "== 1.3.0"},
       {:gettext, "== 1.0.2"},
-      {:jason, "== 1.4.4"},
+      {:jason, "== 1.4.5"},
       {:dns_cluster, "== 0.2.0"},
       {:bandit, "== 1.11.0"},
       {:bcrypt_elixir, "== 3.3.2"},
