@@ -128,6 +128,16 @@ defmodule CroniqWeb.TasksController do
     )
   end
 
+  defp encode_headers_field_for_form(changeset) do
+    case Ecto.Changeset.get_field(changeset, :headers) do
+      headers when is_map(headers) ->
+        Ecto.Changeset.put_change(changeset, :headers, Jason.encode!(headers))
+
+      _ ->
+        changeset
+    end
+  end
+
   def edit(conn, %{"task_id" => task_id, "task" => task_params}) do
     if conn.assigns.current_user.confirmed_at do
       with %Croniq.Task{} = task <- user_task(task_id, conn.assigns.current_user.id),
@@ -144,17 +154,7 @@ defmodule CroniqWeb.TasksController do
 
         {:error, changeset} ->
           task = user_task(task_id, conn.assigns.current_user.id)
-
-          changeset =
-            if is_map(Ecto.Changeset.get_field(changeset, :headers)) do
-              Ecto.Changeset.put_change(
-                changeset,
-                :headers,
-                Jason.encode!(Ecto.Changeset.get_field(changeset, :headers))
-              )
-            else
-              changeset
-            end
+          changeset = encode_headers_field_for_form(changeset)
 
           render(conn, :edit, task: task, changeset: changeset)
       end
