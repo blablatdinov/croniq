@@ -62,7 +62,7 @@ defmodule Croniq.MixProject do
       {:quantum, "== 3.5.3"},
       {:crontab, "== 1.2.0"},
       {:httpoison, "== 2.3.0"},
-      {:redix, "== 1.5.3"},
+      {:redix, "== 1.6.0"},
       {:poolboy, "== 1.5.2"},
       # Dev/test dependencies
       {:phoenix_live_reload, "== 1.6.2", only: :dev},
