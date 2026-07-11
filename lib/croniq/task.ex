@@ -199,8 +199,6 @@ defmodule Croniq.Task do
     end
   end
 
-  defp decode_json(val), do: val
-
   defp put_default(changeset, field, default) do
     if Map.get(changeset.changes, field) == nil and get_field(changeset, field) in [nil, ""] do
       put_change(changeset, field, default)

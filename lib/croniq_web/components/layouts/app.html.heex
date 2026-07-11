@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
           <.link navigate={~p"/"} class="flex items-center">
             <span class="text-xl font-bold text-blue-600">Croniq</span>
           </.link>
-          
+
 <!-- Основные ссылки -->
           <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
             <.link
@@ -30,7 +30,7 @@ SPDX-License-Identifier: MIT
             </.link>
           </div>
         </div>
-        
+
 <!-- Кнопки справа (логин/настройки) -->
         <div class="flex items-center">
           <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
@@ -54,7 +54,7 @@ SPDX-License-Identifier: MIT
                   API Keys
                 </.link>
               </li>
-              <%= if @current_user && @current_user.is_admin do %>
+              <%= if @current_user.is_admin do %>
                 <li>
                   <.link
                     href={~p"/admin/users"}
@@ -98,19 +98,19 @@ SPDX-License-Identifier: MIT
       </div>
     </div>
   </nav>
-  
+
 <!-- Flash-уведомления -->
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <.flash_group flash={@flash} />
   </div>
-  
+
 <!-- Основной контент -->
   <main class="flex-1 py-6">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       {@inner_content}
     </div>
   </main>
-  
+
 <!-- Футер (опционально) -->
   <footer class="bg-white border-t mt-8 py-4">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
