@@ -1,21 +1,21 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025-2026 Almaz Ilaletdinov <a.ilaletdinov@yandex.ru>
 # SPDX-License-Identifier: MIT
 
-FROM hexpm/elixir:1.19.5-erlang-28.3-alpine-3.23.2 AS builder
+FROM hexpm/elixir:1.20.1-erlang-27.3.4.14-alpine-3.23.5 AS builder
 
 ENV MIX_ENV=prod
 
 RUN apk add --no-cache build-base git npm
 
 RUN mix local.hex --force && \
-    mix local.rebar --force
+  mix local.rebar --force
 
 WORKDIR /app
 
 COPY mix.exs mix.lock ./
 
 RUN mix deps.get --only prod && \
-    mix deps.compile
+  mix deps.compile
 
 COPY config/config.exs config/prod.exs config/runtime.exs config/
 
@@ -24,8 +24,8 @@ COPY priv priv
 COPY lib lib
 
 RUN mix assets.deploy && \
-    mix compile && \
-    mix release
+  mix compile && \
+  mix release
 
 FROM alpine:3.24.1 AS app
 

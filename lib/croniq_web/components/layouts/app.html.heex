@@ -54,7 +54,7 @@ SPDX-License-Identifier: MIT
                   API Keys
                 </.link>
               </li>
-              <%= if @current_user && @current_user.is_admin do %>
+              <%= if @current_user.is_admin do %>
                 <li>
                   <.link
                     href={~p"/admin/users"}
