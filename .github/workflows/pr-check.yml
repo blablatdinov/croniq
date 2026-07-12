@@ -37,7 +37,7 @@ jobs:
     - name: Set up Elixir
       uses: erlef/setup-beam@fc68ffb90438ef2936bbb3251622353b3dcb2f93
       with:
-        elixir-version: '1.20.1'
+        elixir-version: '1.20.2'
         otp-version: '28.3'
     # - name: Set up db
     #   run: psql -d revive_bot -U almazilaletdinov -h localhost < .github/setup-db.sql
@@ -66,7 +66,7 @@ jobs:
     - name: Set up Elixir
       uses: erlef/setup-beam@fc68ffb90438ef2936bbb3251622353b3dcb2f93
       with:
-        elixir-version: '1.20.1'
+        elixir-version: '1.20.2'
         otp-version: '28.3'
     - name: Restore dependencies cache
       uses: actions/cache@v6
