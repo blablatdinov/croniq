@@ -22,8 +22,54 @@ defmodule Croniq.Redis.Pool do
   end
 
   def command(command) do
-    :poolboy.transaction(@pool_name, fn conn ->
+    start_time = System.monotonic_time(:millisecond)
+    command_name = List.first(command) |> to_string() |> String.downcase() |> String.to_atom()
+
+    result = :poolboy.transaction(@pool_name, fn conn ->
       Redix.command(conn, command)
     end)
+
+    duration = System.monotonic_time(:millisecond) - start_time
+
+    case result do
+      {:ok, _} ->
+        :telemetry.execute(
+          [:croniq, :redis, :command],
+          %{duration: duration},
+          %{command: command_name}
+        )
+
+      {:error, error} ->
+        error_type =
+          case error do
+            %{__struct__: struct} when is_atom(struct) ->
+              struct
+              |> Module.split()
+              |> List.last()
+              |> String.to_atom()
+
+            _ ->
+              :unknown_error
+          end
+
+        :telemetry.execute(
+          [:croniq, :redis, :error],
+          %{count: 1},
+          %{error_type: error_type}
+        )
+    end
+
+    # Emit pool metrics
+    pool_size = :poolboy.info(@pool_name, :size)
+    pool_workers = :poolboy.info(@pool_name, :workers)
+    available_workers = length(pool_workers)
+
+    :telemetry.execute(
+      [:croniq, :redis, :pool, :available_workers],
+      %{count: available_workers},
+      %{}
+    )
+
+    result
   end
 end
