@@ -57,8 +57,28 @@ defmodule Croniq.Application do
   end
 
   defp load_job_from_db do
-    Croniq.Repo.all(Croniq.Task)
+    start_time = System.monotonic_time(:millisecond)
+
+    tasks = Croniq.Repo.all(Croniq.Task)
+    task_count = length(tasks)
+
+    tasks
     |> Enum.each(&start_task_on_boot/1)
+
+    duration = System.monotonic_time(:millisecond) - start_time
+
+    # Emit boot metrics
+    :telemetry.execute(
+      [:croniq, :application, :boot, :load_tasks],
+      %{duration: duration},
+      %{}
+    )
+
+    :telemetry.execute(
+      [:croniq, :application, :boot, :tasks_loaded],
+      %{count: task_count},
+      %{}
+    )
   end
 
   defp start_task_on_boot(

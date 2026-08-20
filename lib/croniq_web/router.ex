@@ -71,6 +71,13 @@ defmodule CroniqWeb.Router do
     delete "/:task_id", TasksAPIController, :delete
   end
 
+  # Prometheus metrics endpoint
+  scope "/", CroniqWeb do
+    pipe_through :api
+
+    get "/metrics", PrometheusController, :metrics
+  end
+
   scope "/api_keys", CroniqWeb do
     pipe_through [:browser, :require_authenticated_user]
 
