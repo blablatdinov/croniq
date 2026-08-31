@@ -71,7 +71,7 @@ defmodule Croniq.MixProject do
       {:floki, "== 0.38.4", only: :test},
       {:credo, "== 1.7.19", only: :dev},
       {:recode, "== 0.8.0", only: :dev},
-      {:mox, "== 1.2.0", only: :test}
+      {:mox, "== 1.3.1", only: :test}
     ]
   end
 
