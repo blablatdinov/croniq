@@ -58,7 +58,7 @@ defmodule Croniq.MixProject do
       {:dns_cluster, "== 0.2.0"},
       {:bandit, "== 1.12.4"},
       {:bcrypt_elixir, "== 3.3.2"},
-      {:guardian, "== 2.4.1"},
+      {:guardian, "== 2.5.0"},
       {:quantum, "== 3.5.3"},
       {:crontab, "== 1.2.0"},
       {:httpoison, "== 3.0.0"},
